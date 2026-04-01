@@ -174,3 +174,4 @@ window.NorthernHealthPlatform = {
     formatThaiNumber,
     calculatePercentage
 };
+

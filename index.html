@@ -6,335 +6,373 @@
   <title>Data Area North</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="style.css">
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    /* Map wrapper */
-    #map-wrapper {
-      position: relative;
-      border-radius: 0 0 8px 8px;
-      overflow: hidden;
+    /* ── Map ── */
+    #leaflet-map, #public-leaflet-map { height:360px; width:100%; background:#efefeb; }
+    #map-wrapper { border-radius:0 0 8px 8px; overflow:hidden; }
+
+    /* ── Map filter bar ── */
+    .map-filter-bar {
+      display:flex; gap:8px; flex-wrap:wrap;
+      padding:10px 16px; border-bottom:0.5px solid rgba(0,0,0,0.08); background:#fafaf8;
     }
-    #leaflet-map {
-      height: 340px;
-      width: 100%;
-      background: #efefeb;
+    .map-filter-bar select {
+      font-size:12px; padding:5px 8px;
+      border:0.5px solid rgba(0,0,0,0.18); border-radius:6px;
+      background:white; color:#1a1a1a; flex:1; min-width:110px;
     }
+
+    /* ── Search / filter bar ── */
+    .filter-bar {
+      display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;
+    }
+    .filter-bar input, .filter-bar select {
+      font-size:13px; padding:7px 10px;
+      border:0.5px solid rgba(0,0,0,0.2); border-radius:8px;
+      background:white; color:#1a1a1a;
+    }
+    .filter-bar input  { flex:2; min-width:160px; }
+    .filter-bar select { flex:1; min-width:110px; }
+    .filter-bar button {
+      padding:7px 16px; border:none; border-radius:8px;
+      background:#1D9E75; color:white; font-size:13px; cursor:pointer; white-space:nowrap;
+    }
+    .filter-bar button:hover { background:#0F6E56; }
+
+    /* ── Table helpers ── */
+    .td-center { text-align:center; padding:24px; }
+    .td-name   { font-weight:500; font-size:13px; max-width:200px; }
+
+    /* ── Charter image thumb ── */
+    .charter-thumb {
+      width:44px; height:44px; object-fit:cover; border-radius:5px;
+      border:0.5px solid rgba(0,0,0,0.1); cursor:zoom-in; display:block;
+    }
+    .charter-thumb-empty {
+      width:44px; height:44px; border-radius:5px;
+      background:#f0f0ec; border:0.5px solid rgba(0,0,0,0.08);
+      font-size:9px; color:#bbb; display:flex;
+      align-items:center; justify-content:center; text-align:center;
+    }
+
+    /* ── PDF button ── */
+    .btn-pdf {
+      font-size:11px; color:#185FA5; border:0.5px solid #185FA5;
+      border-radius:4px; padding:3px 9px; text-decoration:none;
+      display:inline-block; white-space:nowrap;
+    }
+    .btn-pdf.disabled { color:#bbb; border-color:#ddd; cursor:default; }
+
+    /* ── Pager ── */
+    .pager-wrap { display:flex; align-items:center; gap:10px; margin-top:10px; }
+    .pager-btn  {
+      padding:5px 14px; border:0.5px solid rgba(0,0,0,0.2); border-radius:6px;
+      background:white; color:#444; font-size:12px; cursor:pointer;
+    }
+    .pager-btn:disabled { color:#ccc; cursor:default; }
+    .pager-info { font-size:12px; color:#888; }
+
+    /* ── Public hero ── */
+    .public-hero {
+      background:linear-gradient(135deg,#0F6E56 0%,#1D9E75 100%);
+      border-radius:12px; padding:28px 24px; margin-bottom:16px; color:white;
+    }
+    .public-hero h2 { font-size:20px; font-weight:500; margin-bottom:6px; color:white; }
+    .public-hero p  { font-size:13px; opacity:0.85; }
+
+    /* ── Sidebar footer ── */
+    .sidebar-footer { margin-top:auto; padding:12px 16px 16px; }
   </style>
 </head>
 <body>
-  <div class="app">
+<div class="app">
 
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-      <div class="logo">
-        <div class="logo-title">Data Area North</div>
-      </div>
-
-      <div class="nav-section">ภาพรวม</div>
-      <div class="nav-item active" onclick="showPage('overview', this)">
-        <div class="nav-icon" style="background:#1D9E75;"></div>
-        ภาพรวมภาคเหนือ
-      </div>
-
-      <div class="nav-section">คลังข้อมูล</div>
-      <div class="nav-item" onclick="showPage('charter', this)">
-        <div class="nav-icon" style="background:#378ADD;"></div>
-        ธรรมนูญสุขภาพ
-      </div>
-      <div class="nav-item" onclick="showPage('livingwill', this)">
-        <div class="nav-icon" style="background:#D4537E;"></div>
-        Living Will ม.12
-      </div>
-
-      <div class="nav-section">วิเคราะห์</div>
-      <div class="nav-item" onclick="showPage('gap', this)">
-        <div class="nav-icon" style="background:#EF9F27;"></div>
-        Gap Analysis
-      </div>
-
-      <div class="sidebar-footer">
-        <button class="login-btn" onclick="window.location.href='login.html'" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:white;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 1.5L12.5 5.25V12.5H1.5V5.25L7 1.5Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
-                    <path d="M4.5 8.5h5M7 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-                เข้าสู่ระบบ
-        </button>
-      </div>
+  <!-- ════ SIDEBAR ════════════════════════════════════ -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-title">Data Area North</div>
     </div>
 
-      
+    <div class="nav-section">ภาพรวม</div>
+    <div class="nav-item active" onclick="showPage('overview',this)">
+      <div class="nav-icon" style="background:#1D9E75;"></div> ภาพรวมภาคเหนือ
+    </div>
 
-    <!-- Main Content -->
-    <div class="main">
+    <div class="nav-section">คลังข้อมูล</div>
+    <div class="nav-item" onclick="showPage('charter',this)">
+      <div class="nav-icon" style="background:#378ADD;"></div> ธรรมนูญสุขภาพ
+    </div>
+    <div class="nav-item" onclick="showPage('livingwill',this)">
+      <div class="nav-icon" style="background:#D4537E;"></div> Living Will ม.12
+    </div>
 
-      <!-- ══════════════════════════════════════
-           OVERVIEW PAGE
-      ═══════════════════════════════════════ -->
-      <div class="page active" id="page-overview">
-        <div class="page-title">ภาพรวมภาคเหนือ</div>
-        <div class="page-sub">ข้อมูล ณ มีนาคม 2568</div>
+    <div class="nav-section">วิเคราะห์</div>
+    <div class="nav-item" onclick="showPage('gap',this)">
+      <div class="nav-icon" style="background:#EF9F27;"></div> Gap Analysis
+    </div>
 
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">จังหวัดมีธรรมนูญ</div>
-            <div class="kpi-value" id="kpi-provinces">--</div>
-            <div class="kpi-unit">จาก 17 จังหวัด</div>
-            <div class="kpi-badge badge-green">88%</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">ธรรมนูญมีเนื้อหา ม.12</div>
-            <div class="kpi-value" id="kpi-article12-pct">--</div>
-            <div class="kpi-unit">ของธรรมนูญทั้งหมด</div>
-            <div class="kpi-badge badge-amber">กำลังขยาย</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">จำนวน Living Will</div>
-            <div class="kpi-value" id="kpi-livingwill-total">--</div>
-            <div class="kpi-unit">ราย (สะสม)</div>
-            <div class="kpi-badge badge-green">+18% YoY</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">หน่วยบริการรองรับ</div>
-            <div class="kpi-value">320</div>
-            <div class="kpi-unit">รพ.สต. / รพ. / อปท.</div>
-            <div class="kpi-badge badge-green">ครอบคลุม</div>
-          </div>
+    <div class="nav-section">สาธารณะ</div>
+    <div class="nav-item" onclick="showPage('public',this)">
+      <div class="nav-icon" style="background:#888;opacity:0.6;"></div> หน้าประชาชน
+    </div>
+
+    <div class="sidebar-footer">
+      <button onclick="window.location.href='login.html'"
+        style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:white;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1.5L12.5 5.25V12.5H1.5V5.25L7 1.5Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <path d="M4.5 8.5h5M7 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        เข้าสู่ระบบ
+      </button>
+    </div>
+  </div>
+
+  <!-- ════ MAIN ════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- ── OVERVIEW ──────────────────────────────────── -->
+    <div class="page active" id="page-overview">
+      <div class="page-title">ภาพรวมภาคเหนือ</div>
+      <div class="page-sub">ข้อมูลจาก data_charter · คลิก marker เพื่อดูรายชื่อธรรมนูญ</div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">จังหวัดมีธรรมนูญ</div>
+          <div class="kpi-value" id="kpi-provinces">--</div>
+          <div class="kpi-unit">จาก 17 จังหวัด</div>
         </div>
-
-        <div class="row-3">
-          <!-- Map card -->
-          <div class="card" style="padding:0;overflow:visible;">
-            <div style="padding:14px 16px 10px;">
-              <div class="card-title" style="margin-bottom:0;">
-                แผนที่ธรรมนูญสุขภาพภาคเหนือ
-              </div>
-            </div>
-            <div id="map-wrapper">
-              <div id="leaflet-map"></div>
-            </div>
-            <div style="padding:6px 16px 12px;font-size:10px;color:#aaa;">
-              คลิกที่จุดสีเพื่อดูรายชื่อธรรมนูญในจังหวัดนั้น · ตัวเลขบน marker = จำนวนธรรมนูญ
-            </div>
-          </div>
-          </div>
-
-        <div class="card">
-          <div class="card-title">สัดส่วนธรรมนูญแต่ละประเด็น</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-            <div>
-              <div class="bar-row"><div class="bar-label">ผู้สูงอายุ</div><div class="bar-track"><div class="bar-fill" style="width:92%;background:#1D9E75;"></div></div><div class="bar-val">92%</div></div>
-              <div class="bar-row"><div class="bar-label">ตายดี/ม.12</div><div class="bar-track"><div class="bar-fill" style="width:62%;background:#1D9E75;"></div></div><div class="bar-val">62%</div></div>
-              <div class="bar-row"><div class="bar-label">LTC</div><div class="bar-track"><div class="bar-fill" style="width:78%;background:#1D9E75;"></div></div><div class="bar-val">78%</div></div>
-            </div>
-            <div>
-              <div class="bar-row"><div class="bar-label">สุขภาพจิต</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:#378ADD;"></div></div><div class="bar-val">45%</div></div>
-              <div class="bar-row"><div class="bar-label">กลุ่มเปราะบาง</div><div class="bar-track"><div class="bar-fill" style="width:55%;background:#378ADD;"></div></div><div class="bar-val">55%</div></div>
-              <div class="bar-row"><div class="bar-label">สุขภาพชุมชน</div><div class="bar-track"><div class="bar-fill" style="width:85%;background:#378ADD;"></div></div><div class="bar-val">85%</div></div>
-            </div>
-          </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ธรรมนูญมี ม.12</div>
+          <div class="kpi-value" id="kpi-article12-pct">--</div>
+          <div class="kpi-unit">ของธรรมนูญทั้งหมด</div>
+          <div class="kpi-badge badge-amber">กำลังขยาย</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ธรรมนูญทั้งหมด</div>
+          <div class="kpi-value" id="kpi-charter-total">--</div>
+          <div class="kpi-unit">ฉบับ</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Living Will ทั้งหมด</div>
+          <div class="kpi-value" id="kpi-livingwill-total">--</div>
+          <div class="kpi-unit">ราย</div>
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════
-           CHARTER PAGE
-      ═══════════════════════════════════════ -->
-      <div class="page" id="page-charter">
-        <div class="page-title">คลังธรรมนูญสุขภาพ</div>
-        <div class="page-sub">ค้นหาและดูรายละเอียดธรรมนูญสุขภาพรายพื้นที่ · คลิกแถวเพื่อดูรายละเอียด</div>
-
-        <div class="search-bar">
-          <select id="filter-province">
-            <option value="all">ทุกจังหวัด</option>
-            <option value="เชียงใหม่">เชียงใหม่</option>
-            <option value="ลำปาง">ลำปาง</option>
-            <option value="เชียงราย">เชียงราย</option>
-            <option value="พะเยา">พะเยา</option>
-            <option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option>
-            <option value="แพร่">แพร่</option>
-            <option value="น่าน">น่าน</option>
-            <option value="ลำพูน">ลำพูน</option>
-          </select>
-          <select id="filter-year">
-            <option value="all">ทุกปี</option>
-            <option value="2567">2567</option>
-            <option value="2566">2566</option>
-            <option value="2565">2565</option>
-            <option value="2564">2564</option>
-          </select>
-          <select id="filter-status">
-            <option value="all">ทุกสถานะ</option>
-            <option value="active">ใช้จริง</option>
-            <option value="draft">ร่าง</option>
-            <option value="revision">ปรับปรุง</option>
-          </select>
-          <select id="filter-article12">
-            <option value="all">มี ม.12 ทั้งหมด</option>
-            <option value="true">มีเนื้อหา ม.12</option>
-            <option value="false">ยังไม่มี</option>
-          </select>
-          <button id="charter-search-btn">ค้นหา</button>
+      <!-- Map card -->
+      <div class="card" style="padding:0;overflow:visible;margin-bottom:16px;">
+        <div style="padding:14px 16px 0;">
+          <div class="card-title">แผนที่ธรรมนูญสุขภาพภาคเหนือ</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px;margin-bottom:10px;">
+            เลือกจังหวัด / อำเภอ / ตำบล เพื่อซูมเข้าดู · คลิก marker เพื่อดูรายชื่อธรรมนูญ
+          </div>
         </div>
+        <!-- map filter -->
+        <div class="map-filter-bar">
+          <select id="mf-province"><option value="all">ทุกจังหวัด</option></select>
+          <select id="mf-district"><option value="all">ทุกอำเภอ</option></select>
+          <select id="mf-subdistrict"><option value="all">ทุกตำบล</option></select>
+        </div>
+        <div id="map-wrapper">
+          <div id="leaflet-map"></div>
+        </div>
+        <div style="padding:6px 16px 12px;font-size:10px;color:#aaa;">© OpenStreetMap contributors</div>
+      </div>
 
-        <div class="card" style="padding:0;">
+      <!-- Topic bars -->
+      <div class="card">
+        <div class="card-title">สัดส่วนธรรมนูญแต่ละประเด็น</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div class="bar-row"><div class="bar-label">ผู้สูงอายุ</div><div class="bar-track"><div class="bar-fill" style="width:92%;background:#1D9E75;"></div></div><div class="bar-val">92%</div></div>
+            <div class="bar-row"><div class="bar-label">ตายดี/ม.12</div><div class="bar-track"><div class="bar-fill" style="width:62%;background:#1D9E75;"></div></div><div class="bar-val">62%</div></div>
+            <div class="bar-row"><div class="bar-label">LTC</div><div class="bar-track"><div class="bar-fill" style="width:78%;background:#1D9E75;"></div></div><div class="bar-val">78%</div></div>
+          </div>
+          <div>
+            <div class="bar-row"><div class="bar-label">สุขภาพจิต</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:#378ADD;"></div></div><div class="bar-val">45%</div></div>
+            <div class="bar-row"><div class="bar-label">กลุ่มเปราะบาง</div><div class="bar-track"><div class="bar-fill" style="width:55%;background:#378ADD;"></div></div><div class="bar-val">55%</div></div>
+            <div class="bar-row"><div class="bar-label">สุขภาพชุมชน</div><div class="bar-track"><div class="bar-fill" style="width:85%;background:#378ADD;"></div></div><div class="bar-val">85%</div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /overview -->
+
+    <!-- ── CHARTER ───────────────────────────────────── -->
+    <div class="page" id="page-charter">
+      <div class="page-title">คลังธรรมนูญสุขภาพ</div>
+      <div class="page-sub">ข้อมูลจาก data_charter · กรองและค้นหารายชื่อธรรมนูญ</div>
+
+      <div class="filter-bar">
+        <input id="cf-search" type="text" placeholder="🔍  ค้นหาชื่อ / จังหวัด / อำเภอ / ตำบล...">
+        <select id="cf-province"><option value="all">ทุกจังหวัด</option></select>
+        <select id="cf-district"><option value="all">ทุกอำเภอ</option></select>
+        <select id="cf-subdistrict"><option value="all">ทุกตำบล</option></select>
+        <select id="cf-year"><option value="all">ทุกปี</option></select>
+        <button id="cf-search-btn">ค้นหา</button>
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:54px;">รูป</th>
+                <th>ชื่อธรรมนูญ</th>
+                <th>จังหวัด</th>
+                <th>อำเภอ</th>
+                <th>ตำบล</th>
+                <th>ปี (พ.ศ.)</th>
+                <th>ไฟล์ PDF</th>
+              </tr>
+            </thead>
+            <tbody id="charter-tbody">
+              <tr><td colspan="7" class="td-center" style="color:#aaa;">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px;">
+        <div id="charter-count" style="font-size:12px;color:#888;"></div>
+        <div id="charter-pager" class="pager-wrap"></div>
+      </div>
+    </div><!-- /charter -->
+
+    <!-- ── LIVING WILL ───────────────────────────────── -->
+    <div class="page" id="page-livingwill">
+      <div class="page-title">Living Will · มาตรา 12</div>
+      <div class="page-sub">ข้อมูลจาก data_living_will · ติดตามการเข้าถึงสิทธิ</div>
+
+      <div class="filter-bar">
+        <input id="lw-search" type="text" placeholder="🔍  ค้นหาชื่อ / จังหวัด / อำเภอ...">
+        <select id="lw-province"><option value="all">ทุกจังหวัด</option></select>
+        <select id="lw-district"><option value="all">ทุกอำเภอ</option></select>
+        <select id="lw-subdistrict"><option value="all">ทุกตำบล</option></select>
+        <select id="lw-year"><option value="all">ทุกปี</option></select>
+        <button id="lw-search-btn">ค้นหา</button>
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>ชื่อ</th>
+                <th>จังหวัด</th>
+                <th>อำเภอ</th>
+                <th>ตำบล</th>
+                <th>ปี (พ.ศ.)</th>
+                <th>ช่องทาง</th>
+              </tr>
+            </thead>
+            <tbody id="lw-tbody">
+              <tr><td colspan="6" class="td-center" style="color:#aaa;">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px;">
+        <div id="lw-count" style="font-size:12px;color:#888;"></div>
+        <div id="lw-pager" class="pager-wrap"></div>
+      </div>
+    </div><!-- /livingwill -->
+
+    <!-- ── GAP ANALYSIS ──────────────────────────────── -->
+    <div class="page" id="page-gap">
+      <div class="page-title">Gap Analysis · วิเคราะห์ช่องว่าง</div>
+      <div class="page-sub">พื้นที่ที่ควรเร่งดำเนินการ เรียงตามความเร่งด่วน</div>
+      <div class="row">
+        <div class="card">
+          <div class="card-title">รายตำบลที่ต้องเร่งดำเนินการ</div>
           <div style="overflow:auto;">
             <table>
               <thead>
                 <tr>
-                  <th>ชื่อธรรมนูญ</th>
-                  <th>จังหวัด</th>
-                  <th>ปีที่เผยแพร่</th>
-                  <th>มี ม.12</th>
-                  <th>สถานะ</th>
-                  <th>อำเภอ / ตำบล</th>
-                  <th></th>
+                  <th>ตำบล / อำเภอ / จังหวัด</th>
+                  <th>ธรรมนูญ</th>
+                  <th>ม.12</th>
+                  <th>Living Will</th>
+                  <th>ระดับเร่งด่วน</th>
                 </tr>
-
               </thead>
-              <tbody id="charter-tbody">
-                <tr><td colspan="7" style="text-align:center;padding:20px;color:#aaa;">กำลังโหลด...</td></tr>
+              <tbody id="gap-tbody">
+                <tr><td colspan="5" class="td-center" style="color:#aaa;">กำลังโหลด...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div id="charter-count" style="font-size:12px;color:#888;margin-top:10px;">กำลังโหลด...</div>
-      </div>
-
-      <!-- ══════════════════════════════════════
-           LIVING WILL PAGE
-      ═══════════════════════════════════════ -->
-      <div class="page" id="page-livingwill">
-        <div class="page-title">Living Will · มาตรา 12</div>
-        <div class="page-sub">ติดตามการเข้าถึงสิทธิแสดงเจตนาปฏิเสธการรักษา</div>
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Living Will ทั้งหมด</div>
-            <div class="kpi-value" id="lw-total">--</div>
-            <div class="kpi-unit">ราย</div>
+        <div class="card">
+          <div class="card-title">คำแนะนำระบบ</div>
+          <div class="gap-card-inner">
+            <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">พื้นที่ไม่มีธรรมนูญ</div>
+            <div style="font-size:12px;color:#666;">ควรเร่งจัดทำธรรมนูญสุขภาพชุมชน พร้อมบรรจุเนื้อหา ม.12 ตั้งแต่ต้น</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-label">เพิ่มขึ้นเดือนนี้</div>
-            <div class="kpi-value" id="lw-this-month">--</div>
-            <div class="kpi-unit">ราย</div>
-            <div class="kpi-badge badge-green">มีนาคม 2568</div>
+          <div class="gap-card-inner">
+            <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">ธรรมนูญไม่มีเนื้อหา ม.12</div>
+            <div style="font-size:12px;color:#666;">ควรจัดประชุมทบทวน และเพิ่มเติมเนื้อหาสิทธิการตายดีในธรรมนูญที่มีอยู่</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-label">ช่องทางออนไลน์</div>
-            <div class="kpi-value" id="lw-pct-online">--</div>
-            <div class="kpi-unit">ผ่าน e-Living Will</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Case Implementation</div>
-            <div class="kpi-value">1,840</div>
-            <div class="kpi-unit">ราย (นำใช้จริง)</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="card">
-            <div class="card-title">แยกตามจังหวัด (Top 5)</div>
-            <div id="lw-province-bars"><div style="color:#aaa;font-size:12px;padding:10px 0;">กำลังโหลด...</div></div>
-          </div>
-          <div class="card">
-            <div class="card-title">ช่องทางการจัดทำ</div>
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-                  <span style="color:#666;">e-Living Will (ออนไลน์)</span>
-                  <span style="font-weight:500;" id="lw-label-online">--</span>
-                </div>
-                <div class="bar-track" style="height:10px;">
-                  <div class="bar-fill" id="bar-online" style="width:0%;background:#378ADD;"></div>
-                </div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-                  <span style="color:#666;">โรงพยาบาล</span>
-                  <span style="font-weight:500;" id="lw-label-hospital">--</span>
-                </div>
-                <div class="bar-track" style="height:10px;">
-                  <div class="bar-fill" id="bar-hospital" style="width:0%;background:#1D9E75;"></div>
-                </div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-                  <span style="color:#666;">รพ.สต. / ชุมชน</span>
-                  <span style="font-weight:500;" id="lw-label-community">--</span>
-                </div>
-                <div class="bar-track" style="height:10px;">
-                  <div class="bar-fill" id="bar-community" style="width:0%;background:#D4537E;"></div>
-                </div>
-              </div>
-            </div>
-            <div style="margin-top:16px;border-top:0.5px solid rgba(0,0,0,0.08);padding-top:14px;">
-              <div class="card-title">Best Practice</div>
-              <div style="font-size:12px;color:#666;line-height:1.6;">
-                <div style="margin-bottom:6px;">📌 ต.แม่เหียะ เชียงใหม่ — เพิ่ม Living Will 340% ใน 1 ปี หลังเชื่อมธรรมนูญ</div>
-                <div>📌 ต.บ้านดง ลำปาง — อบรมชุมชน 5 ครั้ง ครอบคลุม 100% ของ รพ.สต.</div>
-              </div>
-            </div>
+          <div class="gap-card-inner">
+            <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">จัดอบรม Living Will</div>
+            <div style="font-size:12px;color:#666;">ตำบลที่มี Living Will ต่ำกว่า 10 ราย ควรจัดอบรมประชาชนและเจ้าหน้าที่</div>
           </div>
         </div>
       </div>
+    </div><!-- /gap -->
 
-      <!-- ══════════════════════════════════════
-           GAP PAGE
-      ═══════════════════════════════════════ -->
-      <div class="page" id="page-gap">
-        <div class="page-title">Gap Analysis · วิเคราะห์ช่องว่าง</div>
-        <div class="page-sub">พื้นที่ที่ควรเร่งดำเนินการ เรียงตามความเร่งด่วน</div>
+    <!-- ── PUBLIC ─────────────────────────────────────── -->
+    <div class="page" id="page-public">
+      <div class="public-hero">
+        <h2>Living Will คืออะไร?</h2>
+        <p>ตามมาตรา 12 พ.ร.บ.สุขภาพแห่งชาติ คุณมีสิทธิ์แสดงเจตนาล่วงหน้า<br>
+           เพื่อปฏิเสธการรักษาที่ยืดการตายในระยะสุดท้าย</p>
+      </div>
 
-        <div class="row">
-          <div class="card">
-            <div class="card-title">รายตำบลที่ต้องเร่งดำเนินการ</div>
-            <div style="overflow:auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ตำบล / จังหวัด</th>
-                    <th>ธรรมนูญ</th>
-                    <th>ม.12</th>
-                    <th>Living Will</th>
-                    <th>ระดับเร่งด่วน</th>
-                  </tr>
-                </thead>
-                <tbody id="gap-tbody">
-                  <tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">กำลังโหลด...</td></tr>
-                </tbody>
-              </table>
-            </div>
+      <div class="info-cards">
+        <div class="info-card">
+          <div style="width:32px;height:32px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" fill="#1D9E75" opacity="0.8"/><path d="M5 8h6M8 5v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
           </div>
-          <div class="card">
-            <div class="card-title">คำแนะนำระบบ</div>
-            <div class="gap-card-inner">
-              <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">พื้นที่ไม่มีธรรมนูญ</div>
-              <div style="font-size:12px;color:#666;">ควรเร่งจัดทำธรรมนูญสุขภาพชุมชน พร้อมบรรจุเนื้อหา ม.12 ตั้งแต่ต้น</div>
-            </div>
-            <div class="gap-card-inner">
-              <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">ธรรมนูญไม่มีเนื้อหา ม.12</div>
-              <div style="font-size:12px;color:#666;">ควรจัดประชุมทบทวน และเพิ่มเติมเนื้อหาสิทธิการตายดีในธรรมนูญที่มีอยู่</div>
-            </div>
-            <div class="gap-card-inner">
-              <div style="font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">จัดอบรม Living Will</div>
-              <div style="font-size:12px;color:#666;">ตำบลที่มี Living Will ต่ำกว่า 10 ราย ควรจัดอบรมประชาชนและเจ้าหน้าที่</div>
-            </div>
+          <h4>Living Will คืออะไร</h4>
+          <p>หนังสือแสดงเจตนาล่วงหน้า เพื่อกำหนดการรักษาในวาระสุดท้ายของชีวิตตามความต้องการของคุณ</p>
+        </div>
+        <div class="info-card">
+          <div style="width:32px;height:32px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" fill="#378ADD" opacity="0.8"/><path d="M8 5v3l2 2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
           </div>
+          <h4>ใครทำได้บ้าง</h4>
+          <p>ผู้มีสัญชาติไทย อายุ 18 ปีขึ้นไป มีสติสัมปชัญญะสมบูรณ์ สามารถทำได้ที่โรงพยาบาล หรือออนไลน์</p>
+        </div>
+        <div class="info-card">
+          <div style="width:32px;height:32px;border-radius:8px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L10 6H14L11 9L12 13L8 11L4 13L5 9L2 6H6L8 2Z" fill="#D4537E" opacity="0.8"/></svg>
+          </div>
+          <h4>หน่วยบริการใกล้บ้าน</h4>
+          <p>ดูแผนที่สถานบริการที่ให้บริการ Living Will ในจังหวัดของคุณด้านล่าง</p>
         </div>
       </div>
 
-    </div><!-- /.main -->
-  </div><!-- /.app -->
+      <!-- สถานบริการ map เท่านั้น — ไม่มีฟอร์มลงทะเบียน -->
+      <div class="card" style="padding:0;overflow:visible;">
+        <div style="padding:14px 16px 10px;">
+          <div class="card-title">สถานบริการ Living Will ภาคเหนือ</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px;">
+            คลิก marker เพื่อดูข้อมูลจังหวัด · ตัวเลข = จำนวนธรรมนูญสุขภาพในพื้นที่
+          </div>
+        </div>
+        <div id="public-leaflet-map"></div>
+        <div style="padding:6px 16px 12px;font-size:10px;color:#aaa;">© OpenStreetMap contributors</div>
+      </div>
+    </div><!-- /public -->
 
-  <script src="app.js"></script>
-  <script src="script.js"></script>
+  </div><!-- /.main -->
+</div><!-- /.app -->
+
+<script src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
