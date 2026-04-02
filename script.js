@@ -34,7 +34,7 @@ const tx = (id, v) => { const e = $(id); if (e) e.textContent = v ?? '—'; };
 const hx = (id, v) => { const e = $(id); if (e) e.innerHTML = v; };
 
 function rowLoading(id, cols) {
-  hx(id, `<tr><td colspan="${cols}" class="td-center" style="color:#aaa;">🔄 กำลังโหลด...</td></tr>`);
+  hx(id, `<tr><td colspan="${cols}" class="td-center" style="color:#aaa;">กำลังโหลด...</td></tr>`);
 }
 function rowEmpty(id, msg, cols) {
   hx(id, `<tr><td colspan="${cols}" class="td-center" style="color:#aaa;">🔍 ${msg}</td></tr>`);
@@ -396,7 +396,7 @@ async function loadCharterTable(options = {}) {
   const { reset = true, page = 1 } = options;
   
   if (reset) charterPage = 1;
-  else charterPage = page; // ✅ ใช้หน้าที่ส่งมา
+  else charterPage = page;
   
   rowLoading('charter-tbody', 7);
 
@@ -411,19 +411,28 @@ async function loadCharterTable(options = {}) {
     let query = db.from('data_charter').select('*', { count: 'exact' });
     
     if (prov !== 'all') query = query.eq('province', prov);
-    if (yr !== 'all') {
-      const y = parseInt(yr) - 543;
-      query = query.gte('publish_date',`${y}-01-01`).lte('publish_date',`${y}-12-31`);
-    }
+    // ❌ ลบการกรองปีด้วย SQL ออก เพราะ publish_date เป็น text ภาษาไทย
+    // if (yr !== 'all') { ... }
 
     const { data: allData, count: totalCount, error } = await query;
     
     if (error) throw error;
 
-    // ✅ กรองข้อมูลในฝั่ง client (district, subdistrict, search)
+    // ✅ กรองข้อมูลในฝั่ง client (district, subdistrict, search, YEAR)
     let filtered = allData || [];
+    
     if (dist !== 'all') filtered = filtered.filter(r => r?.district === dist);
     if (sub  !== 'all') filtered = filtered.filter(r => r?.subdistrict === sub);
+    
+    // ✅ กรองปีในฝั่ง client (ใช้ฟังก์ชัน thYear)
+    if (yr !== 'all') {
+      const targetYear = parseInt(yr);
+      filtered = filtered.filter(r => {
+        const recordYear = thYear(r?.publish_date);
+        return recordYear === targetYear;
+      });
+    }
+    
     if (q) {
       const term = q.toLowerCase();
       filtered = filtered.filter(r => 
