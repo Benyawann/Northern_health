@@ -301,6 +301,20 @@ body {
     justify-content: center; 
 }
 
+/* ปุ่มล้าง filter ในแผนที่ */
+#mf-reset-btn {
+  background: #666 !important;
+  transition: background 0.2s;
+}
+
+#mf-reset-btn:hover {
+  background: #444 !important;
+}
+
+#mf-reset-btn:active {
+  background: #333 !important;
+}
+
 /* ========== Bars ========== */
 .bar-row { 
     display: flex; 
