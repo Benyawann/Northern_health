@@ -527,20 +527,20 @@ tr:hover td {
     min-width: 120px;
 }
 
-.search-bar button { 
-    padding: 7px 14px; 
-    border: none; 
-    border-radius: 8px; 
-    background: #1D9E75; 
-    color: white; 
-    font-size: 13px; 
-    cursor: pointer; 
+/* ปุ่มล้างการคัดกรอง */
+#cf-reset-btn, #lw-reset-btn {
+  background: #666 !important;
+}
+
+#cf-reset-btn:hover, #lw-reset-btn:hover {
+  background: #444 !important;
 }
 
 /* Loading indicator */
 .search-loading {
   position: relative;
 }
+
 .search-loading::after {
   content: '';
   position: absolute;
