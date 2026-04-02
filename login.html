@@ -7,7 +7,7 @@
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/login.css">
   
-  <!-- ✅ โหลด Supabase Library (ลบ defer ออกเพื่อให้โหลดทันที) -->
+  <!-- ✅ โหลด Supabase Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -36,10 +36,10 @@
       <!-- Form -->
       <form class="login-form" id="login-form" onsubmit="handleLogin(event)">
         
-        <!-- Username Field -->
+        <!-- Email Field -->
         <div class="form-group">
-          <label for="username">ชื่อผู้ใช้</label>
-          <input type="text" id="username" placeholder="ป้อนชื่อผู้ใช้" required autocomplete="username">
+          <label for="email">อีเมล</label>
+          <input type="email" id="email" placeholder="admin@gmail.com" required autocomplete="email">
         </div>
         
         <!-- Password Field -->
@@ -50,7 +50,7 @@
         
         <!-- Error Message -->
         <div class="login-error" id="login-error">
-          ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+          อีเมลหรือรหัสผ่านไม่ถูกต้อง
         </div>
         
         <!-- Submit Button -->
@@ -61,7 +61,7 @@
       
       <!-- Footer -->
       <div class="login-footer">
-        <a href="#" onclick="alert('ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เข้าถึง'); return false;">
+        <a href="#" onclick="alert('ติดต่อผู้ดูแลระบบเพื่อรีเซ็ตรหัสผ่าน'); return false;">
           ลืมรหัสผ่าน?
         </a>
       </div>
@@ -70,114 +70,113 @@
 
   <script>
     // ========== Supabase Configuration ==========
-    const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+    // ✅ ใช้ let แทน const และเช็คก่อนประกาศ
+    let supabaseClient;
     
-    // ✅ สร้าง Client ทันที (ไม่ต้องรอ)
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (!window.supabaseClient) {
+      const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+      
+      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
     
-    console.log('✅ Supabase client created');
+    supabaseClient = window.supabaseClient;
+    
+    console.log('✅ Supabase client initialized');
     
     // ========== Login Logic ==========
     
     async function handleLogin(e) {
       e.preventDefault();
       
-      const username = document.getElementById('username')?.value.trim();
+      const email = document.getElementById('email')?.value.trim();
       const password = document.getElementById('password')?.value;
       const submitBtn = document.getElementById('login-submit');
-      const errorEl = document.getElementById('login-error');
       
-      if (!username || !password) {
-        showError('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      // Validate input
+      if (!email || !password) {
+        showError('กรุณากรอกอีเมลและรหัสผ่าน');
         return;
       }
       
-      // แสดงสถานะกำลังโหลด
+      // Show loading state
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังตรวจสอบ...';
       hideError();
       
-      console.log('🔍 Attempting login for:', username);
+      console.log('🔍 Attempting login for:', email);
       
       try {
-        // 🔐 Query ข้อมูลจากตาราง 'users'
-        const {  users, error } = await supabase
-          .from('users')
-          .select('id, username, password, name, role')
-          .eq('username', username)
-          .limit(1);
+        // 🔐 ใช้ Supabase Auth สำหรับล็อกอิน
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
         
-        // Debug: แสดงผลลัพธ์ใน Console
-        console.log('📊 Query result:', { users, error });
+        console.log('📊 Auth result:', { data, error });
         
         if (error) {
-          console.error('❌ Supabase error:', error);
-          throw error;
+          console.error('❌ Supabase Auth error:', error.message);
+          
+          // แปลงข้อความผิดพลาดให้เข้าใจง่าย
+          if (error.message?.includes('Invalid login credentials')) {
+            showError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+          } else if (error.message?.includes('Email not confirmed')) {
+            showError('กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ');
+          } else {
+            showError(error.message || 'เข้าสู่ระบบไม่สำเร็จ');
+          }
+          return;
         }
         
-        // ✅ ถ้าพบผู้ใช้
-        if (users && users.length > 0) {
-          const user = users[0];
-          console.log('✅ Found user:', user);
+        // ✅ ล็อกอินสำเร็จ
+        if (data?.user) {
+          const user = data.user;
           
-          // เปรียบเทียบรหัสผ่าน (แบบตรงๆ สำหรับตัวอย่าง)
-          if (String(user.password).trim() === String(password).trim()) {
-            
-            // ล็อกอินสำเร็จ
-            const userProfile = {
-              id: user.id,
-              name: user.name || user.username,
-              username: user.username,
-              role: user.role || 'user',
-              loggedIn: true,
-              loginTime: new Date().toISOString()
-            };
-            
-            // บันทึกสถานะใน localStorage
-            localStorage.setItem('user', JSON.stringify(userProfile));
-            
-            console.log('🎉 Login success! Redirecting...');
-            
-            // กลับไปหน้าหลัก
-            window.location.href = 'index.html';
-            
-          } else {
-            console.log('❌ Password mismatch');
-            showError('รหัสผ่านไม่ถูกต้อง');
-          }
+          const userProfile = {
+            id: user.id,
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'ผู้ใช้',
+            email: user.email,
+            role: user.user_metadata?.role || 'user',
+            loggedIn: true,
+            loginTime: new Date().toISOString()
+          };
           
-        } else {
-          console.log('❌ User not found');
-          showError('ไม่พบชื่อผู้ใช้นี้ในระบบ');
+          // 💾 บันทึกสถานะใน localStorage
+          localStorage.setItem('user', JSON.stringify(userProfile));
+          
+          console.log('🎉 Login success! Redirecting...', userProfile);
+          
+          // 🔄 กลับไปหน้าหลัก
+          window.location.href = 'index.html';
         }
         
       } catch (err) {
         console.error('💥 Login failed:', err);
         
         // แสดงข้อความที่อ่านง่าย
-        let msg = 'เกิดข้อผิดพลาด';
-        if (err.message?.includes('relation')) {
-          msg = 'ตารางฐานข้อมูลไม่พบ (ติดต่อผู้ดูแลระบบ)';
-        } else if (err.message?.includes('policy')) {
-          msg = 'สิทธิ์การเข้าถึงถูกจำกัด (ติดต่อผู้ดูแลระบบ)';
+        let msg = 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        
+        if (err.message?.includes('network')) {
+          msg = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
         }
         
         showError(msg);
         
       } finally {
-        // คืนค่าปุ่ม
+        // 🔘 คืนค่าปุ่ม
         submitBtn.disabled = false;
         submitBtn.textContent = 'เข้าสู่ระบบ';
       }
     }
+    
+    // ========== UI Helper Functions ==========
     
     function showError(msg) {
       const el = document.getElementById('login-error');
       if (el) {
         el.textContent = msg;
         el.classList.add('show');
-        // สั่นเล็กน้อยเพื่อดึงความสนใจ
         el.style.animation = 'shake 0.3s ease';
       }
     }
@@ -189,23 +188,53 @@
         el.style.animation = '';
       }
     }
+
+    function checkAuthRequired() {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        window.location.href = 'login.html';
+        return false;
+      }
+      return true;
+    }
     
-    // ========== Check if already logged in ==========
-    function checkAuthStatus() {
+    // ========== Check Auth Status ==========
+    
+    async function checkAuthStatus() {
       try {
+        // ตรวจสอบว่ามีเซสชันจาก Supabase Auth หรือไม่
+        const {  session } = await supabaseClient.auth.getSession();
+        
+        if (session?.user) {
+          const user = session.user;
+          const userProfile = {
+            id: user.id,
+            name: user.user_metadata?.name || user.email?.split('@')[0],
+            email: user.email,
+            role: user.user_metadata?.role || 'user',
+            loggedIn: true,
+            loginTime: new Date().toISOString()
+          };
+          
+          localStorage.setItem('user', JSON.stringify(userProfile));
+          console.log('✅ User already logged in via Supabase Auth:', userProfile.email);
+          window.location.href = 'index.html';
+          return;
+        }
+        
+        // ตรวจสอบ localStorage เป็น fallback
         const userStr = localStorage.getItem('user');
         if (userStr) {
           const user = JSON.parse(userStr);
-          // ตรวจสอบว่ายังล็อกอินอยู่ (ภายใน 24 ชม.)
           const loginTime = new Date(user.loginTime);
           const now = new Date();
           const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
           
           if (hoursDiff < 24) {
-            console.log('✅ User already logged in:', user.username);
+            console.log('✅ User already logged in (localStorage):', user.email);
             window.location.href = 'index.html';
           } else {
-            // Session หมดอายุ
+            console.log('⏰ Session expired, logging out');
             localStorage.removeItem('user');
           }
         }
@@ -216,10 +245,108 @@
     }
     
     // ========== Initialize ==========
+    
     document.addEventListener('DOMContentLoaded', () => {
       console.log('🚀 Login page loaded');
       checkAuthStatus();
     });
+
+    function updateAuthUI() {
+  const loggedOutEl = document.getElementById('auth-logged-out');
+  const loggedInEl = document.getElementById('auth-logged-in');
+  const userNameEl = document.getElementById('user-name');
+  const userRoleEl = document.getElementById('user-role');
+  const userAvatarEl = document.getElementById('user-avatar');
+  
+  if (!loggedOutEl || !loggedInEl) return;
+  
+  try {
+    const userStr = localStorage.getItem('user');
+    
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      
+      // ตรวจสอบว่ายังล็อกอินอยู่ (ภายใน 24 ชม.)
+      const loginTime = new Date(user.loginTime);
+      const now = new Date();
+      const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+      
+      if (hoursDiff < 24 && user.loggedIn) {
+        // ✅ แสดงสถานะล็อกอิน
+        loggedOutEl.style.display = 'none';
+        loggedInEl.style.display = 'flex';
+        
+        // อัปเดตข้อมูลผู้ใช้
+        if (userNameEl) userNameEl.textContent = user.name || user.username || 'ผู้ใช้';
+        if (userRoleEl) userRoleEl.textContent = user.role || 'user';
+        if (userAvatarEl) {
+          const initial = (user.name || user.username || 'U').charAt(0).toUpperCase();
+          userAvatarEl.textContent = initial;
+          userAvatarEl.style.background = user.role === 'admin' 
+            ? 'linear-gradient(135deg, #EF9F27, #B5721C)' 
+            : 'linear-gradient(135deg, #1D9E75, #0F6E56)';
+        }
+        
+        console.log('✅ User displayed:', user.username);
+        return;
+      }
+    }
+    
+    // ❌ แสดงสถานะยังไม่ล็อกอิน
+    loggedOutEl.style.display = 'block';
+    loggedInEl.style.display = 'none';
+    
+  } catch (err) {
+    console.error('updateAuthUI error:', err);
+    localStorage.removeItem('user');
+    loggedOutEl.style.display = 'block';
+    loggedInEl.style.display = 'none';
+  }
+}
+
+/**
+ * ออกจากระบบ
+ */
+function handleLogout() {
+  if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
+    // ลบข้อมูลผู้ใช้
+    localStorage.removeItem('user');
+    
+    // ถ้าใช้ Supabase Auth ให้ sign out ด้วย
+    if (typeof supabaseClient !== 'undefined' && supabaseClient?.auth) {
+      supabaseClient.auth.signOut().catch(err => console.warn('Sign out warning:', err));
+    }
+    
+    // อัปเดต UI
+    updateAuthUI();
+    
+    console.log('🔓 Logged out');
+    
+    // ถ้าอยู่ในหน้าอื่นนอกจาก index ให้กลับไปที่ index
+    if (!window.location.href.endsWith('index.html') && !window.location.href.endsWith('/')) {
+      window.location.href = 'index.html';
+    }
+  }
+}
+
+/**
+ * ตรวจสอบสถานะเมื่อโหลดหน้า
+ */
+function initAuthCheck() {
+  document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+  });
+  
+  // ฟังเหตุการณ์ storage change (สำหรับหลายแท็บ)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'user') {
+      updateAuthUI();
+    }
+  });
+}
+
+// เรียกใช้งาน
+initAuthCheck();
   </script>
   
   <!-- CSS สำหรับเอฟเฟกต์ -->

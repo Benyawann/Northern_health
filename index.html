@@ -92,30 +92,34 @@
 <div class="app">
 
   <!-- ════ SIDEBAR ════════════════════════════════════ -->
-  <div class="sidebar">
-    <div class="logo">
-      <div class="logo-title">Data Area North</div>
-    </div>
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-title">Data Area North</div>
+  </div>
 
-    <div class="nav-section">ภาพรวม</div>
-    <div class="nav-item active" onclick="showPage('overview',this)">
-      <div class="nav-icon" style="background:#1D9E75;"></div> ภาพรวมภาคเหนือ
-    </div>
+  <div class="nav-section">ภาพรวม</div>
+  <div class="nav-item active" onclick="showPage('overview',this)">
+    <div class="nav-icon" style="background:#1D9E75;"></div> ภาพรวมภาคเหนือ
+  </div>
 
-    <div class="nav-section">คลังข้อมูล</div>
-    <div class="nav-item" onclick="showPage('charter',this)">
-      <div class="nav-icon" style="background:#378ADD;"></div> ธรรมนูญสุขภาพ
-    </div>
-    <div class="nav-item" onclick="showPage('livingwill',this)">
-      <div class="nav-icon" style="background:#D4537E;"></div> Living Will ม.12
-    </div>
+  <div class="nav-section">คลังข้อมูล</div>
+  <div class="nav-item" onclick="showPage('charter',this)">
+    <div class="nav-icon" style="background:#378ADD;"></div> ธรรมนูญสุขภาพ
+  </div>
+  <div class="nav-item" onclick="showPage('livingwill',this)">
+    <div class="nav-icon" style="background:#D4537E;"></div> Living Will ม.12
+  </div>
 
-    <div class="nav-section">วิเคราะห์</div>
-    <div class="nav-item" onclick="showPage('gap',this)">
-      <div class="nav-icon" style="background:#EF9F27;"></div> Gap Analysis
-    </div>
+  <div class="nav-section">วิเคราะห์</div>
+  <div class="nav-item" onclick="showPage('gap',this)">
+    <div class="nav-icon" style="background:#EF9F27;"></div> Gap Analysis
+  </div>
 
-    <div class="sidebar-footer">
+  <!-- ✅ ส่วนแสดงสถานะผู้ใช้ (ด้านล่างซ้าย) -->
+  <div class="sidebar-footer">
+    
+    <!-- สถานะ: ยังไม่ล็อกอิน → แสดงปุ่มเข้าสู่ระบบ -->
+    <div id="auth-logged-out">
       <button onclick="window.location.href='login.html'"
         style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:white;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -125,7 +129,33 @@
         เข้าสู่ระบบ
       </button>
     </div>
+    
+    <!-- สถานะ: ล็อกอินแล้ว → แสดงชื่อผู้ใช้ + ปุ่มออก -->
+    <div id="auth-logged-in" style="display:none;">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <!-- Avatar -->
+        <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">👤</div>
+        
+        <!-- User Info -->
+        <div style="flex:1;min-width:0;">
+          <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">ผู้ใช้</div>
+          <div id="user-role" style="font-size:10px;color:#666;">user</div>
+        </div>
+        
+        <!-- Logout Button -->
+        <button onclick="handleLogout()" title="ออกจากระบบ"
+          style="width:28px;height:28px;border:none;background:#f5f4f0;border-radius:6px;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
   </div>
+</div>
 
   <!-- ════ MAIN ════════════════════════════════════════ -->
   <div class="main">
@@ -323,5 +353,101 @@
 
 <script src="js/app.js"></script>
 <script src="js/script.js"></script>
+<script>
+  // ========== AUTH FUNCTIONS (เพิ่มใน index.html) ==========
+  
+  /**
+   * อัปเดตสถานะผู้ใช้ใน Sidebar
+   */
+  function updateAuthUI() {
+    const loggedOutEl = document.getElementById('auth-logged-out');
+    const loggedInEl = document.getElementById('auth-logged-in');
+    const userNameEl = document.getElementById('user-name');
+    const userRoleEl = document.getElementById('user-role');
+    const userAvatarEl = document.getElementById('user-avatar');
+    
+    if (!loggedOutEl || !loggedInEl) return;
+    
+    try {
+      const userStr = localStorage.getItem('user');
+      
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        
+        // ตรวจสอบว่ายังล็อกอินอยู่ (ภายใน 24 ชม.)
+        const loginTime = new Date(user.loginTime);
+        const now = new Date();
+        const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24 && user.loggedIn) {
+          // ✅ แสดงสถานะล็อกอิน
+          loggedOutEl.style.display = 'none';
+          loggedInEl.style.display = 'flex';
+          
+          // อัปเดตข้อมูลผู้ใช้
+          if (userNameEl) userNameEl.textContent = user.name || user.username || 'ผู้ใช้';
+          if (userRoleEl) userRoleEl.textContent = user.role || 'user';
+          if (userAvatarEl) {
+            const initial = (user.name || user.username || 'U').charAt(0).toUpperCase();
+            userAvatarEl.textContent = initial;
+            userAvatarEl.style.background = user.role === 'admin' 
+              ? 'linear-gradient(135deg, #EF9F27, #B5721C)' 
+              : 'linear-gradient(135deg, #1D9E75, #0F6E56)';
+          }
+          
+          console.log('✅ User displayed:', user.username);
+          return;
+        }
+      }
+      
+      // ❌ แสดงสถานะยังไม่ล็อกอิน
+      loggedOutEl.style.display = 'block';
+      loggedInEl.style.display = 'none';
+      
+    } catch (err) {
+      console.error('updateAuthUI error:', err);
+      localStorage.removeItem('user');
+      loggedOutEl.style.display = 'block';
+      loggedInEl.style.display = 'none';
+    }
+  }
+
+  /**
+   * ออกจากระบบ
+   */
+  function handleLogout() {
+    if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
+      // ลบข้อมูลผู้ใช้
+      localStorage.removeItem('user');
+      
+      // ถ้าใช้ Supabase Auth ให้ sign out ด้วย
+      if (typeof supabaseClient !== 'undefined' && supabaseClient?.auth) {
+        supabaseClient.auth.signOut().catch(err => console.warn('Sign out warning:', err));
+      }
+      
+      // อัปเดต UI
+      updateAuthUI();
+      
+      console.log('🔓 Logged out');
+      
+      // รีเฟรชหน้าปัจจุบัน
+      window.location.reload();
+    }
+  }
+
+  /**
+   * ตรวจสอบสถานะเมื่อโหลดหน้า
+   */
+  document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+    
+    // ฟังเหตุการณ์ storage change (สำหรับหลายแท็บ)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'user') {
+        updateAuthUI();
+      }
+    });
+  });
+</script>
 </body>
 </html>
