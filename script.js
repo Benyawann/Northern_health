@@ -78,9 +78,48 @@ function thDate(val) {
   }
 }
 
+/**
+ * ดึงปี พ.ศ. จากข้อความวันที่ภาษาไทย หรือ ISO Date
+ * รองรับ: "1 สิงหาคม 2565", "2565-08-01", "2022-08-01"
+ */
 function thYear(val) {
   if (!val) return '—';
-  try { return new Date(val).getFullYear()} catch { return '—'; }
+  
+  const strVal = String(val).trim();
+  
+  // ✅ กรณีที่ 1: ข้อความภาษาไทย (เช่น "1 สิงหาคม 2565")
+  // ค้นหารูปแบบ: ตัวเลข 4 หลักท้ายประโยค (ซึ่งมักจะเป็นปี พ.ศ.)
+  const thaiYearMatch = strVal.match(/(\d{4})$/);
+  if (thaiYearMatch) {
+    const year = parseInt(thaiYearMatch[1]);
+    // ตรวจสอบว่าเป็นปี พ.ศ. ที่สมเหตุสมผล (2500-2600)
+    if (year >= 2500 && year <= 2600) {
+      return year;
+    }
+    // ถ้าไม่ใช่ พ.ศ. อาจจะเป็น ค.ศ. ให้แปลงเป็น พ.ศ.
+    if (year >= 1900 && year <= 2100) {
+      return year + 543;
+    }
+  }
+
+  // ✅ กรณีที่ 2: รูปแบบ ISO (2022-08-01)
+  try {
+    const d = new Date(strVal);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear() + 543; // แปลง ค.ศ. เป็น พ.ศ.
+    }
+  } catch (e) {
+    // Ignore error
+  }
+
+  // ✅ กรณีที่ 3: เป็นตัวเลขล้วนๆ
+  const numVal = parseInt(strVal);
+  if (!isNaN(numVal)) {
+    if (numVal >= 2500 && numVal <= 2600) return numVal; // เป็น พ.ศ. อยู่แล้ว
+    if (numVal >= 1900 && numVal <= 2100) return numVal + 543; // เป็น ค.ศ.
+  }
+
+  return '—'; // ไม่สามารถระบุปีได้
 }
 
 function buildOptions(items, allLabel) {
@@ -452,45 +491,152 @@ function charterNext(tp) { if(charterPage<tp){ charterPage++; loadCharterTable(f
 function bindCharterFilters() {
   // ✅ ค้นหาแบบ real-time (debounce 300ms)
   const handleSearch = debounce(() => {
-    loadCharterTable({ reset: true }); // ✅ รีเซ็ตไปหน้า 1 เมื่อค้นหา
+    loadCharterTable({ reset: true });
   }, 300);
   
   $('cf-search')?.addEventListener('input', handleSearch);
   
-  // ✅ Filter selects เปลี่ยนแล้วโหลดทันที
+  // ✅ Filter selects เปลี่ยนแล้วโหลดทันที + อัปเดตฟิลเตอร์ลูก
   const handleFilterChange = debounce(() => {
-    loadCharterTable({ reset: true }); // ✅ รีเซ็ตไปหน้า 1 เมื่อเปลี่ยนฟิลเตอร์
+    loadCharterTable({ reset: true });
   }, 200);
   
-  ['cf-province', 'cf-district', 'cf-subdistrict', 'cf-year'].forEach(id => {
+  // จังหวัดเปลี่ยน → อัปเดตอำเภอ/ตำบล
+  $('cf-province')?.addEventListener('change', () => {
+    const prov = $('cf-province').value;
+    
+    // อัปเดตอำเภอตามจังหวัด
+    populateDistrictsByProvince(prov, 'cf-district', 'ทุกอำเภอ');
+    
+    // รีเซ็ตตำบลเป็น "ทุกตำบล" ก่อน
+    populateSubdistrictsByDistrict(prov, 'all', 'cf-subdistrict', 'ทุกตำบล');
+    
+    // โหลดตาราง
+    handleFilterChange();
+  });
+  
+  // อำเภอเปลี่ยน → อัปเดตตำบล
+  $('cf-district')?.addEventListener('change', () => {
+    const prov = $('cf-province').value;
+    const dist = $('cf-district').value;
+    
+    // อัปเดตตำบลตามจังหวัด+อำเภอ
+    populateSubdistrictsByDistrict(prov, dist, 'cf-subdistrict', 'ทุกตำบล');
+    
+    // โหลดตาราง
+    handleFilterChange();
+  });
+  
+  // ตำบล/ปี เปลี่ยน → โหลดตารางอย่างเดียว
+  ['cf-subdistrict', 'cf-year'].forEach(id => {
     $(id)?.addEventListener('change', handleFilterChange);
   });
   
   // ✅ ปุ่มค้นหายังคงอยู่
   $('cf-search-btn')?.addEventListener('click', () => loadCharterTable({ reset: true }));
   
-  // ✅ กรองจังหวัด → อัปเดตอำเภอ/ตำบล
-  $('cf-province')?.addEventListener('change', () => {
-    const p = $('cf-province').value;
-    const s = p === 'all' ? allCharters : allCharters.filter(r => cleanName(r?.province) === cleanName(p));
-    fillSelect('cf-district', s?.map(r=>r?.district), 'ทุกอำเภอ');
-    fillSelect('cf-subdistrict', s?.map(r=>r?.subdistrict), 'ทุกตำบล');
+  // ✅ ปุ่มล้างการคัดกรอง (ใหม่!)
+  $('cf-reset-btn')?.addEventListener('click', () => {
+    // รีเซ็ตค่าฟิลเตอร์ทั้งหมด
+    $('cf-search').value = '';
+    $('cf-province').value = 'all';
+    $('cf-district').value = 'all';
+    $('cf-subdistrict').value = 'all';
+    $('cf-year').value = 'all';
+    
+    // รีเซ็ตฟิลเตอร์ลูกให้แสดงทั้งหมด
+    populateCharterFilters();
+    
+    // โหลดข้อมูลทั้งหมด
+    loadCharterTable({ reset: true });
   });
 }
 
-// ── POPULATE CHARTER FILTERS ────────────────────────────────
 function populateCharterFilters() {
   console.log('📋 Populating filters with', allCharters?.length, 'charters');
-  fillSelect('mf-province', allCharters?.map(r=>r?.province), 'ทุกจังหวัด');
-  fillSelect('mf-district', allCharters?.map(r=>r?.district), 'ทุกอำเภอ');
-  fillSelect('mf-subdistrict', allCharters?.map(r=>r?.subdistrict), 'ทุกตำบล');
-  fillSelect('cf-province', allCharters?.map(r=>r?.province), 'ทุกจังหวัด');
-  fillSelect('cf-district', allCharters?.map(r=>r?.district), 'ทุกอำเภอ');
-  fillSelect('cf-subdistrict', allCharters?.map(r=>r?.subdistrict), 'ทุกตำบล');
-
-  const years = [...new Set(allCharters?.map(r=>r?.publish_date?thYear(r.publish_date):null).filter(Boolean) || [])].sort((a,b)=>b-a);
+  
+  // จังหวัด
+  const provinces = [...new Set(allCharters?.map(r => r?.province).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  fillSelect('mf-province', provinces, 'ทุกจังหวัด');
+  fillSelect('cf-province', provinces, 'ทุกจังหวัด');
+  
+  // รีเซ็ตอำเภอ/ตำบลเป็นค่าเริ่มต้น
+  populateDistrictsByProvince('all', 'mf-district', 'ทุกอำเภอ');
+  populateDistrictsByProvince('all', 'cf-district', 'ทุกอำเภอ');
+  populateSubdistrictsByDistrict('all', 'all', 'mf-subdistrict', 'ทุกตำบล');
+  populateSubdistrictsByDistrict('all', 'all', 'cf-subdistrict', 'ทุกตำบล');
+  
+  // ปี
+  const years = [...new Set(allCharters?.map(r => r?.publish_date ? thYear(r.publish_date) : null).filter(Boolean) || [])]
+    .sort((a, b) => b - a);
+  
   const ys = $('cf-year');
-  if (ys) ys.innerHTML = '<option value="all">ทุกปี</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if (ys) {
+    ys.innerHTML = '<option value="all">ทุกปี</option>' + 
+      years.map(y => `<option value="${y}">${y}</option>`).join('');
+  }
+}
+
+// ── POPULATE FILTERS DYNAMICALLY ─────────────────────────────
+
+/**
+ * อัปเดตตัวเลือกอำเภอตามจังหวัดที่เลือก
+ */
+function populateDistrictsByProvince(province, selectId, allLabel = 'ทุกอำเภอ') {
+  const select = $(selectId);
+  if (!select) return;
+  
+  const prev = select.value;
+  
+  // กรองข้อมูลตามจังหวัด
+  const filtered = province === 'all' 
+    ? allCharters 
+    : allCharters.filter(r => cleanName(r?.province) === cleanName(province));
+  
+  // ดึงอำเภอที่ไม่ซ้ำ
+  const districts = [...new Set(filtered?.map(r => r?.district).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  select.innerHTML = `<option value="all">${allLabel}</option>` +
+    districts.map(d => `<option value="${d}">${d}</option>`).join('');
+  
+  // คืนค่าเดิมถ้ายังมีอยู่
+  if (prev && prev !== 'all' && districts.includes(prev)) {
+    select.value = prev;
+  }
+}
+
+/**
+ * อัปเดตตัวเลือกตำบลตามอำเภอที่เลือก (และจังหวัดถ้ามี)
+ */
+function populateSubdistrictsByDistrict(province, district, selectId, allLabel = 'ทุกตำบล') {
+  const select = $(selectId);
+  if (!select) return;
+  
+  const prev = select.value;
+  
+  // กรองข้อมูลตามจังหวัดและอำเภอ
+  let filtered = allCharters;
+  if (province !== 'all') {
+    filtered = filtered.filter(r => cleanName(r?.province) === cleanName(province));
+  }
+  if (district !== 'all') {
+    filtered = filtered.filter(r => r?.district === district);
+  }
+  
+  // ดึงตำบลที่ไม่ซ้ำ
+  const subdistricts = [...new Set(filtered?.map(r => r?.subdistrict).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  select.innerHTML = `<option value="all">${allLabel}</option>` +
+    subdistricts.map(s => `<option value="${s}">${s}</option>`).join('');
+  
+  // คืนค่าเดิมถ้ายังมีอยู่
+  if (prev && prev !== 'all' && subdistricts.includes(prev)) {
+    select.value = prev;
+  }
 }
 
 // ── LIVING WILL ─────────────────────────────────────────────
@@ -516,9 +662,96 @@ async function preloadLW() {
 
 function populateLWFilters() {
   if (!allLW?.length) return;
-  fillSelect('lw-province', allLW?.map(r=>r?.province), 'ทุกจังหวัด');
-  fillSelect('lw-district', allLW?.map(r=>r?.district), 'ทุกอำเภอ');
-  fillSelect('lw-subdistrict', allLW?.map(r=>r?.subdistrict), 'ทุกตำบล');
+  
+  // จังหวัด
+  const provinces = [...new Set(allLW?.map(r => r?.province).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  fillSelect('lw-province', provinces, 'ทุกจังหวัด');
+  
+  // อำเภอ/ตำบล (ถ้าต้องการ)
+  populateDistrictsByProvinceLW('all', 'lw-district', 'ทุกอำเภอ');
+  populateSubdistrictsByDistrictLW('all', 'all', 'lw-subdistrict', 'ทุกตำบล');
+}
+
+// ฟังก์ชันสำหรับ Living Will (แยกจาก charter)
+function populateDistrictsByProvinceLW(province, selectId, allLabel) {
+  const select = $(selectId);
+  if (!select) return;
+  
+  const filtered = province === 'all' 
+    ? allLW 
+    : allLW.filter(r => cleanName(r?.province) === cleanName(province));
+  
+  const districts = [...new Set(filtered?.map(r => r?.district).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  select.innerHTML = `<option value="all">${allLabel}</option>` +
+    districts.map(d => `<option value="${d}">${d}</option>`).join('');
+}
+
+function populateSubdistrictsByDistrictLW(province, district, selectId, allLabel) {
+  const select = $(selectId);
+  if (!select) return;
+  
+  let filtered = allLW;
+  if (province !== 'all') {
+    filtered = filtered.filter(r => cleanName(r?.province) === cleanName(province));
+  }
+  if (district !== 'all') {
+    filtered = filtered.filter(r => r?.district === district);
+  }
+  
+  const subdistricts = [...new Set(filtered?.map(r => r?.subdistrict).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  select.innerHTML = `<option value="all">${allLabel}</option>` +
+    subdistricts.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function bindLWFilters() {
+  const handleSearch = debounce(() => {
+    loadLWTable({ reset: true });
+  }, 300);
+  
+  $('lw-search')?.addEventListener('input', handleSearch);
+  
+  const handleFilterChange = debounce(() => {
+    loadLWTable({ reset: true });
+  }, 200);
+  
+  // จังหวัดเปลี่ยน → อัปเดตอำเภอ/ตำบล
+  $('lw-province')?.addEventListener('change', () => {
+    const prov = $('lw-province').value;
+    populateDistrictsByProvinceLW(prov, 'lw-district', 'ทุกอำเภอ');
+    populateSubdistrictsByDistrictLW(prov, 'all', 'lw-subdistrict', 'ทุกตำบล');
+    handleFilterChange();
+  });
+  
+  $('lw-district')?.addEventListener('change', () => {
+    const prov = $('lw-province').value;
+    const dist = $('lw-district').value;
+    populateSubdistrictsByDistrictLW(prov, dist, 'lw-subdistrict', 'ทุกตำบล');
+    handleFilterChange();
+  });
+  
+  ['lw-subdistrict', 'lw-year'].forEach(id => {
+    $(id)?.addEventListener('change', handleFilterChange);
+  });
+  
+  $('lw-search-btn')?.addEventListener('click', () => loadLWTable({ reset: true }));
+  
+  // ✅ ปุ่มล้างการคัดกรองสำหรับ Living Will
+  $('lw-reset-btn')?.addEventListener('click', () => {
+    $('lw-search').value = '';
+    $('lw-province').value = 'all';
+    $('lw-district').value = 'all';
+    $('lw-subdistrict').value = 'all';
+    $('lw-year').value = 'all';
+    
+    populateLWFilters();
+    loadLWTable({ reset: true });
+  });
 }
 
 // ── LIVING WILL TABLE (แก้ไขเหมือนกัน) ───────────────────────
