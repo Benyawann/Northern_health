@@ -117,20 +117,37 @@ function initMainMap() {
 
 // ── BUILD MARKERS ───────────────────────────────────────────
 function buildMarkers(data, groupBy) {
-  if (!mainMap || !mainLayer || !data?.length) return;
+  if (!mainMap || !mainLayer || !data?.length) {
+    console.warn('⚠️ ไม่มีข้อมูลหรือแผนที่ไม่พร้อม');
+    return;
+  }
+  
   mainLayer.clearLayers();
-
   const groups = {};
+  const skippedProvinces = new Set(); // เก็บรายชื่อจังหวัดที่ทำ Marker ไม่ได้
+
   data.forEach(r => {
     const prov = cleanName(r?.province);
-    if (!prov || !PROVINCE_COORDS[prov]) return;
+    
+    // ✅ เช็คตรงนี้: ถ้าไม่มีพิกัด จะไม่สร้างกลุ่ม
+    if (!prov || !PROVINCE_COORDS[prov]) {
+      if (prov) skippedProvinces.add(prov); // เก็บไว้ดูภายหลัง
+      return; 
+    }
     
     const key = groupBy === 'subdistrict' ? `${r?.subdistrict}||${r?.district}||${prov}`
               : groupBy === 'district'    ? `${r?.district}||${prov}`
               :                             prov;
+              
     if (!groups[key]) groups[key] = [];
     groups[key].push(r);
   });
+
+  // 🚨 แจ้งเตือนใน Console ถ้ามีจังหวัดที่ไม่มีพิกัด
+  if (skippedProvinces.size > 0) {
+    console.error('❌ พบจังหวัดที่ไม่มีพิกัดใน PROVINCE_COORDS:', [...skippedProvinces]);
+    console.log('💡 คำแนะนำ: เพิ่มจังหวัดเหล่านี้ลงในตัวแปร PROVINCE_COORDS ด้านบนสุดของไฟล์');
+  }
 
   Object.entries(groups).forEach(([key, rows]) => {
     const r0 = rows[0];
@@ -142,10 +159,7 @@ function buildMarkers(data, groupBy) {
     if (!coords) return;
 
     const cnt = rows.length;
-    const label = groupBy === 'province' ? prov
-                : groupBy === 'district' ? (r0?.district || prov)
-                : (r0?.subdistrict || r0?.district || prov);
-    
+    const label = groupBy === 'province' ? prov : (r0?.district || prov);
     const sz = cnt >= 10 ? 42 : 36;
     const bg = cnt >= 10 ? '#0F6E56' : cnt >= 5 ? '#1D9E75' : '#5DCAA5';
 

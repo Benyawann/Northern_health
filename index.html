@@ -115,11 +115,6 @@
       <div class="nav-icon" style="background:#EF9F27;"></div> Gap Analysis
     </div>
 
-    <div class="nav-section">สาธารณะ</div>
-    <div class="nav-item" onclick="showPage('public',this)">
-      <div class="nav-icon" style="background:#888;opacity:0.6;"></div> หน้าประชาชน
-    </div>
-
     <div class="sidebar-footer">
       <button onclick="window.location.href='login.html'"
         style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:white;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
@@ -143,7 +138,7 @@
       <!-- KPI -->
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">จังหวัดมีธรรมนูญ</div>
+          <div class="kpi-label">จังหวัดที่มีธรรมนูญ</div>
           <div class="kpi-value" id="kpi-provinces">--</div>
           <div class="kpi-unit">จาก 17 จังหวัด</div>
         </div>
@@ -206,7 +201,6 @@
     <!-- ── CHARTER ───────────────────────────────────── -->
     <div class="page" id="page-charter">
       <div class="page-title">คลังธรรมนูญสุขภาพ</div>
-      <div class="page-sub">ข้อมูลจาก data_charter · กรองและค้นหารายชื่อธรรมนูญ</div>
 
       <div class="filter-bar">
         <input id="cf-search" type="text" placeholder="🔍  ค้นหาชื่อ / จังหวัด / อำเภอ / ตำบล...">
@@ -323,52 +317,6 @@
         </div>
       </div>
     </div><!-- /gap -->
-
-    <!-- ── PUBLIC ─────────────────────────────────────── -->
-    <div class="page" id="page-public">
-      <div class="public-hero">
-        <h2>Living Will คืออะไร?</h2>
-        <p>ตามมาตรา 12 พ.ร.บ.สุขภาพแห่งชาติ คุณมีสิทธิ์แสดงเจตนาล่วงหน้า<br>
-           เพื่อปฏิเสธการรักษาที่ยืดการตายในระยะสุดท้าย</p>
-      </div>
-
-      <div class="info-cards">
-        <div class="info-card">
-          <div style="width:32px;height:32px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" fill="#1D9E75" opacity="0.8"/><path d="M5 8h6M8 5v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <h4>Living Will คืออะไร</h4>
-          <p>หนังสือแสดงเจตนาล่วงหน้า เพื่อกำหนดการรักษาในวาระสุดท้ายของชีวิตตามความต้องการของคุณ</p>
-        </div>
-        <div class="info-card">
-          <div style="width:32px;height:32px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" fill="#378ADD" opacity="0.8"/><path d="M8 5v3l2 2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <h4>ใครทำได้บ้าง</h4>
-          <p>ผู้มีสัญชาติไทย อายุ 18 ปีขึ้นไป มีสติสัมปชัญญะสมบูรณ์ สามารถทำได้ที่โรงพยาบาล หรือออนไลน์</p>
-        </div>
-        <div class="info-card">
-          <div style="width:32px;height:32px;border-radius:8px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L10 6H14L11 9L12 13L8 11L4 13L5 9L2 6H6L8 2Z" fill="#D4537E" opacity="0.8"/></svg>
-          </div>
-          <h4>หน่วยบริการใกล้บ้าน</h4>
-          <p>ดูแผนที่สถานบริการที่ให้บริการ Living Will ในจังหวัดของคุณด้านล่าง</p>
-        </div>
-      </div>
-
-      <!-- สถานบริการ map เท่านั้น — ไม่มีฟอร์มลงทะเบียน -->
-      <div class="card" style="padding:0;overflow:visible;">
-        <div style="padding:14px 16px 10px;">
-          <div class="card-title">สถานบริการ Living Will ภาคเหนือ</div>
-          <div style="font-size:11px;color:#aaa;margin-top:2px;">
-            คลิก marker เพื่อดูข้อมูลจังหวัด · ตัวเลข = จำนวนธรรมนูญสุขภาพในพื้นที่
-          </div>
-        </div>
-        <div id="public-leaflet-map"></div>
-        <div style="padding:6px 16px 12px;font-size:10px;color:#aaa;">© OpenStreetMap contributors</div>
-      </div>
-    </div><!-- /public -->
-
   </div><!-- /.main -->
 </div><!-- /.app -->
 
