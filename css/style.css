@@ -155,6 +155,32 @@ body {
     flex-shrink: 0;
 }
 
+ /* Hover effect สำหรับปุ่ม + */
+#floating-add-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(29,158,117,0.6);
+}
+    
+#floating-add-btn:active {
+    transform: scale(0.95);
+}
+    
+/* Animation เมื่อแสดงปุ่ม */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+    
+#floating-add-btn.show {
+    animation: fadeInUp 0.3s ease forwards;
+}
+
 /* ========== Main Content - เลื่อนได้ ========== */
 .main { 
     flex: 1; 

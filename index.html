@@ -144,7 +144,7 @@
         
         <!-- Logout Button -->
         <button onclick="handleLogout()" title="ออกจากระบบ"
-          style="width:28px;height:28px;border:none;background:#f5f4f0;border-radius:6px;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;">
+          style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:30px;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
@@ -156,6 +156,10 @@
     
   </div>
 </div>
+
+<div id="floating-add-btn" style="display:none;position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;border:none;box-shadow:0 4px 16px rgba(29,158,117,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:300;z-index:1000;transition:all 0.2s ease;" onclick="handleAddClick()" title="เพิ่มข้อมูลใหม่">
+    +
+  </div>
 
   <!-- ════ MAIN ════════════════════════════════════════ -->
   <div class="main">
@@ -435,9 +439,7 @@
     }
   }
 
-  /**
-   * ตรวจสอบสถานะเมื่อโหลดหน้า
-   */
+  /*ตรวจสอบสถานะเมื่อโหลดหน้า*/
   document.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
     
@@ -447,6 +449,64 @@
         updateAuthUI();
       }
     });
+  });
+
+  /*แสดง/ซ่อนปุ่ม + ตามสถานะล็อกอิน*/
+    function updateFloatingButton() {
+      const btn = document.getElementById('floating-add-btn');
+      if (!btn) return;
+      
+      try {
+        const userStr = localStorage.getItem('user');
+        
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          const loginTime = new Date(user.loginTime);
+          const now = new Date();
+          const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+          
+          if (hoursDiff < 24 && user.loggedIn) {
+            // ✅ แสดงปุ่ม +
+            btn.style.display = 'flex';
+            setTimeout(() => btn.classList.add('show'), 10);
+            return;
+          }
+        }
+        
+        // ❌ ซ่อนปุ่ม +
+        btn.style.display = 'none';
+        btn.classList.remove('show');
+        
+      } catch (err) {
+        console.error('updateFloatingButton error:', err);
+        btn.style.display = 'none';
+      }
+    }
+    
+    /**
+     * ฟังก์ชันเมื่อคลิกปุ่ม +
+     */
+    function handleAddClick() {
+      // ✅ แก้ไขตามความต้องการ: เปิดฟอร์ม, ไปหน้าเพิ่มข้อมูล, ฯลฯ
+      console.log('➕ Add button clicked');
+      
+      // ตัวอย่าง: แสดงข้อความหรือเปิดหน้าใหม่
+      alert('📝 ฟังก์ชันเพิ่มข้อมูล (กำลังพัฒนา)');
+      
+      // หรือเปลี่ยนหน้า:
+      // window.location.href = 'add-charter.html';
+    }
+    
+    // เรียกใช้งานเมื่อโหลดหน้า
+    document.addEventListener('DOMContentLoaded', () => {
+      updateFloatingButton();
+    });
+    
+    // ฟังเหตุการณ์เมื่อล็อกอิน/ออกจากระบบ
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'user') {
+        updateFloatingButton();
+      }
   });
 </script>
 </body>
