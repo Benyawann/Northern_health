@@ -167,7 +167,6 @@
     <!-- ── OVERVIEW ──────────────────────────────────── -->
     <div class="page active" id="page-overview">
       <div class="page-title">ภาพรวมภาคเหนือ</div>
-      <div class="page-sub">ข้อมูลจาก data_charter · คลิก marker เพื่อดูรายชื่อธรรมนูญ</div>
 
       <!-- KPI -->
       <div class="kpi-grid">
@@ -183,7 +182,7 @@
           <div class="kpi-badge badge-amber">กำลังขยาย</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">ธรรมนูญทั้งหมด</div>
+          <div class="kpi-label">ธรรมนูญสุขภาพทั้งหมด</div>
           <div class="kpi-value" id="kpi-charter-total">--</div>
           <div class="kpi-unit">ฉบับ</div>
         </div>
@@ -358,6 +357,144 @@
 <script src="js/app.js"></script>
 <script src="js/script.js"></script>
 <script>
+
+  // ── MAP MODAL (พร้อมช่องค้นหา) ───────────────────────────────
+function openMapModal(groupName, rows) {
+  let ov = $('map-modal-ov');
+  
+  // สร้าง overlay ถ้ายังไม่มี
+  if (!ov) {
+    ov = document.createElement('div'); 
+    ov.id = 'map-modal-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    ov.addEventListener('click', e => { if (e.target===ov) closeMapModal(); });
+    document.body.appendChild(ov);
+  }
+
+  // ✅ เก็บข้อมูลต้นฉบับสำหรับค้นหา
+  const allRows = rows || [];
+  
+  // ✅ ฟังก์ชันกรองข้อมูลตามคำค้นหา
+  function filterRows(searchTerm) {
+    if (!searchTerm.trim()) return allRows;
+    
+    const term = searchTerm.toLowerCase().trim();
+    return allRows.filter(r => {
+      const name = (r?.charter_name || r?.title || '').toLowerCase();
+      const province = (r?.province || '').toLowerCase();
+      const district = (r?.district || '').toLowerCase();
+      const subdistrict = (r?.subdistrict || '').toLowerCase();
+      
+      return name.includes(term) || 
+             province.includes(term) || 
+             district.includes(term) || 
+             subdistrict.includes(term);
+    });
+  }
+  
+  // ✅ ฟังก์ชันเรนเดอร์รายการ
+  function renderRows(items) {
+    if (!items?.length) {
+      return '<div style="text-align:center;padding:32px;color:#aaa;">🔍 ไม่พบข้อมูลที่ตรงกับการค้นหา</div>';
+    }
+    
+    return items.map(r => {
+      const name = r?.charter_name || r?.title || '(ไม่มีชื่อ)';
+      const prov = r?.province || '—';
+      const dist = r?.district || '—';
+      const sub = r?.subdistrict || '';
+      const pubDate = r?.publish_date || null;
+      
+      return `
+      <div style="border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:11px 14px;background:#fafaf8;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:6px;">${name}</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse;">
+          <tr><td style="color:#888;padding:2px 0;width:80px;">จังหวัด</td><td style="color:#444;">${prov}</td></tr>
+          <tr><td style="color:#888;padding:2px 0;">อำเภอ / ตำบล</td><td style="color:#444;">${dist}${sub ? ' · '+sub : ''}</td></tr>
+          <tr><td style="color:#888;padding:2px 0;">วันที่เผยแพร่</td><td style="color:#444;">${thDate(pubDate)}</td></tr>
+        </table>
+      </div>`;
+    }).join('');
+  }
+
+  // ✅ สร้างเนื้อหาเริ่มต้น
+  const itemsHtml = renderRows(allRows);
+  
+  ov.innerHTML = `
+    <div style="background:white;border-radius:12px;width:100%;max-width:520px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden;">
+      <!-- Header -->
+      <div style="padding:14px 18px;border-bottom:0.5px solid rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div>
+          <div style="font-size:15px;font-weight:500;color:#1a1a1a;">📍 ${groupName}</div>
+          <div style="font-size:12px;color:#888;margin-top:2px;"><span id="modal-count">${allRows?.length || 0}</span> ธรรมนูญสุขภาพ</div>
+        </div>
+        <button onclick="closeMapModal()" style="border:none;background:none;cursor:pointer;font-size:20px;color:#aaa;line-height:1;">✕</button>
+      </div>
+      
+      <!-- ✅ Search Bar -->
+      <div style="padding:12px 18px;border-bottom:0.5px solid rgba(0,0,0,0.08);background:#fafafa;flex-shrink:0;">
+        <div style="position:relative;">
+          <input type="text" id="modal-search" placeholder="ค้นหาชื่อธรรมนูญ / อำเภอ / ตำบล / จังหวัด..." 
+            style="width:100%;padding:10px 12px 10px 36px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;background:white;">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#888;font-size:14px;">🔍</span>
+          <button id="modal-search-clear" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;color:#888;cursor:pointer;font-size:16px;display:none;">✕</button>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:6px;">ค้นหาจาก: ชื่อธรรมนูญ, จังหวัด, อำเภอ, ตำบล</div>
+      </div>
+      
+      <!-- Content (scrollable) -->
+      <div style="padding:12px 18px 16px;overflow-y:auto;flex:1;" id="modal-content">
+        ${itemsHtml}
+      </div>
+      
+      <!-- Footer -->
+      <div style="padding:10px 18px;border-top:0.5px solid rgba(0,0,0,0.08);display:flex;justify-content:flex-end;flex-shrink:0;">
+        <button onclick="closeMapModal()" style="padding:7px 20px;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px;background:white;color:#444;font-size:13px;cursor:pointer;">ปิด</button>
+      </div>
+    </div>`;
+  
+  ov.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  
+  // ✅ ผูกเหตุการณ์ค้นหา
+  const searchInput = document.getElementById('modal-search');
+  const clearBtn = document.getElementById('modal-search-clear');
+  const contentEl = document.getElementById('modal-content');
+  const countEl = document.getElementById('modal-count');
+  
+  // เมื่อพิมพ์ค้นหา
+  searchInput?.addEventListener('input', (e) => {
+    const term = e.target.value;
+    
+    // แสดง/ซ่อนปุ่มล้าง
+    if (clearBtn) {
+      clearBtn.style.display = term ? 'flex' : 'none';
+    }
+    
+    // กรองและเรนเดอร์ใหม่
+    const filtered = filterRows(term);
+    contentEl.innerHTML = renderRows(filtered);
+    
+    // อัปเดตจำนวน
+    if (countEl) {
+      countEl.textContent = filtered.length;
+    }
+  });
+  
+  // ปุ่มล้างคำค้นหา
+  clearBtn?.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    searchInput.focus();
+    
+    const filtered = filterRows('');
+    contentEl.innerHTML = renderRows(filtered);
+    if (countEl) countEl.textContent = filtered.length;
+  });
+  
+  // โฟกัสที่ช่องค้นหาเมื่อเปิดโมดัล
+  setTimeout(() => searchInput?.focus(), 100);
+}
   // ========== AUTH FUNCTIONS (เพิ่มใน index.html) ==========
   
   /**
