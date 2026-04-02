@@ -122,6 +122,19 @@ function mockCoords(province, district, subdistrict) {
   return [+(lat+dLat+sLat).toFixed(5), +(lng+dLng+sLng).toFixed(5)];
 }
 
+// ── DEBOUNCE HELPER ────────────────────────────────────────
+function debounce(func, wait = 300) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 // ── MAP INIT ────────────────────────────────────────────────
 function initMainMap() {
   const el = $('leaflet-map');
@@ -339,9 +352,13 @@ async function preloadCharters() {
   }
 }
 
-// ── CHARTER TABLE ───────────────────────────────────────────
-async function loadCharterTable(reset=true) {
+// ── CHARTER TABLE (แก้ไข: รับ page เป็นพารามิเตอร์) ─────────
+async function loadCharterTable(options = {}) {
+  const { reset = true, page = 1 } = options;
+  
   if (reset) charterPage = 1;
+  else charterPage = page; // ✅ ใช้หน้าที่ส่งมา
+  
   rowLoading('charter-tbody', 7);
 
   try {
@@ -351,22 +368,21 @@ async function loadCharterTable(reset=true) {
     const yr    = $('cf-year')?.value || 'all';
     const q     = $('cf-search')?.value?.trim() || '';
 
-    let query = db.from('data_charter')
-      .select('*', { count:'exact' })
-      .order('publish_date', { ascending:false, nullsFirst:true })
-      .range((charterPage-1)*PAGE, charterPage*PAGE-1);
-
+    // ✅ ดึงข้อมูลทั้งหมดก่อน (ไม่ใช้ range) เพื่อกรองและนับถูกต้อง
+    let query = db.from('data_charter').select('*', { count: 'exact' });
+    
     if (prov !== 'all') query = query.eq('province', prov);
     if (yr !== 'all') {
       const y = parseInt(yr) - 543;
       query = query.gte('publish_date',`${y}-01-01`).lte('publish_date',`${y}-12-31`);
     }
 
-    const { data, count, error } = await query;
+    const { data: allData, count: totalCount, error } = await query;
     
     if (error) throw error;
 
-    let filtered = data || [];
+    // ✅ กรองข้อมูลในฝั่ง client (district, subdistrict, search)
+    let filtered = allData || [];
     if (dist !== 'all') filtered = filtered.filter(r => r?.district === dist);
     if (sub  !== 'all') filtered = filtered.filter(r => r?.subdistrict === sub);
     if (q) {
@@ -378,7 +394,12 @@ async function loadCharterTable(reset=true) {
       );
     }
 
-    renderCharterTable(filtered, filtered.length);
+    // ✅ ตัดข้อมูลตามหน้า (pagination)
+    const start = (charterPage - 1) * PAGE;
+    const end = start + PAGE;
+    const pageData = filtered.slice(start, end);
+
+    renderCharterTable(pageData, filtered.length);
 
   } catch(e) {
     console.error('loadCharterTable:', e.message);
@@ -386,7 +407,7 @@ async function loadCharterTable(reset=true) {
   }
 }
 
-function renderCharterTable(data, count) {
+function renderCharterTable(data, total) {
   if (!data?.length) {
     rowEmpty('charter-tbody', 'ไม่พบข้อมูลตามเงื่อนไข', 7);
     tx('charter-count','ไม่พบข้อมูล');
@@ -413,24 +434,45 @@ function renderCharterTable(data, count) {
       </tr>`;
   }).join('');
 
-  const total = count || data.length;
   const from = (charterPage-1)*PAGE + 1;
   const to = Math.min(charterPage*PAGE, total);
   const tp = Math.ceil(total/PAGE);
+  
   tx('charter-count', `แสดง ${from}–${to} จาก ${total.toLocaleString('th-TH')} รายการ`);
-  renderPager('charter-pager', charterPage, tp, 'charterPrev','charterNext');
+  
+  // ✅ ส่ง callback function ไปที่ renderPager
+  renderPager('charter-pager', charterPage, tp, (newPage) => {
+    loadCharterTable({ reset: false, page: newPage });
+  });
 }
 
 function charterPrev() { if(charterPage>1){ charterPage--; loadCharterTable(false); } }
 function charterNext(tp) { if(charterPage<tp){ charterPage++; loadCharterTable(false); } }
 
 function bindCharterFilters() {
-  $('cf-search-btn')?.addEventListener('click', () => loadCharterTable(true));
-  $('cf-search')?.addEventListener('keydown', e => { if(e.key==='Enter') loadCharterTable(true); });
-
+  // ✅ ค้นหาแบบ real-time (debounce 300ms)
+  const handleSearch = debounce(() => {
+    loadCharterTable({ reset: true }); // ✅ รีเซ็ตไปหน้า 1 เมื่อค้นหา
+  }, 300);
+  
+  $('cf-search')?.addEventListener('input', handleSearch);
+  
+  // ✅ Filter selects เปลี่ยนแล้วโหลดทันที
+  const handleFilterChange = debounce(() => {
+    loadCharterTable({ reset: true }); // ✅ รีเซ็ตไปหน้า 1 เมื่อเปลี่ยนฟิลเตอร์
+  }, 200);
+  
+  ['cf-province', 'cf-district', 'cf-subdistrict', 'cf-year'].forEach(id => {
+    $(id)?.addEventListener('change', handleFilterChange);
+  });
+  
+  // ✅ ปุ่มค้นหายังคงอยู่
+  $('cf-search-btn')?.addEventListener('click', () => loadCharterTable({ reset: true }));
+  
+  // ✅ กรองจังหวัด → อัปเดตอำเภอ/ตำบล
   $('cf-province')?.addEventListener('change', () => {
     const p = $('cf-province').value;
-    const s = p==='all' ? allCharters : allCharters.filter(r => cleanName(r?.province) === cleanName(p));
+    const s = p === 'all' ? allCharters : allCharters.filter(r => cleanName(r?.province) === cleanName(p));
     fillSelect('cf-district', s?.map(r=>r?.district), 'ทุกอำเภอ');
     fillSelect('cf-subdistrict', s?.map(r=>r?.subdistrict), 'ทุกตำบล');
   });
@@ -479,27 +521,39 @@ function populateLWFilters() {
   fillSelect('lw-subdistrict', allLW?.map(r=>r?.subdistrict), 'ทุกตำบล');
 }
 
-async function loadLWTable(reset=true) {
+// ── LIVING WILL TABLE (แก้ไขเหมือนกัน) ───────────────────────
+async function loadLWTable(options = {}) {
+  const { reset = true, page = 1 } = options;
+  
   if (reset) lwPage = 1;
+  else lwPage = page;
+  
   rowLoading('lw-tbody', 6);
 
   try {
-    const { data, count, error } = await db
+    const { data: allData, count: totalCount, error } = await db
       .from('data_living_will')
-      .select('*', { count:'exact' })
-      .order('year', { ascending:false, nullsFirst:true })
-      .range((lwPage-1)*PAGE, lwPage*PAGE-1);
+      .select('*', { count:'exact' });
 
     if (error) throw error;
 
-    if (!data?.length) {
+    let filtered = allData || [];
+    
+    // (เพิ่มฟิลเตอร์ที่นี่ถ้าต้องการ)
+
+    // ✅ ตัดข้อมูลตามหน้า
+    const start = (lwPage - 1) * PAGE;
+    const end = start + PAGE;
+    const pageData = filtered.slice(start, end);
+
+    if (!pageData?.length) {
       rowEmpty('lw-tbody', 'ไม่มีข้อมูล Living Will', 6);
       tx('lw-count','');
       hx('lw-pager','');
       return;
     }
 
-    $('lw-tbody').innerHTML = data.map(r => `
+    $('lw-tbody').innerHTML = pageData.map(r => `
       <tr>
         <td class="td-name">${r?.name || r?.full_name || '—'}</td>
         <td>${r?.province || '—'}</td>
@@ -509,12 +563,17 @@ async function loadLWTable(reset=true) {
         <td>${r?.channel || '—'}</td>
       </tr>`).join('');
 
-    const total = count || data.length;
+    const total = totalCount || filtered.length;
     const from = (lwPage-1)*PAGE + 1;
     const to = Math.min(lwPage*PAGE, total);
     const tp = Math.ceil(total/PAGE);
+    
     tx('lw-count', `แสดง ${from}–${to} จาก ${total.toLocaleString('th-TH')} รายการ`);
-    renderPager('lw-pager', lwPage, tp, 'lwPrev','lwNext');
+    
+    // ✅ ส่ง callback ไปที่ renderPager
+    renderPager('lw-pager', lwPage, tp, (newPage) => {
+      loadLWTable({ reset: false, page: newPage });
+    });
 
   } catch(e) {
     console.warn('loadLWTable:', e.message);
@@ -522,19 +581,65 @@ async function loadLWTable(reset=true) {
   }
 }
 
+// ── bindLWFilters (แก้ไขเหมือนกัน) ───────────────────────────
+function bindLWFilters() {
+  const handleSearch = debounce(() => {
+    loadLWTable({ reset: true });
+  }, 300);
+  
+  $('lw-search')?.addEventListener('input', handleSearch);
+  
+  const handleFilterChange = debounce(() => {
+    loadLWTable({ reset: true });
+  }, 200);
+  
+  ['lw-province', 'lw-district', 'lw-subdistrict', 'lw-year'].forEach(id => {
+    $(id)?.addEventListener('change', handleFilterChange);
+  });
+  
+  $('lw-search-btn')?.addEventListener('click', () => loadLWTable({ reset: true }));
+}
+
 function lwPrev() { if(lwPage>1){ lwPage--; loadLWTable(false); } }
 function lwNext(tp) { if(lwPage<tp){ lwPage++; loadLWTable(false); } }
 function bindLWFilters() {
-  $('lw-search-btn')?.addEventListener('click', () => loadLWTable(true));
+  // ✅ ค้นหาแบบ real-time
+  const handleSearch = debounce(() => {
+    loadLWTable(true);
+  }, 300);
+  
+  $('lw-search')?.addEventListener('input', handleSearch);
+  
+  // ✅ Filter selects
+  const handleFilterChange = debounce(() => {
+    loadLWTable(true);
+  }, 200);
+  
+  ['lw-province', 'lw-district', 'lw-subdistrict', 'lw-year'].forEach(id => {
+    $(id)?.addEventListener('change', handleFilterChange);
+  });
 }
 
-// ── PAGER ───────────────────────────────────────────────────
-function renderPager(id, page, total, prevFn, nextFn) {
-  const el = $(id); if (!el) return;
+// ── PAGER (แก้ไข: ใช้ event delegation) ─────────────────────
+function renderPager(id, page, total, onPageChange) {
+  const el = $(id); 
+  if (!el) return;
+  
+  // สร้าง HTML โดยไม่ใส่ onclick ในสตริง
   el.innerHTML = `
-    <button onclick="${prevFn}()" class="pager-btn" ${page<=1?'disabled':''}>‹ ก่อนหน้า</button>
+    <button data-pager="prev" class="pager-btn" ${page<=1?'disabled':''}>‹ ก่อนหน้า</button>
     <span class="pager-info">หน้า ${page} / ${total}</span>
-    <button onclick="${nextFn}(${total})" class="pager-btn" ${page>=total?'disabled':''}>ถัดไป ›</button>`;
+    <button data-pager="next" class="pager-btn" ${page>=total?'disabled':''}>ถัดไป ›</button>
+  `;
+  
+  // ผูก event listeners
+  el.querySelector('[data-pager="prev"]')?.addEventListener('click', () => {
+    if (page > 1 && onPageChange) onPageChange(page - 1);
+  });
+  
+  el.querySelector('[data-pager="next"]')?.addEventListener('click', () => {
+    if (page < total && onPageChange) onPageChange(page + 1);
+  });
 }
 
 // ── PUBLIC MAP ──────────────────────────────────────────────
