@@ -286,9 +286,30 @@ function applyMapFilter() {
 }
 
 function bindMapFilters() {
+  // ✅ ผูก event change ให้ selects
   ['mf-province','mf-district','mf-subdistrict'].forEach(id => {
     const el = $(id);
     if (el) el.addEventListener('change', applyMapFilter);
+  });
+  
+  // ✅ เพิ่มปุ่มล้างการคัดกรอง
+  $('mf-reset-btn')?.addEventListener('click', () => {
+    // รีเซ็ตค่า selects ทั้งหมด
+    $('mf-province').value = 'all';
+    $('mf-district').value = 'all';
+    $('mf-subdistrict').value = 'all';
+    
+    // รีเซ็ต marker ให้แสดงทั้งหมด
+    buildMarkers(allCharters, 'province');
+    
+    // รีเซ็ตมุมมองแผนที่
+    mainMap.setView([17.8, 99.8], 7);
+    
+    // รีเซ็ตตัวเลือกอำเภอ/ตำบล
+    fillSelect('mf-district', allCharters?.map(r => r?.district), 'ทุกอำเภอ');
+    fillSelect('mf-subdistrict', allCharters?.map(r => r?.subdistrict), 'ทุกตำบล');
+    
+    console.log('🗺️ Map filters reset');
   });
 }
 
