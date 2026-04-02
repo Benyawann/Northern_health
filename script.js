@@ -42,15 +42,45 @@ function rowEmpty(id, msg, cols) {
 
 function thDate(val) {
   if (!val) return '—';
+  
+  // ✅ กรณีที่ 1: ถ้าเป็นข้อความภาษาไทย (เช่น "กรกฎาคม 2565", "1 สิงหาคม 2565")
+  const thaiMonths = {
+    'มกราคม': '01', 'กุมภาพันธ์': '02', 'มีนาคม': '03', 'เมษายน': '04',
+    'พฤษภาคม': '05', 'มิถุนายน': '06', 'กรกฎาคม': '07', 'สิงหาคม': '08',
+    'กันยายน': '09', 'ตุลาคม': '10', 'พฤศจิกายน': '11', 'ธันวาคม': '12'
+  };
+  
+  // ตรวจสอบว่าเป็นข้อความภาษาไทยหรือไม่
+  const thaiMonthPattern = /(\d{1,2})?\s*([ก-ฮ]+)\s+(\d{4})/;
+  const match = String(val).match(thaiMonthPattern);
+  
+  if (match) {
+    const day = match[1] || '1';
+    const monthThai = match[2];
+    const yearBE = match[3];
+    const monthNum = thaiMonths[monthThai];
+    
+    if (monthNum) {
+      return `${day.padStart(2, '0')} ${monthThai} ${yearBE}`;
+    }
+    return val; // ส่งคืนค่าเดิมถ้าไม่พบเดือน
+  }
+  
+  // ✅ กรณีที่ 2: ถ้าเป็น ISO date format (2023-07-15)
   try {
     const d = new Date(val);
+    if (isNaN(d.getTime())) return val; // ถ้าไม่ valid ให้แสดงค่าเดิม
+    
     const m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][d.getMonth()];
     return `${d.getDate()} ${m} ${d.getFullYear()+543}`;
-  } catch { return val; }
+  } catch {
+    return val; // แสดงค่าเดิมถ้า error
+  }
 }
+
 function thYear(val) {
   if (!val) return '—';
-  try { return new Date(val).getFullYear()+543; } catch { return '—'; }
+  try { return new Date(val).getFullYear()} catch { return '—'; }
 }
 
 function buildOptions(items, allLabel) {
