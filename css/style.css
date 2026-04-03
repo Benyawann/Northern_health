@@ -410,6 +410,28 @@ body {
     width: 30px; 
 }
 
+/* Dropdown Title */
+#cf-title {
+  background: white;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+#cf-title:hover {
+  border-color: #1D9E75;
+}
+
+#cf-title:focus {
+  outline: none;
+  border-color: #1D9E75;
+  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+}
+
 /* ========== Trend Chart ========== */
 .trend-row { 
     display: flex; 
@@ -462,6 +484,154 @@ td {
     padding: 7px 8px; 
     border-bottom: 0.5px solid rgba(0,0,0,0.08); 
     color: #1a1a1a; 
+}
+
+/* ========== Table Column Styles ========== */
+
+/* คอลัมน์ประเด็นหลัก (Title) */
+.td-title {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+/* Badge สำหรับประเด็นหลัก */
+.title-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #E1F5EE 0%, #D4F1E7 100%);
+  color: #1D9E75;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  border: 0.5px solid rgba(29, 158, 117, 0.2);
+  transition: all 0.15s ease;
+}
+
+.title-badge:hover {
+  background: linear-gradient(135deg, #D4F1E7 0%, #C7EBDE 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.2);
+}
+
+/* คอลัมน์ปี */
+.td-year {
+  text-align: center;
+  font-weight: 500;
+  color: #666;
+  padding: 8px 12px;
+}
+
+/* ========== Button Styles ========== */
+
+/* ปุ่มดู */
+.btn-view {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #378ADD 0%, #2E6DB8 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(55, 138, 221, 0.2);
+  white-space: nowrap;
+}
+
+.btn-view:hover {
+  background: linear-gradient(135deg, #2E6DB8 0%, #255A99 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(55, 138, 221, 0.3);
+}
+
+.btn-view:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(55, 138, 221, 0.2);
+}
+
+/* ปุ่มดูแบบเล็ก */
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 11px;
+}
+
+/* ปุ่ม PDF */
+.btn-pdf {
+  padding: 5px 10px;
+  background: white;
+  color: #185FA5;
+  border: 0.5px solid #185FA5;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-pdf:hover {
+  background: #E6F1FB;
+  border-color: #0F4D8A;
+  color: #0F4D8A;
+}
+/* ========== Title Badge Styles ========== */
+.title-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: all 0.15s ease;
+  cursor: default;
+}
+
+.title-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+.title-badge[data-type="elderly"] {
+  background: #E1F5EE;
+  color: #1D9E75;
+}
+
+.title-badge[data-type="child"] {
+  background: #E6F1FB;
+  color: #378ADD;
+}
+
+.title-badge[data-type="mental"] {
+  background: #FBEAF0;
+  color: #D4537E;
+}
+
+.title-badge[data-type="endoflife"] {
+  background: #FFF4E6;
+  color: #EF9F27;
+}
+
+.title-badge[data-type="ltc"] {
+  background: #E8F4FD;
+  color: #5DCAA5;
+}
+
+.title-badge[data-type="other"] {
+  background: #F5F5F3;
+  color: #666;
 }
 
 tr:last-child td { 

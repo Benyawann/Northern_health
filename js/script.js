@@ -509,7 +509,7 @@ async function preloadCharters() {
   }
 }
 
-// ── CHARTER TABLE (แก้ไข: รับ page เป็นพารามิเตอร์) ─────────
+// ── CHARTER TABLE (แก้ไข: เพิ่มการกรอง title) ─────────
 async function loadCharterTable(options = {}) {
   const { reset = true, page = 1 } = options;
   
@@ -519,28 +519,33 @@ async function loadCharterTable(options = {}) {
   rowLoading('charter-tbody', 7);
 
   try {
-    const prov  = $('cf-province')?.value || 'all';
-    const dist  = $('cf-district')?.value || 'all';
-    const sub   = $('cf-subdistrict')?.value || 'all';
-    const yr    = $('cf-year')?.value || 'all';
-    const q     = $('cf-search')?.value?.trim() || '';
+    const prov    = $('cf-province')?.value || 'all';
+    const dist    = $('cf-district')?.value || 'all';
+    const sub     = $('cf-subdistrict')?.value || 'all';
+    const yr      = $('cf-year')?.value || 'all';
+    const title   = $('cf-title')?.value || 'all';  // ✅ เพิ่ม
+    const q       = $('cf-search')?.value?.trim() || '';
 
     // ✅ ดึงข้อมูลทั้งหมดก่อน (ไม่ใช้ range) เพื่อกรองและนับถูกต้อง
     let query = db.from('data_charter').select('*', { count: 'exact' });
     
     if (prov !== 'all') query = query.eq('province', prov);
     // ❌ ลบการกรองปีด้วย SQL ออก เพราะ publish_date เป็น text ภาษาไทย
-    // if (yr !== 'all') { ... }
 
     const { data: allData, count: totalCount, error } = await query;
     
     if (error) throw error;
 
-    // ✅ กรองข้อมูลในฝั่ง client (district, subdistrict, search, YEAR)
+    // ✅ กรองข้อมูลในฝั่ง client (district, subdistrict, search, YEAR, TITLE)
     let filtered = allData || [];
     
     if (dist !== 'all') filtered = filtered.filter(r => r?.district === dist);
     if (sub  !== 'all') filtered = filtered.filter(r => r?.subdistrict === sub);
+    
+    // ✅ กรอง title
+    if (title !== 'all') {
+      filtered = filtered.filter(r => r?.title === title);
+    }
     
     // ✅ กรองปีในฝั่ง client (ใช้ฟังก์ชัน thYear)
     if (yr !== 'all') {
@@ -575,7 +580,7 @@ async function loadCharterTable(options = {}) {
 
 function renderCharterTable(data, total) {
   if (!data?.length) {
-    rowEmpty('charter-tbody', 'ไม่พบข้อมูลตามเงื่อนไข', 7);
+    rowEmpty('charter-tbody', 'ไม่พบข้อมูลตามเงื่อนไข', 8);
     tx('charter-count','ไม่พบข้อมูล');
     hx('charter-pager','');
     return;
@@ -586,17 +591,36 @@ function renderCharterTable(data, total) {
     const prov = r?.province || '—';
     const dist = r?.district || '—';
     const sub = r?.subdistrict || '—';
+    const title = r?.title || '—';
     const year = thYear(r?.publish_date);
+    
+    // ✅ ดึงสีตามประเภทของ title
+    const colors = getTitleColor(title);
     
     return `
       <tr>
-        <td style="padding:6px 8px;"><div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#888;">📄</div></td>
+        <td style="padding:6px 8px;">
+          <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#888;">📄</div>
+        </td>
         <td class="td-name" title="${name}">${name}</td>
         <td>${prov}</td>
         <td>${dist}</td>
         <td>${sub}</td>
-        <td>${year}</td>
-        <td><button class="btn-sm" onclick="alert('ดูรายละเอียด: ${name}')">ดู</button></td>
+        <td class="td-title">
+          <!-- ✅ Badge ที่มีสีตามประเภท -->
+          <span class="title-badge" 
+              style="background:${colors.bg};color:${colors.color};border:0.5px solid ${colors.border};" 
+              onclick="filterByTitle('${title.replace(/'/g, "\\'")}')"
+              title="คลิกเพื่อกรองตามประเด็นนี้">
+            ${title}
+          </span>
+        </td>
+        <td class="td-year">${year}</td>
+        <td style="text-align:center;padding:8px;">
+          <button class="btn-view btn-sm" onclick="viewCharterDetail('${name.replace(/'/g, "\\'")}')" title="ดูรายละเอียด">
+            ดู
+          </button>
+        </td>
       </tr>`;
   }).join('');
 
@@ -610,6 +634,25 @@ function renderCharterTable(data, total) {
   renderPager('charter-pager', charterPage, tp, (newPage) => {
     loadCharterTable({ reset: false, page: newPage });
   });
+}
+
+function filterByTitle(title) {
+  const select = $('cf-title');
+  if (select) {
+    select.value = title;
+    loadCharterTable({ reset: true });
+  }
+}
+
+// ✅ เพิ่มฟังก์ชันสำหรับดูรายละเอียด
+function viewCharterDetail(charterName) {
+  console.log('📄 View charter:', charterName);
+  
+  // ตัวอย่าง: แสดง alert หรือเปิด modal
+  alert(`📋 รายละเอียดธรรมนูญ\n\nชื่อ: ${charterName}\n\n(กำลังพัฒนา - จะแสดงรายละเอียดเต็มรูปแบบ)`);
+  
+  // หรือเปิดหน้าใหม่:
+  // window.open(`charter-detail.html?name=${encodeURIComponent(charterName)}`, '_blank');
 }
 
 function charterPrev() { if(charterPage>1){ charterPage--; loadCharterTable(false); } }
@@ -654,8 +697,8 @@ function bindCharterFilters() {
     handleFilterChange();
   });
   
-  // ตำบล/ปี เปลี่ยน → โหลดตารางอย่างเดียว
-  ['cf-subdistrict', 'cf-year'].forEach(id => {
+  // ตำบล/ปี/Title เปลี่ยน → โหลดตารางอย่างเดียว
+  ['cf-subdistrict', 'cf-year', 'cf-title'].forEach(id => {
     $(id)?.addEventListener('change', handleFilterChange);
   });
   
@@ -670,6 +713,7 @@ function bindCharterFilters() {
     $('cf-district').value = 'all';
     $('cf-subdistrict').value = 'all';
     $('cf-year').value = 'all';
+    $('cf-title').value = 'all';  // ✅ รีเซ็ต title ด้วย
     
     // รีเซ็ตฟิลเตอร์ลูกให้แสดงทั้งหมด
     populateCharterFilters();
@@ -704,6 +748,9 @@ function populateCharterFilters() {
     ys.innerHTML = '<option value="all">ทุกปี</option>' + 
       years.map(y => `<option value="${y}">${y}</option>`).join('');
   }
+  
+  // ✅ เพิ่ม: Populate title dropdown
+  populateTitleDropdown();
 }
 
 // ── POPULATE FILTERS DYNAMICALLY ─────────────────────────────
@@ -764,6 +811,49 @@ function populateSubdistrictsByDistrict(province, district, selectId, allLabel =
   if (prev && prev !== 'all' && subdistricts.includes(prev)) {
     select.value = prev;
   }
+}
+
+// ── POPULATE TITLE DROPDOWN ──────────────────────────────
+
+function populateTitleDropdown() {
+  console.log('📋 Populating title dropdown with', allCharters?.length, 'charters');
+  
+  // ดึง title ที่ไม่ซ้ำ
+  const titles = [...new Set(allCharters?.map(r => r?.title).filter(Boolean) || [])]
+    .sort((a, b) => String(a).localeCompare(String(b), 'th'));
+  
+  const select = $('cf-title');
+  if (select) {
+    const prev = select.value;
+    select.innerHTML = '<option value="all">ทุกประเด็น</option>' +
+      titles.map(t => `<option value="${t.replace(/"/g, '&quot;')}">${t}</option>`).join('');
+    
+    // คืนค่าเดิมถ้ายังมีอยู่
+    if (prev && prev !== 'all') select.value = prev;
+  }
+}
+
+function getTitleColor(title) {
+  if (!title) return { bg: '#f0f0f0', color: '#888' };
+  
+  const t = title.toLowerCase();
+  
+  // ✅ กำหนดสีตามคีย์เวิร์ดในชื่อประเด็น
+  if (t.includes('ผู้สูงอายุ') || t.includes('สูงวัย')) {
+    return { bg: '#CDE9CF', color: '#409145', border: '#4CAD52' };
+  }
+  if (t.includes('อาหารสุขภาพ') || t.includes('ปลอดภัย')) {
+    return { bg: '#F2DE97', color: '#907513', border: '#B99618' };
+  }
+  if (t.includes('สุขภาพดี') || t.includes('สูงดี')) {
+    return { bg: '#C7EBEF', color: '#2E95A3', border: '#24757F' };
+  }
+  if (t.includes('ตายดี') || t.includes('ม.12') || t.includes('living will')) {
+    return { bg: '#FFF4E6', color: '#EF9F27', border: 'rgba(239,159,39,0.3)' };
+  }
+  
+  // ✅ สีเริ่มต้นสำหรับประเด็นอื่นๆ
+  return { bg: '#F5F5F3', color: '#666', border: 'rgba(0,0,0,0.1)' };
 }
 
 // ── LIVING WILL ─────────────────────────────────────────────
