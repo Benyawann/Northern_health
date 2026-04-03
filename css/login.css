@@ -210,6 +210,26 @@
   transform: scale(1.05);
 }
 
+/* บนขวา (ค่าเริ่มต้น) */
+#toast-notification { top: 20px; right: 20px; }
+
+/* บนซ้าย */
+#toast-notification.top-left { top: 20px; left: 20px; right: auto; }
+
+/* ล่างขวา */
+#toast-notification.bottom-right { top: auto; bottom: 20px; right: 20px; }
+
+/* ล่างซ้าย */
+#toast-notification.bottom-left { top: auto; bottom: 20px; left: 20px; right: auto; }
+
+/* ตรงกลางบน */
+#toast-notification.top-center { 
+  top: 20px; 
+  left: 50%; 
+  right: auto; 
+  transform: translateX(-50%); 
+}
+
 /* Responsive */
 @media (max-width: 480px) {
     .login-card {
