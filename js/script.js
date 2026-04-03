@@ -593,46 +593,50 @@ function renderCharterTable(data, total) {
     const sub = r?.subdistrict || '—';
     const title = r?.title || '—';
     const year = thYear(r?.publish_date);
-    
-    // ✅ ดึงสีตามประเภทของ title
     const colors = getTitleColor(title);
-    
-    // แทนที่ใน data.map(r => { ... }) ใน renderCharterTable
+
+    // ✅ รูปภาพ — ถ้ามี image_url แสดงรูป, ถ้าไม่มีแสดง icon
+    const imgUrl = r?.image_url || null;
+    const imgHtml = imgUrl
+      ? `<div style="position:relative;width:44px;height:44px;">
+           <img src="${imgUrl}"
+             style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:0.5px solid rgba(0,0,0,0.1);display:block;"
+             onerror="this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;background:#f0f0ec;border-radius:6px;border:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;\\'>📄</div>'"
+           >
+         </div>`
+      : `<div style="width:44px;height:44px;background:#f0f0ec;border-radius:6px;border:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;">📄</div>`;
+
     return `
       <tr>
-        <td style="padding:6px 8px;">
-          <div style="width:40px;height:40px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#888;">📄</div>
-        </td>
+        <td style="padding:6px 8px;">${imgHtml}</td>
         <td class="td-name" title="${name}">${name}</td>
         <td>${prov}</td>
         <td>${dist}</td>
         <td>${sub}</td>
         <td class="td-title">
-          <span class="title-badge" 
-            style="background:${colors.bg};color:${colors.color};border:0.5px solid ${colors.border};" 
+          <span class="title-badge"
+            style="background:${colors.bg};color:${colors.color};border:0.5px solid ${colors.border};"
             onclick="filterByTitle('${title.replace(/'/g, "\\'")}')"
             title="คลิกเพื่อกรองตามประเด็นนี้">
-          ${title}
-        </span>
-      </td>
-      <td class="td-year">${year}</td>
-      <td style="text-align:center;padding:8px;">
-        <button class="btn-view btn-sm" 
-          onclick="viewCharterPDF(${JSON.stringify(r).replace(/"/g, '&quot;')})" 
-          title="ดูรายละเอียด">
-          อ่านเพิ่มเติม
-        </button>
-      </td>
-    </tr>`;
+            ${title}
+          </span>
+        </td>
+        <td class="td-year">${year}</td>
+        <td style="text-align:center;padding:8px;">
+          <button class="btn-view btn-sm"
+            onclick="viewCharterPDF(${JSON.stringify(r).replace(/"/g, '&quot;')})"
+            title="ดูรายละเอียด">
+            อ่านเพิ่มเติม
+          </button>
+        </td>
+      </tr>`;
   }).join('');
 
   const from = (charterPage-1)*PAGE + 1;
   const to = Math.min(charterPage*PAGE, total);
   const tp = Math.ceil(total/PAGE);
-  
+
   tx('charter-count', `แสดง ${from}–${to} จาก ${total.toLocaleString('th-TH')} รายการ`);
-  
-  // ✅ ส่ง callback function ไปที่ renderPager
   renderPager('charter-pager', charterPage, tp, (newPage) => {
     loadCharterTable({ reset: false, page: newPage });
   });
