@@ -597,6 +597,7 @@ function renderCharterTable(data, total) {
     // ✅ ดึงสีตามประเภทของ title
     const colors = getTitleColor(title);
     
+    // แทนที่ใน data.map(r => { ... }) ใน renderCharterTable
     return `
       <tr>
         <td style="padding:6px 8px;">
@@ -607,21 +608,22 @@ function renderCharterTable(data, total) {
         <td>${dist}</td>
         <td>${sub}</td>
         <td class="td-title">
-          <!-- ✅ Badge ที่มีสีตามประเภท -->
           <span class="title-badge" 
-              style="background:${colors.bg};color:${colors.color};border:0.5px solid ${colors.border};" 
-              onclick="filterByTitle('${title.replace(/'/g, "\\'")}')"
-              title="คลิกเพื่อกรองตามประเด็นนี้">
-            ${title}
-          </span>
-        </td>
-        <td class="td-year">${year}</td>
-        <td style="text-align:center;padding:8px;">
-          <button class="btn-view btn-sm" onclick="viewCharterDetail('${name.replace(/'/g, "\\'")}')" title="ดูรายละเอียด">
-            ดู
-          </button>
-        </td>
-      </tr>`;
+            style="background:${colors.bg};color:${colors.color};border:0.5px solid ${colors.border};" 
+            onclick="filterByTitle('${title.replace(/'/g, "\\'")}')"
+            title="คลิกเพื่อกรองตามประเด็นนี้">
+          ${title}
+        </span>
+      </td>
+      <td class="td-year">${year}</td>
+      <td style="text-align:center;padding:8px;">
+        <button class="btn-view btn-sm" 
+          onclick="viewCharterPDF(${JSON.stringify(r).replace(/"/g, '&quot;')})" 
+          title="ดูรายละเอียด">
+          อ่านเพิ่มเติม
+        </button>
+      </td>
+    </tr>`;
   }).join('');
 
   const from = (charterPage-1)*PAGE + 1;
@@ -644,16 +646,26 @@ function filterByTitle(title) {
   }
 }
 
-// ✅ เพิ่มฟังก์ชันสำหรับดูรายละเอียด
-function viewCharterDetail(charterName) {
-  console.log('📄 View charter:', charterName);
-  
-  // ตัวอย่าง: แสดง alert หรือเปิด modal
-  alert(`📋 รายละเอียดธรรมนูญ\n\nชื่อ: ${charterName}\n\n(กำลังพัฒนา - จะแสดงรายละเอียดเต็มรูปแบบ)`);
-  
-  // หรือเปิดหน้าใหม่:
-  // window.open(`charter-detail.html?name=${encodeURIComponent(charterName)}`, '_blank');
+function viewCharterPDF(r) {
+  let rawPdf = r?.pdf_url || null;
+  let pdfUrl = null;
+
+  if (rawPdf) {
+    if (rawPdf.startsWith('http')) {
+      pdfUrl = rawPdf;
+    } else {
+      const cleanPath = rawPdf.startsWith('/') ? rawPdf.slice(1) : rawPdf;
+      pdfUrl = `${SUPABASE_URL}/storage/v1/object/public/charter-pdfs/${cleanPath}`;
+    }
+  }
+
+  if (pdfUrl) {
+    window.open(pdfUrl, '_blank', 'noopener');
+  } else {
+    alert('❌ ธรรมนูญนี้ยังไม่มีไฟล์ PDF');
+  }
 }
+
 
 function charterPrev() { if(charterPage>1){ charterPage--; loadCharterTable(false); } }
 function charterNext(tp) { if(charterPage<tp){ charterPage++; loadCharterTable(false); } }
@@ -1124,7 +1136,10 @@ function initPublicMap() {
 
 // ── KEYBOARD ESC ────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeMapModal(); }
+  if (e.key === 'Escape') { 
+    closeMapModal(); 
+    closePDFModal();  // ✅ เพิ่มบรรทัดนี้
+  }
 });
 
 // ── INIT ────────────────────────────────────────────────────
