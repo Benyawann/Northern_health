@@ -468,19 +468,138 @@ function closeMapModal() {
 // ── OVERVIEW KPIs ───────────────────────────────────────────
 async function loadKPIs() {
   try {
-    const { data, error } = await db.from('data_charter').select('province');
-    if (error) {
-      console.error('loadKPIs error:', error.message);
-      throw error;
-    }
+    const { data, error } = await db.from('data_charter').select('province, title');
+    if (error) throw error;
+
     const rows = data || [];
-    console.log(`📊 KPI: loaded ${rows.length} charters`);
-    tx('kpi-provinces', new Set(rows.map(r=>r?.province).filter(Boolean)).size);
-    tx('kpi-charter-total', rows.length.toLocaleString('th-TH'));
+    const total = rows.length;
+
+    // KPI cards
+    tx('kpi-provinces', new Set(rows.map(r => r?.province).filter(Boolean)).size);
+    tx('kpi-charter-total', total.toLocaleString('th-TH'));
+
+    // ✅ นับจำนวนแต่ละ title
+    const titleCount = {};
+    rows.forEach(r => {
+      const t = r?.title?.trim();
+      if (t) titleCount[t] = (titleCount[t] || 0) + 1;
+    });
+
+    // ✅ เรียงจากมากไปน้อย
+    const sorted = Object.entries(titleCount)
+      .sort((a, b) => b[1] - a[1]);
+
+    // ✅ Render bar chart
+    renderTopicBars(sorted, total);
+
   } catch(e) {
     console.error('loadKPIs failed:', e.message);
     tx('kpi-provinces', '0');
     tx('kpi-charter-total', '0');
+  }
+}
+
+function renderTopicBars(sorted, total) {
+  const container = document.querySelector('#page-overview .card:last-child');
+  if (!container || !sorted.length) return;
+
+  // ✅ สีวนซ้ำตามลำดับ
+  const COLORS = [
+    '#1D9E75', '#378ADD', '#EF9F27', '#D4537E',
+    '#5DCAA5', '#7B61FF', '#F97316', '#14B8A6',
+  ];
+
+  // ✅ แบ่งเป็น 2 คอลัมน์
+  const half = Math.ceil(sorted.length / 2);
+  const left = sorted.slice(0, half);
+  const right = sorted.slice(half);
+
+  function barHtml(entries, startIdx) {
+    return entries.map(([title, count], i) => {
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      const color = COLORS[(startIdx + i) % COLORS.length];
+      // ตัดชื่อยาวให้แสดงได้
+      const shortTitle = title.length > 14 ? title.slice(0, 13) + '…' : title;
+      return `
+        <div class="bar-row" title="${title} (${count} ฉบับ)">
+          <div class="bar-label" style="width:90px;font-size:11px;" title="${title}">${shortTitle}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%;background:${color};transition:width 0.6s ease;"></div>
+          </div>
+          <div class="bar-val">${pct}%</div>
+        </div>`;
+    }).join('');
+  }
+
+  container.innerHTML = `
+    <div class="card-title">สัดส่วนธรรมนูญแต่ละประเด็น
+      <span style="font-size:11px;font-weight:400;color:#aaa;margin-left:8px;">รวม ${total.toLocaleString('th-TH')} ฉบับ</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>${barHtml(left, 0)}</div>
+      <div>${barHtml(right, half)}</div>
+    </div>`;
+}
+
+// ── TOPIC BARS (ดึงจาก data_charter.title) ──────────────────
+// ── TOPIC BARS (ดึงจาก data_charter ตรง title) ──────────────
+async function loadTopicBars() {
+  try {
+    const { data, error } = await db.from('data_charter').select('title');
+    if (error) throw error;
+
+    const rows = data || [];
+    const total = rows.length;
+    if (!total) return;
+
+    // ── keyword groups ──────────────────────────────────────
+    const groups = [
+      { key: 'elderly',   label: 'ผู้สูงอายุ',        color: '#1D9E75', keywords: ['ผู้สูงอายุ','สูงวัย','สูงอายุ'] },
+      { key: 'endoflife', label: 'ตายดี / ม.12',       color: '#EF9F27', keywords: ['ตายดี','ม.12','living will','มาตรา 12','สิทธิการตาย'] },
+      { key: 'ltc',       label: 'LTC / ดูแลระยะยาว',  color: '#378ADD', keywords: ['ltc','ดูแลระยะยาว','long term'] },
+      { key: 'child',     label: 'เด็กและเยาวชน',      color: '#D4537E', keywords: ['เด็ก','เยาวชน','นักเรียน','โรงเรียน'] },
+      { key: 'food',      label: 'อาหาร / ความปลอดภัย',color: '#B99618', keywords: ['อาหาร','ปลอดภัย','โภชนาการ'] },
+      { key: 'mental',    label: 'สุขภาพจิต',           color: '#9B59B6', keywords: ['สุขภาพจิต','จิตใจ','จิตเวช'] },
+      { key: 'community', label: 'สุขภาพชุมชน',        color: '#16A085', keywords: ['ชุมชน','สุขภาพดี','สุขภาวะ','สังคม'] },
+      { key: 'fragile',   label: 'กลุ่มเปราะบาง',      color: '#E67E22', keywords: ['เปราะบาง','ผู้พิการ','ความด้อยโอกาส'] },
+    ];
+
+    // นับจำนวนตาม keyword
+    const counts = {};
+    groups.forEach(g => counts[g.key] = 0);
+
+    rows.forEach(r => {
+      const t = (r?.title || '').toLowerCase();
+      groups.forEach(g => {
+        if (g.keywords.some(kw => t.includes(kw.toLowerCase()))) {
+          counts[g.key]++;
+        }
+      });
+    });
+
+    // คำนวณ % และเรียงจากมากไปน้อย
+    const results = groups
+      .map(g => ({ ...g, count: counts[g.key], pct: Math.round((counts[g.key] / total) * 100) }))
+      .filter(g => g.count > 0)
+      .sort((a, b) => b.pct - a.pct);
+
+    // render
+    const container = $('topic-bars-container');
+    if (!container) return;
+
+    container.innerHTML = results.map(g => `
+      <div class="topic-bar-item">
+        <div class="topic-bar-label">${g.label}</div>
+        <div class="topic-bar-track">
+          <div class="topic-bar-fill" style="width:${g.pct}%;background:${g.color};"></div>
+        </div>
+        <div class="topic-bar-val" style="color:${g.color};">${g.pct}%</div>
+        <div class="topic-bar-count">(${g.count})</div>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    console.error('loadTopicBars:', e.message);
   }
 }
 
@@ -1166,7 +1285,7 @@ async function initDashboard() {
   }
 
   // 4. Load sections
-  await Promise.all([loadKPIs(), loadCharterTable(), loadLWTable()]);
+  await Promise.all([loadKPIs(), loadCharterTable(), loadLWTable(), loadTopicBars()]);
   
   // 5. Bind filters
   bindMapFilters();
