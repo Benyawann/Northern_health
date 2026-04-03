@@ -76,7 +76,6 @@
         </button>
       </div>
     </div>
-    
   </div>
 </div>
 
@@ -575,6 +574,148 @@ function openMapModal(groupName, rows) {
         updateFloatingButton();
       }
   });
+
+  // ========== Custom Confirmation Modal Functions ==========
+
+let logoutPending = false;
+
+/**
+ * แสดง Custom Confirmation Modal
+ */
+function showConfirmModal() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    logoutPending = true;
+  }
+}
+
+/**
+ * ปิด Custom Confirmation Modal
+ */
+function closeConfirmModal() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    logoutPending = false;
+  }
+}
+
+/**
+ * ยืนยันการออกจากระบบ (หลังจากกดปุ่มใน modal)
+ */
+function confirmLogout() {
+  // ปิด modal ก่อน
+  closeConfirmModal();
+  
+  // แสดง toast notification
+  showToast('👋 ออกจากระบบ', 'คุณได้ออกจากระบบเรียบร้อยแล้ว', 'logout', 2000);
+  
+  // ลบข้อมูลผู้ใช้หลังจากแสดง toast
+  setTimeout(() => {
+    localStorage.removeItem('user');
+    
+    // ถ้าใช้ Supabase Auth ให้ sign out ด้วย
+    if (typeof supabaseClient !== 'undefined' && supabaseClient?.auth) {
+      supabaseClient.auth.signOut().catch(err => console.warn('Sign out warning:', err));
+    }
+    
+    // อัปเดต UI
+    updateAuthUI();
+    updateFloatingButton();
+    
+    console.log('🔓 Logged out');
+    
+    // รีเฟรชหน้าปัจจุบัน
+    window.location.reload();
+  }, 1000);
+}
+
+// ========== Toast Notification Functions ==========
+
+function showToast(title, message, type = 'success', duration = 3000) {
+  // สร้างหรือใช้ toast ที่มีอยู่
+  let toast = document.getElementById('toast-notification');
+  
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:white;border-radius:12px;padding:16px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.15);border-left:4px solid #1D9E75;display:none;z-index:9999;min-width:280px;animation:slideIn 0.3s ease;';
+    toast.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div id="toast-icon" style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#1D9E75;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">✓</div>
+        <div style="flex:1;min-width:0;">
+          <div id="toast-title" style="font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">สำเร็จ</div>
+          <div id="toast-message" style="font-size:12px;color:#666;line-height:1.4;">ดำเนินการเรียบร้อยแล้ว</div>
+        </div>
+        <button onclick="hideToast()" style="border:none;background:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">✕</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+  }
+  
+  const icon = toast.querySelector('#toast-icon');
+  const toastTitle = toast.querySelector('#toast-title');
+  const toastMessage = toast.querySelector('#toast-message');
+  
+  // ตั้งค่าตามประเภท
+  const styles = {
+    success: { bg: '#E1F5EE', color: '#1D9E75', border: '#1D9E75', icon: '✓' },
+    error: { bg: '#FCEBEB', color: '#E24B4A', border: '#E24B4A', icon: '✕' },
+    info: { bg: '#E6F1FB', color: '#378ADD', border: '#378ADD', icon: 'ℹ' },
+    logout: { bg: '#FFF4E6', color: '#EF9F27', border: '#EF9F27', icon: '👋' }
+  };
+  
+  const style = styles[type] || styles.success;
+  
+  // อัปเดตเนื้อหา
+  toastTitle.textContent = title;
+  toastMessage.textContent = message;
+  icon.textContent = style.icon;
+  icon.style.background = style.bg;
+  icon.style.color = style.color;
+  toast.style.borderLeftColor = style.border;
+  
+  // แสดงและซ่อนอัตโนมัติ
+  toast.classList.remove('hide');
+  toast.style.display = 'block';
+  
+  setTimeout(() => hideToast(), duration);
+}
+
+function hideToast() {
+  const toast = document.getElementById('toast-notification');
+  if (!toast) return;
+  
+  toast.classList.add('hide');
+  setTimeout(() => {
+    toast.style.display = 'none';
+    toast.classList.remove('hide');
+  }, 300);
+}
+
+/**
+ * ออกจากระบบ (เวอร์ชันใหม่ - ใช้ Custom Modal)
+ */
+function handleLogout() {
+  // ✅ แสดง custom confirmation modal แทน confirm() ของ browser
+  showConfirmModal();
+}
 </script>
+
+<!-- ✅ Custom Confirmation Modal -->
+<div id="confirm-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;padding:24px;max-width:400px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,0.2);animation:modalSlideIn 0.2s ease;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:64px;height:64px;background:#FFF4E6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">👋</div>
+      <h3 style="font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">ออกจากระบบ</h3>
+      <p style="font-size:14px;color:#666;">คุณต้องการออกจากระบบใช่หรือไม่?</p>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="closeConfirmModal()" style="flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:8px;color:#666;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;">ยกเลิก</button>
+      <button onclick="confirmLogout()" style="flex:1;padding:12px;background:#E04031;border:none;border-radius:8px;color:white;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;">ออกจากระบบ</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
