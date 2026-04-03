@@ -132,7 +132,7 @@
         // ✅ ล็อกอินสำเร็จ
         if (data?.user) {
           const user = data.user;
-          
+  
           const userProfile = {
             id: user.id,
             name: user.user_metadata?.name || user.email?.split('@')[0] || 'ผู้ใช้',
@@ -141,14 +141,19 @@
             loggedIn: true,
             loginTime: new Date().toISOString()
           };
-          
+  
           // 💾 บันทึกสถานะใน localStorage
           localStorage.setItem('user', JSON.stringify(userProfile));
-          
+  
           console.log('🎉 Login success! Redirecting...', userProfile);
-          
-          // 🔄 กลับไปหน้าหลัก
-          window.location.href = 'index.html';
+  
+          // ✅ แสดง popup แจ้งเตือนก่อนเปลี่ยนหน้า
+          showToast('🎉 ยินดีต้อนรับ!', `สวัสดี ${userProfile.name} เข้าสู่ระบบเรียบร้อยแล้ว`, 'success', 2500);
+  
+          // 🔄 เปลี่ยนหน้าหลังจากแสดง toast เล็กน้อย
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
         }
         
       } catch (err) {
@@ -304,12 +309,83 @@
   }
 }
 
-/**
- * ออกจากระบบ
- */
+function showToast(title, message, type = 'success', duration = 3000) {
+    const toast = document.getElementById('toast-notification');
+    const icon = document.getElementById('toast-icon');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    
+    if (!toast) return;
+    
+    // ตั้งค่าตามประเภท
+    const styles = {
+      success: {
+        bg: '#E1F5EE',
+        color: '#1D9E75',
+        border: '#1D9E75',
+        icon: '✓'
+      },
+      error: {
+        bg: '#FCEBEB',
+        color: '#E24B4A',
+        border: '#E24B4A',
+        icon: '✕'
+      },
+      info: {
+        bg: '#E6F1FB',
+        color: '#378ADD',
+        border: '#378ADD',
+        icon: 'ℹ'
+      },
+      logout: {
+        bg: '#FFF4E6',
+        color: '#EF9F27',
+        border: '#EF9F27',
+        icon: '👋'
+      }
+    };
+    
+    const style = styles[type] || styles.success;
+    
+    // อัปเดตเนื้อหา
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    icon.textContent = style.icon;
+    icon.style.background = style.bg;
+    icon.style.color = style.color;
+    toast.style.borderLeftColor = style.border;
+    
+    // แสดงและซ่อนอัตโนมัติ
+    toast.classList.remove('hide');
+    toast.style.display = 'block';
+    
+    // ซ่อนหลังจากเวลาที่กำหนด
+    setTimeout(() => {
+      hideToast();
+    }, duration);
+  }
+  
+  /**
+   * ซ่อน toast notification
+   */
+  function hideToast() {
+    const toast = document.getElementById('toast-notification');
+    if (!toast) return;
+    
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.style.display = 'none';
+      toast.classList.remove('hide');
+    }, 300);
+  }
+
+/*ออกจากระบบ*/
 function handleLogout() {
-  if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
-    // ลบข้อมูลผู้ใช้
+  // ✅ แสดง popup แจ้งเตือนก่อนล็อก아웃
+  showToast('👋 ออกจากระบบ', 'คุณได้ออกจากระบบเรียบร้อยแล้ว', 'logout', 2000);
+  
+  // ลบข้อมูลผู้ใช้หลังจากแสดง toast
+  setTimeout(() => {
     localStorage.removeItem('user');
     
     // ถ้าใช้ Supabase Auth ให้ sign out ด้วย
@@ -322,11 +398,9 @@ function handleLogout() {
     
     console.log('🔓 Logged out');
     
-    // ถ้าอยู่ในหน้าอื่นนอกจาก index ให้กลับไปที่ index
-    if (!window.location.href.endsWith('index.html') && !window.location.href.endsWith('/')) {
-      window.location.href = 'index.html';
-    }
-  }
+    // รีเฟรชหน้าปัจจุบัน
+    window.location.reload();
+  }, 1000);
 }
 
 /**
@@ -355,6 +429,45 @@ initAuthCheck();
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
+    }
+  </style>
+  <div id="toast-notification" style="position:fixed;top:20px;right:20px;background:white;border-radius:12px;padding:16px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.15);border-left:4px solid #1D9E75;display:none;z-index:9999;min-width:280px;animation:slideIn 0.3s ease;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div id="toast-icon" style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#1D9E75;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">✓</div>
+      <div style="flex:1;min-width:0;">
+        <div id="toast-title" style="font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">สำเร็จ</div>
+        <div id="toast-message" style="font-size:12px;color:#666;line-height:1.4;">ดำเนินการเรียบร้อยแล้ว</div>
+      </div>
+      <button onclick="hideToast()" style="border:none;background:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">✕</button>
+    </div>
+  </div>
+  
+  <!-- CSS Animation -->
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+    
+    #toast-notification.hide {
+      animation: slideOut 0.3s ease forwards;
     }
   </style>
 </body>
