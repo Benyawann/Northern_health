@@ -279,3 +279,36 @@
     min-width: 220px;
   }
 }
+
+/* ── Pagination — จัดกลาง ── */
+.pager-wrap {
+  justify-content: center;
+}
+
+.pager-btn {
+  padding: 6px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 0.5px solid rgba(0,0,0,0.18);
+  background: white;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pager-btn:hover:not(:disabled) {
+  background: #f0f0ec;
+}
+
+.pager-btn:disabled {
+  color: #ccc;
+  cursor: default;
+  border-color: rgba(0,0,0,0.08);
+}
+
+.pager-info {
+  font-size: 13px;
+  color: #666;
+  min-width: 80px;
+  text-align: center;
+}
