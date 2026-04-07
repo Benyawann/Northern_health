@@ -1,0 +1,281 @@
+/* =====================================================
+   RESPONSIVE PATCH v2 — Data Area North
+   วางต่อท้าย style.css (แทนที่ @media block เดิม)
+   ===================================================== */
+
+/* ── Top nav bar (mobile only, hidden on desktop) ── */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1200;
+  background: #efefeb;
+  border-bottom: 0.5px solid rgba(0,0,0,0.12);
+  height: 52px;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-topbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Logo ซ้ายสุด */
+.mobile-topbar-logo {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: 8px;
+  border-right: 0.5px solid rgba(0,0,0,0.15);
+  margin-right: 4px;
+}
+
+/* Nav items แนวนอน */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  border: 0.5px solid transparent;
+}
+
+.mobile-nav-item:hover {
+  background: white;
+  color: #1a1a1a;
+}
+
+.mobile-nav-item.active {
+  background: white;
+  color: #1a1a1a;
+  font-weight: 500;
+  border-color: rgba(0,0,0,0.1);
+}
+
+.mobile-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* User avatar button ขวาสุด */
+.mobile-topbar-user {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding-left: 8px;
+  border-left: 0.5px solid rgba(0,0,0,0.12);
+}
+
+.mobile-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1D9E75, #0F6E56);
+  color: white;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Mobile ≤ 768px ── */
+@media (max-width: 768px) {
+
+  /* แสดง top nav bar */
+  .mobile-topbar {
+    display: flex;
+  }
+
+  /* ซ่อน sidebar เดิม */
+  .sidebar {
+    display: none !important;
+  }
+
+  .app {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Main เลื่อนได้ เริ่มต่ำกว่า topbar */
+  .main {
+    width: 100%;
+    height: 100vh;
+    padding: 64px 14px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* KPI 2 คอลัมน์ */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .kpi-value  { font-size: 20px; }
+  .kpi-label  { font-size: 10px; }
+
+  /* Row → stack */
+  .row,
+  .row-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Filter bar แนวตั้ง */
+  .filter-bar {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  /* Map filter bar แนวตั้ง */
+  .map-filter-bar {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .map-filter-bar select {
+    width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  /* Map ลดความสูง */
+  #leaflet-map,
+  #public-leaflet-map {
+    height: 240px;
+  }
+
+  /* Table scroll แนวนอน */
+  .table-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 560px;
+  }
+
+  /* Info cards */
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Topic bars */
+  .topic-bar-item {
+    grid-template-columns: 90px 1fr 36px 28px;
+    gap: 6px;
+  }
+
+  .topic-bar-label { font-size: 11px; }
+
+  /* Page title */
+  .page-title {
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 2px;
+  }
+
+  /* Gap analysis */
+  #page-gap .row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Floating button */
+  #floating-add-btn {
+    bottom: 20px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  /* Map modal → bottom sheet */
+  #map-modal-ov {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  #map-modal-ov > div {
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    width: 100% !important;
+  }
+
+  /* Card padding ลดลง */
+  .card {
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+}
+
+/* ── Tablet (769px – 1024px) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 180px;
+    min-width: 180px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    padding: 20px 16px;
+  }
+
+  #leaflet-map,
+  #public-leaflet-map {
+    height: 300px;
+  }
+}
+
+/* ── Desktop ≥ 1440px ── */
+@media (min-width: 1440px) {
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+  }
+}
