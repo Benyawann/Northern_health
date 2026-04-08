@@ -6,9 +6,7 @@
   <title>เพิ่มข้อมูลธรรมนูญสุขภาพ</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/add_style.css">
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
 </head>
 <body>
   <div class="page-container">
@@ -125,166 +123,386 @@
           </div>
         </div>
         
-        <!-- Section 3: ไฟล์แนบ -->
+        <!-- Section 3: อัปโหลดไฟล์ (ทั้ง PDF และ รูปภาพ) -->
         <div class="form-section">
-          <h2 class="section-title">ไฟล์แนบ (Optional)</h2>
+          <h2 class="section-title">อัปโหลดไฟล์</h2>
+          <p style="font-size:12px; color:#888; margin-bottom:16px;">ลากไฟล์หรือคลิกเลือก · ได้รับลิงก์พร้อมใช้งานทันที</p>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label>ลิงก์ไฟล์ PDF</label>
-              <input type="url" id="pdf-url" placeholder="https://.../charter.pdf">
-              <div class="form-hint">ลิงก์โดยตรงไปยังไฟล์ PDF</div>
+          <!-- ========== PDF Upload ========== -->
+          <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:0.5px solid rgba(0,0,0,0.08);">
+            <h3 style="font-size:14px; font-weight:500; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <span style="background:#FCEBEB; color:#E24B4A; padding:2px 8px; border-radius:4px; font-size:11px;">PDF</span>
+              ไฟล์ธรรมนูญสุขภาพ <span style="color:#E24B4A;">*</span>
+            </h3>
+            
+            <input type="hidden" id="bucket-pdf" value="charter-pdfs">
+            
+            <div class="drop-zone" id="drop-zone-pdf">
+              <input type="file" class="drop-file-input" id="file-input-pdf" accept=".pdf" />
+              <div class="drop-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="drop-title">ลากไฟล์ PDF มาวางที่นี่</div>
+              <div class="drop-sub">รองรับไฟล์ PDF ขนาดสูงสุด 50 MB</div>
+              <button class="browse-btn" tabindex="-1">เลือกไฟล์</button>
             </div>
             
-            <div class="form-group">
-              <label>ลิงก์รูปภาพ</label>
-              <input type="url" id="image-url" placeholder="https://.../image.jpg">
-              <div class="form-hint">ลิงก์รูปภาพปกธรรมนูญ</div>
+            <div class="file-list" id="file-list-pdf"></div>
+            
+            <div class="upload-all-bar" id="upload-bar-pdf" style="display:none;">
+              <div class="summary-text" id="summary-text-pdf"></div>
+              <div style="display:flex;gap:8px;">
+                <button type="button" class="clear-btn" id="clear-btn-pdf">ล้าง</button>
+                <button type="button" class="upload-all-btn" id="upload-all-btn-pdf">อัปโหลดไฟล์</button>
+              </div>
             </div>
+            <input type="hidden" id="pdf-url" name="pdf_url">
           </div>
           
-          <!-- File Upload Demo (จำลอง) -->
-          <div class="form-row full">
-            <div class="form-group">
-              <label>อัปโหลดไฟล์ (Demo - ยังไม่ใช้งานจริง)</label>
-              <label class="file-upload" style="pointer-events: none; opacity: 0.6;">
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png" disabled>
-                <div class="file-upload-icon">📁</div>
-                <div class="file-upload-text">คลิกเพื่อเลือกไฟล์ <span>(Demo)</span></div>
-              </label>
+          <!-- ========== Image Upload ========== -->
+          <div>
+            <h3 style="font-size:14px; font-weight:500; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <span style="background:#E1F5EE; color:#1D9E75; padding:2px 8px; border-radius:4px; font-size:11px;">รูปภาพ</span>
+              รูปปกธรรมนูญ (เลือกได้)
+            </h3>
+            
+            <input type="hidden" id="bucket-image" value="charter-images">
+            
+            <div class="drop-zone" id="drop-zone-image">
+              <input type="file" class="drop-file-input" id="file-input-image" accept="image/*" />
+              <div class="drop-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+              </div>
+              <div class="drop-title">ลากไฟล์รูปภาพมาวางที่นี่</div>
+              <div class="drop-sub">รองรับ .jpg, .png, .webp ขนาดสูงสุด 10 MB</div>
+              <button class="browse-btn" tabindex="-1">เลือกไฟล์</button>
             </div>
+            
+            <div class="file-list" id="file-list-image"></div>
+            
+            <div class="upload-all-bar" id="upload-bar-image" style="display:none;">
+              <div class="summary-text" id="summary-text-image"></div>
+              <div style="display:flex;gap:8px;">
+                <button type="button" class="clear-btn" id="clear-btn-image">ล้าง</button>
+                <button type="button" class="upload-all-btn" id="upload-all-btn-image">อัปโหลดไฟล์</button>
+              </div>
+            </div>
+            <input type="hidden" id="image-url" name="image_url">
           </div>
         </div>
         
         <!-- Actions -->
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">
-            ยกเลิก
-          </button>
-          <button type="submit" class="btn btn-primary" id="submit-btn">
-            บันทึกข้อมูล
-          </button>
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="submit-btn">บันทึกข้อมูล</button>
         </div>
         
       </form>
     </div>
-    
   </div>
   
   <!-- Toast Notification -->
-  <div id="toast-notification">
-    <div style="display:flex;align-items:flex-start;gap:12px;">
-      <div id="toast-icon" style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#1D9E75;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">✓</div>
-      <div style="flex:1;min-width:0;">
-        <div id="toast-title" style="font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:4px;">สำเร็จ</div>
-        <div id="toast-message" style="font-size:12px;color:#666;line-height:1.4;">ดำเนินการเรียบร้อยแล้ว</div>
-      </div>
-      <button onclick="hideToast()" style="border:none;background:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">✕</button>
-    </div>
-  </div>
-  
-  <!-- JavaScript -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ✅ JAVASCRIPT -->
   <script>
-    // ========== Supabase Configuration ==========
+    console.log('🚀 Initializing form...');
+    
+    /* ════════════════════════════════
+       1. SUPABASE CONFIG
+       ════════════════════════════════ */
     const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ทดสอบ connection ทั้ง 2 buckets
+    (async () => {
+      try {
+        await sb.storage.from('charter-pdfs').list('', { limit: 1 });
+        await sb.storage.from('charter-images').list('', { limit: 1 });
+        console.log('✅ Storage connected successfully');
+      } catch (err) {
+        console.error('❌ Storage connection failed:', err);
+        showToast('⚠️ ไม่สามารถเชื่อมต่อ Storage', true);
+      }
+    })();
+
+    /* ════════════════════════════════
+       2. HELPER FUNCTIONS
+       ════════════════════════════════ */
     
-    // ========== District/Subdistrict Data (Demo) ==========
+    function generateSafePath(originalName) {
+      const ext = originalName.split('.').pop()?.toLowerCase() || 'bin';
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 8);
+      return `${timestamp}_${random}.${ext}`;
+    }
+    
+    function formatSize(bytes) { 
+      if (bytes < 1024) return bytes + ' B'; 
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'; 
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB'; 
+    }
+    
+    function esc(str) { 
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    
+    let toastTimer;
+    function showToast(msg, isError = false) {
+      const toastEl = document.getElementById('toast');
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (isError ? ' error' : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
+    }
+
+    /* ════════════════════════════════
+       3. FILE UPLOAD CLASS (รองรับหลายประเภท)
+       ════════════════════════════════ */
+    class FileUploader {
+      constructor(type, config) {
+        this.type = type;
+        this.config = config;
+        this.files = [];
+        this.idCounter = 0;
+        
+        this.dropZone = document.getElementById(`drop-zone-${type}`);
+        this.fileInput = document.getElementById(`file-input-${type}`);
+        this.fileList = document.getElementById(`file-list-${type}`);
+        this.uploadBar = document.getElementById(`upload-bar-${type}`);
+        this.uploadAllBtn = document.getElementById(`upload-all-btn-${type}`);
+        this.clearBtn = document.getElementById(`clear-btn-${type}`);
+        this.summaryText = document.getElementById(`summary-text-${type}`);
+        this.urlInput = document.getElementById(`${type}-url`);
+        this.bucketInput = document.getElementById(`bucket-${type}`);
+        
+        this.init();
+      }
+      
+      init() {
+        this.dropZone.addEventListener('dragover', e => { 
+          e.preventDefault(); 
+          this.dropZone.classList.add('drag-over'); 
+        });
+        ['dragleave', 'dragend'].forEach(ev => 
+          this.dropZone.addEventListener(ev, () => this.dropZone.classList.remove('drag-over'))
+        );
+        this.dropZone.addEventListener('drop', e => {
+          e.preventDefault();
+          this.dropZone.classList.remove('drag-over');
+          this.addFiles([...e.dataTransfer.files]);
+        });
+        this.fileInput.addEventListener('change', () => { 
+          this.addFiles([...this.fileInput.files]); 
+          this.fileInput.value = ''; 
+        });
+        
+        this.uploadAllBtn.addEventListener('click', async () => { await this.uploadAll(); });
+        this.clearBtn.addEventListener('click', () => { this.clear(); });
+      }
+      
+      addFiles(newFiles) {
+        const MAX = this.config.maxSize;
+        newFiles.forEach(f => {
+          if (f.size > MAX) { 
+            showToast(`ไฟล์ "${f.name}" ใหญ่เกิน ${formatSize(MAX)}`, true); 
+            return; 
+          }
+          if (!this.config.acceptTypes.includes(f.type) && !this.config.acceptExtensions.some(ext => f.name.toLowerCase().endsWith(ext))) { 
+            showToast(`ไฟล์ "${f.name}" ไม่รองรับ`, true); 
+            return; 
+          }
+          this.files.push({ id: ++this.idCounter, file: f, status: 'wait', url: null, progress: 0 });
+        });
+        this.render();
+      }
+      
+      render() {
+        this.fileList.innerHTML = '';
+        if (!this.files.length) { 
+          this.uploadBar.style.display = 'none'; 
+          return; 
+        }
+        
+        this.uploadBar.style.display = 'flex';
+        const waiting = this.files.filter(f => f.status === 'wait').length;
+        const done = this.files.filter(f => f.status === 'done').length;
+        const uploading = this.files.filter(f => f.status === 'upload').length;
+        this.summaryText.textContent = `${this.files.length} ไฟล์ · อัปโหลดแล้ว ${done} · กำลังอัป ${uploading} · รอ ${waiting}`;
+        this.uploadAllBtn.disabled = waiting === 0;
+
+        this.files.forEach(item => {
+          const el = document.createElement('div');
+          el.className = `file-item ${this.type}`;
+          const badgeMap = { 
+            wait: ['badge-wait', 'รอ'], 
+            upload: ['badge-upload', 'กำลังอัป...'], 
+            done: ['badge-done', '✓ สำเร็จ'], 
+            error: ['badge-error', '✗ ผิดพลาด'] 
+          };
+          const [badgeCls, badgeLabel] = badgeMap[item.status] || badgeMap.wait;
+          const icon = this.type === 'image' ? '🖼️' : '📄';
+
+          let previewHtml = '';
+          if (this.type === 'image' && item.status === 'done' && item.url) {
+            previewHtml = `<div class="image-preview"><img src="${item.url}" alt="preview" style="width:100%;height:100%;object-fit:cover;"></div>`;
+          }
+
+          el.innerHTML = `
+            <div class="file-icon">${this.type === 'image' && item.file.type.startsWith('image/') ? `<img src="${URL.createObjectURL(item.file)}" alt="${esc(item.file.name)}" style="width:100%;height:100%;object-fit:cover;">` : icon}</div>
+            <div class="file-info">
+              <div class="file-name" title="${esc(item.file.name)}">${esc(item.file.name)}</div>
+              <div class="file-size">${formatSize(item.file.size)}</div>
+            </div>
+            <div class="file-status">
+              <span class="badge ${badgeCls}">${badgeLabel}</span>
+              ${item.status === 'wait' ? `<button class="remove-btn" onclick="uploader${this.type === 'pdf' ? 'Pdf' : 'Image'}.removeFile(${item.id})">✕</button>` : ''}
+            </div>
+            ${item.status === 'upload' ? `<div class="progress-wrap"><div class="progress-track"><div class="progress-fill" style="width:${item.progress}%"></div></div></div>` : ''}
+            ${item.status === 'done' && item.url ? `
+              <div class="url-box ${this.type === 'image' ? 'has-image' : ''}">
+                ${previewHtml}
+                <input class="url-input" type="text" value="${esc(item.url)}" readonly onclick="this.select()">
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('${esc(item.url)}').then(()=>showToast('📋 คัดลอกแล้ว'))">คัดลอก</button>
+              </div>` : ''}
+          `;
+          this.fileList.appendChild(el);
+        });
+      }
+      
+      async uploadAll() {
+        const bucket = this.bucketInput.value;
+        const waiting = this.files.filter(f => f.status === 'wait');
+        if (!waiting.length) return;
+        this.uploadAllBtn.disabled = true;
+        
+        for (const item of waiting) { 
+          await this.uploadOne(item, bucket); 
+        }
+        this.render();
+        const successCount = this.files.filter(f => f.status === 'done').length;
+        if (successCount > 0) showToast(`✅ อัปโหลด ${this.config.label} สำเร็จ ${successCount} ไฟล์`);
+      }
+      
+      async uploadOne(item, bucket) {
+        item.status = 'upload'; 
+        item.progress = 0; 
+        this.render();
+        
+        const path = generateSafePath(item.file.name);
+        
+        try {
+          const { data, error } = await sb.storage.from(bucket).upload(path, item.file, { 
+            cacheControl: '3600', 
+            upsert: false, 
+            contentType: item.file.type || 'application/octet-stream',
+            metadata: { originalName: item.file.name, uploadedAt: new Date().toISOString() }
+          });
+          if (error) throw error;
+          
+          const { data: urlData } = sb.storage.from(bucket).getPublicUrl(path);
+          item.url = urlData.publicUrl;
+          item.status = 'done'; 
+          item.progress = 100;
+          
+          if(this.urlInput && this.urlInput.value === '') {
+            this.urlInput.value = item.url;
+          }
+        } catch (err) {
+          console.error('[Upload Error]', err);
+          item.status = 'error';
+          showToast(`❌ อัปโหลด "${item.file.name}" ไม่สำเร็จ: ${err.message}`, true);
+        }
+        this.render();
+      }
+      
+      removeFile(id) { 
+        this.files = this.files.filter(f => f.id !== id); 
+        this.render(); 
+      }
+      
+      clear() { 
+        this.files = []; 
+        this.render(); 
+        if(this.urlInput) this.urlInput.value = ''; 
+      }
+      
+      getUrl() {
+        return this.urlInput?.value?.trim() || null;
+      }
+    }
+
+    /* ════════════════════════════════
+       4. INITIALIZE UPLOADERS
+       ════════════════════════════════ */
+    
+    const uploaderPdf = new FileUploader('pdf', {
+      label: 'ไฟล์ PDF',
+      maxSize: 50 * 1024 * 1024,
+      acceptTypes: ['application/pdf'],
+      acceptExtensions: ['.pdf']
+    });
+    
+    const uploaderImage = new FileUploader('image', {
+      label: 'รูปภาพ',
+      maxSize: 10 * 1024 * 1024,
+      acceptTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+      acceptExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif']
+    });
+
+    /* ════════════════════════════════
+       5. FORM DATA & SUBMIT
+       ════════════════════════════════ */
     const DISTRICTS = {
       'เชียงใหม่': ['เมืองเชียงใหม่', 'จอมทอง', 'แม่แจ่ม', 'เชียงดาว', 'ดอยสะเก็ด', 'แม่แตง', 'แม่ริม', 'สะเมิง', 'ฝาง', 'แม่อาย', 'พร้าว', 'สันป่าตอง', 'สันกำแพง', 'สันทราย', 'หางดง', 'ฮอด', 'ดอยเต่า', 'อมก๋อย', 'สารภี', 'เวียงแหง', 'ไชยปราการ', 'แม่วาง', 'แม่ออน', 'ดอยหล่อ', 'กัลยาณิวัฒนา'],
       'เชียงราย': ['เมืองเชียงราย', 'เวียงชัย', 'เชียงของ', 'เทิง', 'พาน', 'ป่าแดด', 'แม่จัน', 'เชียงแสน', 'แม่สาย', 'แม่สรวย', 'เวียงป่าเป้า', 'พญาเม็งราย', 'เวียงแก่น', 'ขุนตาล', 'แม่ฟ้าหลวง', 'แม่ลาว', 'เวียงเชียงรุ้ง', 'ดอยหลวง'],
-      // ... เพิ่มจังหวัดอื่นๆ ตามต้องการ
     };
-    
     const SUBDISTRICTS = {
       'เมืองเชียงใหม่': ['ศรีภูมิ', 'พระสิงห์', 'หายยา', 'ช่างม่อย', 'ช้างคลาน', 'วัดเกต', 'ช้างเผือก', 'สุเทพ', 'แม่เหียะ', 'ป่าแดด', 'หนองหอย', 'ท่าศาลา', 'หนองป่าครั่ง', 'ฟ้าฮ่าม', 'ป่าตัน', 'สันผีเสื้อ'],
       'จอมทอง': ['จอมทอง', 'บ้านหลวง', 'สบเตี๊ยะ', 'ช่างเคิ่ง', 'แม่สอย', 'สบอาบ', 'ดอยแก้ว', 'บ้านแปะ'],
-      // ... เพิ่มตำบลอื่นๆ ตามต้องการ
     };
-    
-    // ========== Toast Functions ==========
-    function showToast(title, message, type = 'success', duration = 3000) {
-      const toast = document.getElementById('toast-notification');
-      const icon = document.getElementById('toast-icon');
-      const toastTitle = document.getElementById('toast-title');
-      const toastMessage = document.getElementById('toast-message');
-      
-      const styles = {
-        success: { bg: '#E1F5EE', color: '#1D9E75', border: '#1D9E75', icon: '✓' },
-        error: { bg: '#FCEBEB', color: '#E24B4A', border: '#E24B4A', icon: '✕' },
-        info: { bg: '#E6F1FB', color: '#378ADD', border: '#378ADD', icon: 'ℹ' }
-      };
-      
-      const style = styles[type] || styles.success;
-      
-      toastTitle.textContent = title;
-      toastMessage.textContent = message;
-      icon.textContent = style.icon;
-      icon.style.background = style.bg;
-      icon.style.color = style.color;
-      toast.style.borderLeftColor = style.border;
-      
-      toast.classList.remove('hide');
-      toast.style.display = 'block';
-      
-      setTimeout(() => hideToast(), duration);
-    }
-    
-    function hideToast() {
-      const toast = document.getElementById('toast-notification');
-      if (!toast) return;
-      toast.classList.add('hide');
-      setTimeout(() => {
-        toast.style.display = 'none';
-        toast.classList.remove('hide');
-      }, 300);
-    }
-    
-    // ========== Dynamic Dropdowns ==========
+
     function populateDistricts() {
       const province = document.getElementById('province').value;
       const districtSelect = document.getElementById('district');
       const subdistrictSelect = document.getElementById('subdistrict');
-      
-      // รีเซ็ตอำเภอและตำบล
       districtSelect.innerHTML = '<option value="">เลือกอำเภอ</option>';
       subdistrictSelect.innerHTML = '<option value="">เลือกตำบล</option>';
-      
       if (province && DISTRICTS[province]) {
         DISTRICTS[province].forEach(district => {
           const option = document.createElement('option');
-          option.value = district;
-          option.textContent = district;
+          option.value = district; option.textContent = district;
           districtSelect.appendChild(option);
         });
       }
     }
-    
+
     function populateSubdistricts() {
       const district = document.getElementById('district').value;
       const subdistrictSelect = document.getElementById('subdistrict');
-      
       subdistrictSelect.innerHTML = '<option value="">เลือกตำบล</option>';
-      
       if (district && SUBDISTRICTS[district]) {
         SUBDISTRICTS[district].forEach(sub => {
           const option = document.createElement('option');
-          option.value = sub;
-          option.textContent = sub;
+          option.value = sub; option.textContent = sub;
           subdistrictSelect.appendChild(option);
         });
       }
     }
-    
-    // ========== Form Submit ==========
+
     async function handleSubmit(e) {
       e.preventDefault();
-      
       const submitBtn = document.getElementById('submit-btn');
       
-      // Validate
       const charterName = document.getElementById('charter-name').value.trim();
       const province = document.getElementById('province').value;
       const district = document.getElementById('district').value;
@@ -292,106 +510,53 @@
       const title = document.getElementById('title').value;
       
       if (!charterName || !province || !district || !subdistrict || !title) {
-        showToast('❌ กรุณากรอกข้อมูล', 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน', 'error');
+        showToast('❌ กรุณากรอกข้อมูลพื้นฐานให้ครบถ้วน', true);
         return;
       }
-      
-      // Show loading
+
+      const pdfUrl = uploaderPdf.getUrl();
+      if (!pdfUrl) {
+        showToast('❌ กรุณาอัปโหลดไฟล์ธรรมนูญ (PDF)', true);
+        document.getElementById('drop-zone-pdf').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      const imageUrl = uploaderImage.getUrl();
+
       submitBtn.disabled = true;
       submitBtn.classList.add('btn-loading');
       submitBtn.textContent = 'กำลังบันทึก...';
       
       try {
-        // ✅ Prepare data for Supabase
         const newCharter = {
-          charter_name: charterName,
-          province: province,
-          district: district,
-          subdistrict: subdistrict,
-          title: title,
+          charter_name: charterName, 
+          province, 
+          district, 
+          subdistrict, 
+          title,
           publish_date: document.getElementById('publish-date').value.trim() || null,
           leader: document.getElementById('leader').value.trim() || null,
           academic_supporter: document.getElementById('academic-supporter').value.trim() || null,
-          pdf_url: document.getElementById('pdf-url').value.trim() || null,
-          image_url: document.getElementById('image-url').value.trim() || null,
+          pdf_url: pdfUrl, 
+          image_url: imageUrl, 
           created_at: new Date().toISOString()
         };
         
-        console.log('📤 Inserting data:', newCharter);
-        
-        // ✅ Insert to Supabase
-        const { data, error } = await supabase
-          .from('data_charter')
-          .insert([newCharter])
-          .select();
-        
+        const { data, error } = await sb.from('data_charter').insert([newCharter]).select();
         if (error) throw error;
         
-        // ✅ Success
-        console.log('✅ Data inserted:', data);
-        showToast('✅ บันทึกสำเร็จ', `เพิ่มข้อมูล "${charterName}" เรียบร้อยแล้ว`, 'success', 3000);
-        
-        // Reset form after delay
-        setTimeout(() => {
-          document.getElementById('add-charter-form').reset();
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('btn-loading');
-          submitBtn.textContent = '💾 บันทึกข้อมูล';
-          
-          // Redirect to main page after success
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
-        }, 1000);
-        
+        showToast('✅ บันทึกสำเร็จ! กำลังกลับหน้าหลัก...');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
       } catch (err) {
         console.error('❌ Insert failed:', err);
-        showToast('❌ บันทึกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่', 'error', 5000);
-        
-        // Reset button
+        showToast('❌ บันทึกไม่สำเร็จ: ' + err.message, true);
         submitBtn.disabled = false;
         submitBtn.classList.remove('btn-loading');
-        submitBtn.textContent = '💾 บันทึกข้อมูล';
+        submitBtn.textContent = 'บันทึกข้อมูล';
       }
     }
     
-    // ========== Initialize ==========
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('🚀 Add Charter page loaded');
-      
-      // Check auth (optional)
-      const userStr = localStorage.getItem('user');
-      if (!userStr) {
-        // Uncomment to require login:
-        // showToast('⚠️ ต้องล็อกอิน', 'กรุณาเข้าสู่ระบบเพื่อเพิ่มข้อมูล', 'info', 3000);
-        // setTimeout(() => window.location.href = 'login.html', 2000);
-      }
-    });
-  </script>
-    <!-- ✅ ปุ่มเลื่อนขึ้นบน -->
-  <button id="scroll-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="เลื่อนขึ้นบน">
-    ↑
-  </button>
-  
-  <script>
-    // ✅ แสดง/ซ่อนปุ่มเลื่อนขึ้นบนตามการสกรอล
-    window.addEventListener('scroll', () => {
-      const btn = document.getElementById('scroll-to-top');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.classList.add('show');
-        } else {
-          btn.classList.remove('show');
-        }
-      }
-    });
-    
-    // ✅ ปิด modal toast เมื่อกด ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        hideToast();
-      }
-    });
+    console.log('✅ Form initialized');
   </script>
 </body>
 </html>
