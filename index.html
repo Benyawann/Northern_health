@@ -16,55 +16,65 @@
 <body>
 <div class="app">
 
-<!-- ── SIDEBAR ── -->
-<div class="sidebar">
-  <div class="logo">
-    <div class="logo-title" onclick="window.location.href='index.html'">🌿 Data Area North</div>
+  <nav class="topnav">
+  <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
+
+  <div class="topnav-links">
+    <!-- เพิ่ม link เมนูได้ตรงนี้ -->
   </div>
 
-  <div class="sidebar-footer">
+  <div class="topnav-right">
+    <a href="https://infocenter.nationalhealth.or.th/%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9B%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7/" target="_blank" class="btn-icon blue">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M7 1.5C7 1.5 5 4 5 7C5 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M7 1.5C7 1.5 9 4 9 7C9 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M1.5 7H12.5" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+      <span>Living Will</span>
+    </a>
+
+    <!-- Auth: logged out -->
     <div id="auth-logged-out">
       <button onclick="window.location.href='login.html'"
-        style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;font-family:'Sarabun',sans-serif;">
+        style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/>
           <path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
-        <span style="font-family: 'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">เข้าสู่ระบบ</span>
+        เข้าสู่ระบบ
       </button>
     </div>
-    <div id="auth-logged-in" style="display:none;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ffffff,#ffffff);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">👤</div>
-        <div style="flex:1;min-width:0;">
-          <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">ผู้ใช้</div>
-          <div id="user-role" style="font-size:10px;color:#888;">user</div>
-        </div>
-        <button onclick="handleLogout()" style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-            <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
-        </button>
+
+    <!-- Auth: logged in -->
+    <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
+      <div id="user-avatar"
+        style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">
+        U
       </div>
+      <div style="min-width:0;">
+        <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;">ผู้ใช้</div>
+        <div id="user-role" style="font-size:10px;color:#888;">user</div>
+      </div>
+      <button onclick="handleLogout()"
+        style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </div>
-</div>
+</nav>
+
 
 <!-- ── MAIN ── -->
 <div class="main">
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="topbar-title">ภาพรวมภาคเหนือ</div>
-    <div class="topbar-actions">
-      <a href="https://infocenter.nationalhealth.or.th/%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9B%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7/" target="_blank" class="btn-icon blue">
-        <svg width="25" height="25" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 1.5C7 1.5 5 4 5 7C5 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 1.5C7 1.5 9 4 9 7C9 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 7H12.5" stroke="currentColor" stroke-width="1.2"/></svg>
-        <span style="font-size: 15px; font-family: 'Sarabun', sans-serif;">Living Will</span>
-      </a>
-    </div>
-  </div>
+  <div style="text-align: center; padding: 16px 24px; width: 100%;">
+  <div style="font-size: 30px; font-weight: 600; color: #1a1a1a; display: inline-block;">ภาพรวมภาคเหนือ</div>
+</div>
 
   <!-- CONTENT -->
   <div class="content">
@@ -86,13 +96,6 @@
       <select id="gf-subdistrict" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกตำบล</option></select>
       <div class="filter-divider"></div>
       <select id="gf-title" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกประเด็น</option></select>
-      <select id="gf-type" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-        <option value="all">ทุกประเภท</option>
-        <option value="จังหวัด">ระดับจังหวัด</option>
-        <option value="อำเภอ">ระดับอำเภอ</option>
-        <option value="ตำบล">ระดับตำบล</option>
-        <option value="ชุมชน">ระดับชุมชน</option>
-      </select>
       <select id="gf-year" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกปี พ.ศ.</option></select>
       <div class="filter-divider"></div>
       <button style="padding: 7px 12px;border-radius: 7px;border: 1px solid var(--border);background: #433e3ec1;color: white;
@@ -888,6 +891,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMapModal(); });
   window.addEventListener('storage', e => { if (e.key === 'user') updateAuthUI(); });
+});
+
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('.topnav');
+  if (window.scrollY > 10) {
+    nav.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+    nav.style.borderBottomColor = 'transparent';
+  } else {
+    nav.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+    nav.style.borderBottomColor = 'var(--border)'; // หรือค่าสีเดิม
+  }
 });
 </script>
 </body>

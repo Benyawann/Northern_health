@@ -13,49 +13,56 @@ body {
     color: #1a1a1a; 
     font-size: 14px;
     /* ✅ ป้องกันการเลื่อนของ body */
-    overflow: hidden;
+    overflow: auto;
     height: 100vh;
 }
 
 /* ========== Layout หลัก ========== */
-.app { 
-    display: flex; 
-    /* ✅ ใช้ความสูงเต็มหน้าจอ */
-    height: 100vh;
-    min-height: 100vh;
-    /* ✅ ป้องกันการเลื่อนซ้อน */
-    overflow: hidden;
+.app {
+  display: flex;
+  flex-direction: column;   /* เปลี่ยนจาก row → column */
+  height: 100vh;
 }
 
-/* ========== Sidebar - อยู่คงที่ ========== */
-.sidebar { 
-    width: 200px; 
-    min-width: 200px; 
-    background: #efefeb; 
-    border-right: 0.5px solid rgba(0,0,0,0.12); 
-    padding: 16px 0;
-    
-    /* ✅ ทำให้ sidebar อยู่คงที่ */
-    position: sticky;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    
-    /* ✅ ถ้าเมนูยาวให้เลื่อนเฉพาะใน sidebar */
-    overflow-y: auto;
-    overflow-x: hidden;
-    
-    /* ✅ จัดเรียงแนวตั้ง */
-    display: flex;
-    flex-direction: column;
-    
-    /* ✅ ซ่อนแถบเลื่อนแต่ยังเลื่อนได้ */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+/* TOP NAV */
+.topnav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  flex-shrink: 0;
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.sidebar::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+/* Topbar ใน .main ก็ติดด้วย */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topnav-logo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-dark);
+  padding-right: 20px;
+  border-right: 1px solid var(--border);
+  margin-right: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.topnav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
 }
 
 .logo { 
@@ -77,6 +84,42 @@ body {
     color: #666; 
     margin-top: 2px; 
 }
+
+.nav-link {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #666;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: 'Kanit', sans-serif;
+}
+
+.nav-link:hover { background: var(--bg); color: var(--text); }
+
+.nav-link.active {
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-weight: 500;
+}
+
+/* เพิ่มใน style.css */
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+#auth-logged-out button:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* ลบ .sidebar และ properties เดิมทิ้ง */
+.sidebar { display: none; }
+
 
 .nav-item { 
     display: flex; 
@@ -182,33 +225,10 @@ body {
 }
 
 /* ========== Main Content - เลื่อนได้ ========== */
-.main { 
-    flex: 1; 
-    /* ✅ ทำให้เนื้อหาหลักเลื่อนได้ */
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: #f5f4f0;
-    
-    /* ✅ ทำให้การเลื่อนลื่นไหล */
-    scroll-behavior: smooth;
-}
-
-/* ========== Custom Scrollbar สำหรับ .main ========== */
-.main::-webkit-scrollbar {
-    width: 6px;
-}
-
-.main::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.main::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-}
-
-.main::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.4);
+.main {
+  flex: 1;
+  background: var(--bg);
+  width: 100%;
 }
 
 /* ========== Pages ========== */
@@ -2707,30 +2727,6 @@ tr:hover td {
   background: var(--bg);
 }
 
-/* ── TOP BAR ── */
-.topbar {
-  background: rgba(245,244,240,0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.topbar-title {
-  font-family: 'IBM Plex Sans Thai', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .btn-icon {
   display: flex;
   align-items: center;
@@ -3202,8 +3198,6 @@ tr:hover td {
 @media (max-width: 768px) {
   :root { --sidebar-w: 0px; }
   .sidebar { display: none; }
-  .topbar { padding: 10px 14px; }
-  .topbar-title { font-size: 14px; }
   .content { padding: 12px 12px 80px; }
 
   /* Filter strip: stack vertically */
@@ -3249,26 +3243,22 @@ tr:hover td {
 @media (max-width: 480px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .kpi-value { font-size: 20px; }
-  .topbar-actions .btn-icon { padding: 7px 10px; }
+  .btn-icon { padding: 7px 10px; }
 }
 
 @media (max-width: 480px) {
-  .topbar-actions {
-    gap: 6px;
-  }
-  
-  .topbar-actions .btn-icon {
+  .btn-icon {
     padding: 8px 12px;
     font-size: 11px;
     min-height: 36px;
   }
   
-  .topbar-actions .btn-icon svg {
+  .btn-icon svg {
     width: 16px;
     height: 16px;
   }
   
-  .topbar-actions .btn-icon.blue span {
+  ััั.btn-icon.blue span {
     font-size: 12px;
     font-weight: 500;
   }
@@ -3723,5 +3713,46 @@ tr:hover td {
   #leaflet-map,
   #public-leaflet-map {
     height: 280px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topnav-links {
+    display: none; /* ซ่อนเมนูบนมือถือ หรือทำ hamburger menu */
+  }
+  .topnav { padding: 0 14px; }
+}
+
+@media (max-width: 768px) {
+  /* ✅ Body ต้องเลื่อนได้ปกติ */
+  body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  /* ✅ App Layout สำหรับมือถือ */
+  .app {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible; /* ✅ สำคัญ: ห้ามเป็น hidden เพราะจะตัดการเลื่อน */
+  }
+
+  /* ✅ Topnav ต้องติดด้านบนเสมอ */
+  .topnav {
+    position: sticky !important; /* ✅ บังคับให้ sticky */
+    top: 0 !important;
+    z-index: 1000 !important;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* ✅ เพิ่มเงาให้ดูมีมิติ */
+  }
+
+  /* ส่วนอื่นๆ ของมือถือ */
+  .main {
+    padding: 16px;
+    padding-top: 50px; /* ✅ เว้นระยะด้านบนไม่ให้เนื้อหาทับเมนู */
   }
 }
