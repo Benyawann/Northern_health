@@ -639,22 +639,235 @@ function renderRecentList() {
   }
 }
 
-// ── MAP ──────────────────────────────────────────────────
 function initMainMap() {
   const el = $('leaflet-map');
   if (!el || mainMap) return;
   mainMap = L.map('leaflet-map', { center:[17.8,99.8], zoom:7, scrollWheelZoom:true });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap', maxZoom:18 }).addTo(mainMap);
   mainLayer = L.layerGroup().addTo(mainMap);
+
+  // ✅ เปลี่ยน groupBy ตาม zoom level อัตโนมัติ
+  mainMap.on('zoomend', () => buildMarkers(filteredCharters));
+
   const leg = L.control({ position:'bottomright' });
   leg.onAdd = () => {
     const d = L.DomUtil.create('div');
     d.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;font-size:11px;color:#444;line-height:1.9;border:1px solid rgba(0,0,0,0.1);';
     d.innerHTML = `<b style="font-size:12px;">สัญลักษณ์</b><br>
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1D9E75;margin-right:5px;vertical-align:middle;"></span>ธรรมนูญสุขภาพ`;
+                    <span style="display:inline-flex;align-items:center;gap:4px;margin:2px 0;">
+                    <span style="width:12px;height:12px;background:#1D9E75;border-radius:50%;border:2px solid white;"></span>
+                    ธรรมนูญสุขภาพ
+              </span>`;
     return d;
   };
   leg.addTo(mainMap);
+}
+
+function buildMarkers(data) {
+  if (!mainMap || !mainLayer) return;
+  mainLayer.clearLayers();
+  if (!data?.length) return;
+
+  const zoom = mainMap.getZoom();
+
+  // ✅ กำหนด groupBy ตาม zoom level
+  let groupBy;
+  if (zoom >= 11) groupBy = 'subdistrict';
+  else if (zoom >= 9) groupBy = 'district';
+  else groupBy = 'province';
+
+  // อัปเดต legend label
+  const zoomLabel = $('map-zoom-label');
+  if (zoomLabel) {
+    zoomLabel.textContent = groupBy === 'subdistrict' ? 'ตำบล' : groupBy === 'district' ? 'อำเภอ' : 'จังหวัด';
+  }
+
+  // ✅ grouping
+  const groups = {};
+  data.forEach(r => {
+    const prov = cleanName(r?.province);
+    if (!prov || !PROVINCE_COORDS[prov]) return;
+
+    let key, label, lat, lng;
+
+    if (groupBy === 'province') {
+      key = prov;
+    } else if (groupBy === 'district') {
+      key = `${r?.district}||${prov}`;
+    } else {
+      key = `${r?.subdistrict}||${r?.district}||${prov}`;
+    }
+
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+
+  // ✅ สีตาม groupBy
+  const COLOR = groupBy === 'province' ? '#1D9E75' : groupBy === 'district' ? '#378ADD' : '#EF9F27';
+
+  Object.entries(groups).forEach(([key, rows]) => {
+    const r0 = rows[0];
+    const prov = cleanName(r0?.province);
+    const cnt = rows.length;
+
+    // คำนวณ coordinates
+    let coords;
+    if (groupBy === 'province') {
+      coords = PROVINCE_COORDS[prov];
+      label = prov;
+    } else if (groupBy === 'district') {
+      coords = mockCoords(prov, r0?.district, null);
+      label = `${r0?.district} (${prov})`;
+    } else {
+      coords = mockCoords(prov, r0?.district, r0?.subdistrict);
+      label = `ต.${r0?.subdistrict} อ.${r0?.district}`;
+    }
+
+    if (!coords) return;
+
+    // ✅ ขนาด marker ตามจำนวน
+    const size = groupBy === 'province'
+      ? Math.max(28, Math.min(52, 20 + cnt * 1.5))
+      : groupBy === 'district'
+      ? Math.max(22, Math.min(40, 16 + cnt * 2))
+      : 18;
+
+    const icon = L.divIcon({
+      className: '',
+      html: `
+        <div style="
+          width:${size}px;height:${size}px;
+          background:${COLOR};
+          border:2.5px solid white;
+          border-radius:50%;
+          box-shadow:0 2px 8px rgba(0,0,0,0.25);
+          cursor:pointer;
+          display:flex;align-items:center;justify-content:center;
+          color:white;font-size:${size > 28 ? 11 : 9}px;font-weight:600;
+          font-family:'Kanit',sans-serif;
+        ">${cnt > 1 ? cnt : ''}</div>`,
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2],
+    });
+
+    const m = L.marker(coords, { icon }).addTo(mainLayer);
+    m.bindTooltip(`
+      <b>${label}</b><br>
+      <span style="font-size:11px;color:#555;">${cnt} ธรรมนูญสุขภาพ</span>
+    `, { direction:'top', offset:[0,-size/2-4], opacity:0.95 });
+    m.on('click', () => openMapModal(label, rows));
+  });
+}
+
+function buildMarkers(data) {
+  if (!mainMap || !mainLayer) return;
+  mainLayer.clearLayers();
+  if (!data?.length) return;
+
+  const zoom = mainMap.getZoom();
+
+  // ✅ กำหนด groupBy ตาม zoom level
+  let groupBy;
+  if (zoom >= 11) groupBy = 'subdistrict';
+  else if (zoom >= 9) groupBy = 'district';
+  else groupBy = 'province';
+
+  // อัปเดต legend label
+  const zoomLabel = $('map-zoom-label');
+  if (zoomLabel) {
+    zoomLabel.textContent = groupBy === 'subdistrict' ? 'ตำบล' : groupBy === 'district' ? 'อำเภอ' : 'จังหวัด';
+  }
+
+  // ✅ grouping
+  const groups = {};
+  data.forEach(r => {
+    const prov = cleanName(r?.province);
+    if (!prov || !PROVINCE_COORDS[prov]) return;
+
+    let key, label, lat, lng;
+
+    if (groupBy === 'province') {
+      key = prov;
+    } else if (groupBy === 'district') {
+      key = `${r?.district}||${prov}`;
+    } else {
+      key = `${r?.subdistrict}||${r?.district}||${prov}`;
+    }
+
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+
+  // ✅ สีตาม groupBy
+  const COLOR = groupBy === 'province' ? '#1D9E75' : groupBy === 'district' ? '#378ADD' : '#EF9F27';
+
+  Object.entries(groups).forEach(([key, rows]) => {
+    const r0 = rows[0];
+    const prov = cleanName(r0?.province);
+    const cnt = rows.length;
+
+    // คำนวณ coordinates
+    let coords;
+    if (groupBy === 'province') {
+      coords = PROVINCE_COORDS[prov];
+      label = prov;
+    } else if (groupBy === 'district') {
+      coords = mockCoords(prov, r0?.district, null);
+      label = `${r0?.district} (${prov})`;
+    } else {
+      coords = mockCoords(prov, r0?.district, r0?.subdistrict);
+      label = `ต.${r0?.subdistrict} อ.${r0?.district}`;
+    }
+
+    if (!coords) return;
+
+    // ✅ ขนาด marker ตามจำนวน
+    const size = groupBy === 'province'
+      ? Math.max(28, Math.min(52, 20 + cnt * 1.5))
+      : groupBy === 'district'
+      ? Math.max(22, Math.min(40, 16 + cnt * 2))
+      : 18;
+
+    // ✅ ใหม่ - แสดงสัญลักษณ์ใน marker
+    const icon = L.divIcon({
+        className: '',
+        html: `
+              <div style="
+                display:flex;
+                flex-direction:${groupBy === 'province' ? 'column' : 'row'};
+                align-items:center;
+                justify-content:center;
+                gap:2px;
+                cursor:pointer;
+              ">
+     
+              <div style="
+                width:${groupBy === 'province' ? 32 : 24}px;
+                height:${groupBy === 'province' ? 32 : 24}px;
+                background:${COLOR};
+                border:2.5px solid white;
+                border-radius:50%;
+                box-shadow:0 2px 8px rgba(0,0,0,0.25);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:14px;
+              ">📋</div>
+
+              ${groupBy === 'province' ? 
+              `<span style="font-size:10px;color:#333;font-weight:500;white-space:nowrap;">ธรรมนูญสุขภาพ</span>` 
+              : ''}
+              </div>`,
+            iconSize: groupBy === 'province' ? [120, 50] : [30, 30],
+            iconAnchor: groupBy === 'province' ? [60, 25] : [15, 15],
+          });
+    const m = L.marker(coords, { icon }).addTo(mainLayer);
+    m.bindTooltip(`
+      <b>${label}</b><br>
+      <span style="font-size:11px;color:#555;">${cnt} ธรรมนูญสุขภาพ</span>
+    `, { direction:'top', offset:[0,-size/2-4], opacity:0.95 });
+    m.on('click', () => openMapModal(label, rows));
+  });
 }
 
 // ── TOGGLE HIA SUBMENU ──────────────────────────────────────────
