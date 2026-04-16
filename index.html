@@ -20,20 +20,23 @@
   <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
 
   <div class="topnav-links">
-    <!-- เพิ่ม link เมนูได้ตรงนี้ -->
+  <a class="nav-link active" onclick="window.location.href='index.html'">ภาพรวม</a>
+  <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">Living Will</a>
+  <a class="nav-link" onclick="window.location.href='4pw.html'">4PW</a>
+  <a class="nav-link" onclick="window.location.href='network.html'">ทำเนียบเครือข่ายตามเครื่องมือ</a>
+  
+  <!-- ✅ เมนู HIA แบบ Dropdown (ใส่ตรงนี้) -->
+  <div class="nav-dropdown">
+    <div class="nav-link nav-dropdown-toggle" onclick="toggleHiaMenu(event)">
+      HIA <span class="arrow">▼</span>
+    </div>
+    <ul class="nav-submenu" id="hia-submenu">
+      <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
+    </ul>
   </div>
+</div>
 
   <div class="topnav-right">
-    <a href="https://infocenter.nationalhealth.or.th/%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%9B%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7/" target="_blank" class="btn-icon blue">
-      <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-        <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/>
-        <path d="M7 1.5C7 1.5 5 4 5 7C5 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/>
-        <path d="M7 1.5C7 1.5 9 4 9 7C9 10 7 12.5 7 12.5" stroke="currentColor" stroke-width="1.2"/>
-        <path d="M1.5 7H12.5" stroke="currentColor" stroke-width="1.2"/>
-      </svg>
-      <span>Living Will</span>
-    </a>
-
     <!-- Auth: logged out -->
     <div id="auth-logged-out">
       <button onclick="window.location.href='login.html'"
@@ -73,7 +76,7 @@
 <div class="main">
 
   <div style="text-align: center; padding: 16px 24px; width: 100%;">
-  <div style="font-size: 30px; font-weight: 600; color: #1a1a1a; display: inline-block;">ภาพรวมภาคเหนือ</div>
+  <div style="font-size: 30px; font-weight: 600; color: #1a1a1a; display: inline-block;">ฐานข้อมูลธรรมนูญภาคเหนือ</div>
 </div>
 
   <!-- CONTENT -->
@@ -86,17 +89,17 @@
        style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
       <div class="filter-divider"></div>
       <select id="gf-zone" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-        <option value="all">ทุกเขต</option>
+        <option value="all">เขต</option>
         <option value="1">เขต 1</option>
         <option value="2">เขต 2</option>
         <option value="3">เขต 3</option>
       </select>
-      <select id="gf-province" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกจังหวัด</option></select>
-      <select id="gf-district" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกอำเภอ</option></select>
-      <select id="gf-subdistrict" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกตำบล</option></select>
+      <select id="gf-province" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">จังหวัด</option></select>
+      <select id="gf-district" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">อำเภอ</option></select>
+      <select id="gf-subdistrict" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ตำบล</option></select>
       <div class="filter-divider"></div>
-      <select id="gf-title" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกประเด็น</option></select>
-      <select id="gf-year" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ทุกปี พ.ศ.</option></select>
+      <select id="gf-title" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ประเด็น</option></select>
+      <select id="gf-year" style="font-family:'Kanit', 'Kodchasan', 'Mali', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><option value="all">ปี พ.ศ.</option></select>
       <div class="filter-divider"></div>
       <button style="padding: 7px 12px;border-radius: 7px;border: 1px solid var(--border);background: #433e3ec1;color: white;
       font-size: 12px;cursor: pointer;transition: all 0.15s; hover { background: #ccc6c6; }" onclick="resetFilters()">ล้างตัวกรอง</button>
@@ -391,24 +394,24 @@ function applyFilters() {
 
 function populateFilters() {
   const provinces = [...new Set(allCharters.map(r=>r?.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-province', provinces, 'ทุกจังหวัด');
-  fillSelect('mf-province', provinces, 'ทุกจังหวัด');
+  fillSelect('gf-province', provinces, 'จังหวัด');
+  fillSelect('mf-province', provinces, 'จังหวัด');
 
   const districts = [...new Set(allCharters.map(r=>r?.district).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-district', districts, 'ทุกอำเภอ');
-  fillSelect('mf-district', districts, 'ทุกอำเภอ');
+  fillSelect('gf-district', districts, 'อำเภอ');
+  fillSelect('mf-district', districts, 'อำเภอ');
 
   const subs = [...new Set(allCharters.map(r=>r?.subdistrict).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-subdistrict', subs, 'ทุกตำบล');
-  fillSelect('mf-subdistrict', subs, 'ทุกตำบล');
+  fillSelect('gf-subdistrict', subs, 'ตำบล');
+  fillSelect('mf-subdistrict', subs, 'ตำบล');
 
   const titles = [...new Set(allCharters.map(r=>r?.title).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-title', titles, 'ทุกประเด็น');
+  fillSelect('gf-title', titles, 'ประเด็น');
 
   const years = [...new Set(allCharters.map(r=>thYear(r?.publish_date)).filter(Boolean))].sort((a,b)=>b-a);
   const ySel = $('gf-year');
   if (ySel) {
-    ySel.innerHTML = '<option value="all">ทุกปี พ.ศ.</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
   }
 }
 
@@ -654,57 +657,30 @@ function initMainMap() {
   leg.addTo(mainMap);
 }
 
-function buildMarkers(data) {
-  if (!mainMap || !mainLayer) return;
-  mainLayer.clearLayers();
-  if (!data?.length) return;
-
-  const mfProv = $('mf-province')?.value || 'all';
-  const mfDist = $('mf-district')?.value || 'all';
-  const mfSub  = $('mf-subdistrict')?.value || 'all';
-
-  let filtered = data;
-  if (mfProv !== 'all') filtered = filtered.filter(r => cleanName(r?.province) === cleanName(mfProv));
-  if (mfDist !== 'all') filtered = filtered.filter(r => r?.district === mfDist);
-  if (mfSub  !== 'all') filtered = filtered.filter(r => r?.subdistrict === mfSub);
-
-  const groupBy = mfSub !== 'all' ? 'subdistrict' : mfDist !== 'all' ? 'subdistrict' : mfProv !== 'all' ? 'district' : 'province';
-  const groups = {};
-
-  filtered.forEach(r => {
-    const prov = cleanName(r?.province);
-    if (!prov || !PROVINCE_COORDS[prov]) return;
-    const key = groupBy === 'subdistrict' ? `${r?.subdistrict}||${r?.district}||${prov}`
-              : groupBy === 'district'    ? `${r?.district}||${prov}`
-              :                             prov;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(r);
-  });
-
-  Object.entries(groups).forEach(([key, rows]) => {
-    const r0 = rows[0];
-    const prov = cleanName(r0?.province);
-    const coords = groupBy === 'province'
-      ? PROVINCE_COORDS[prov]
-      : mockCoords(prov, r0?.district, groupBy === 'subdistrict' ? r0?.subdistrict : null);
-    if (!coords) return;
-
-    const cnt = rows.length;
-    const label = groupBy === 'province' ? prov : (r0?.subdistrict || r0?.district || prov);
-    const bg = '#1D9E75';
-
-    // ไม่แสดงจำนวนใน marker แสดงแค่จุด
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="width:30px;height:30px;background:${bg};border:2.5px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.25);cursor:pointer;"></div>`,
-      iconSize: [14,14], iconAnchor: [7,7],
-    });
-
-    const m = L.marker(coords, { icon }).addTo(mainLayer);
-    m.bindTooltip(`<b>${label}</b><br><span style="font-size:11px;">${cnt} ธรรมนูญสุขภาพ</span>`, { direction:'top', offset:[0,-10], opacity:0.95 });
-    m.on('click', () => openMapModal(label, rows));
-  });
+// ── TOGGLE HIA SUBMENU ──────────────────────────────────────────
+function toggleHiaMenu(e) {
+  e.stopPropagation();
+  e.preventDefault(); // ✅ ป้องกันการลิงก์
+  
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = e.currentTarget;
+  
+  if (submenu) {
+    submenu.classList.toggle('show');
+    toggle.classList.toggle('active');
+  }
 }
+
+// ปิดเมนูย่อยเมื่อคลิกที่อื่น
+document.addEventListener('click', (e) => {
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = document.querySelector('.nav-dropdown-toggle');
+  
+  if (submenu && !e.target.closest('.nav-dropdown')) {
+    submenu.classList.remove('show');
+    if (toggle) toggle.classList.remove('active');
+  }
+});
 
 function bindMapFilters() {
   ['mf-province','mf-district','mf-subdistrict'].forEach(id => {
