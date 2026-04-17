@@ -855,7 +855,7 @@ function buildMarkers(data) {
               ">📋</div>
 
               ${groupBy === 'province' ? 
-              `<span style="font-size:10px;color:#333;font-weight:500;white-space:nowrap;">ธรรมนูญสุขภาพ</span>` 
+              `<span style="font-size:10px;color:#333;font-weight:500;white-space:nowrap;"></span>` 
               : ''}
               </div>`,
             iconSize: groupBy === 'province' ? [120, 50] : [30, 30],
@@ -1039,7 +1039,7 @@ function confirmLogout() {
   localStorage.removeItem('user');
   if (typeof supabaseClient !== 'undefined') supabaseClient?.auth?.signOut?.().catch(()=>{});
   updateAuthUI();
-  showToast('👋 ออกจากระบบเรียบร้อย','','logout');
+  showToast('ออกจากระบบเรียบร้อย','','logout');
   setTimeout(() => window.location.reload(), 1200);
 }
 
