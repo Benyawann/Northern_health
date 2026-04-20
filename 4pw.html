@@ -8,54 +8,6 @@
   <link rel="stylesheet" href="css/4pw_style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-  <style>
-    /* PDF Dropzone */
-    .pdf-dropzone {
-      border: 2px dashed rgba(29, 158, 117, 0.35);
-      border-radius: 10px;
-      padding: 20px 16px;
-      background: #f9fdfb;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      text-align: center;
-      min-height: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .pdf-dropzone:hover,
-    .pdf-dropzone.drag-over {
-      border-color: #1D9E75;
-      background: #E6F7F1;
-    }
-    
-    .pdf-drop-icon { margin-bottom: 8px; }
-    
-    .pdf-drop-text {
-      font-size: 14px;
-      font-weight: 500;
-      color: #1D9E75;
-    }
-    
-    .pdf-drop-sub {
-      font-size: 11px;
-      color: #aaa;
-      margin-top: 3px;
-    }
-    
-    .pdf-selected-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #E6F7F1;
-      border: 1px solid rgba(29, 158, 117, 0.25);
-      border-radius: 8px;
-      padding: 10px 12px;
-      width: 100%;
-      text-align: left;
-    }
-  </style>
 </head>
 
 <body>
@@ -445,7 +397,7 @@
           <td style="${isLoggedIn ? '' : 'display:none'}">
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn-edit" onclick="openEditModal(${r.id})">✏️ แก้ไข</button>
-              <button class="btn-del" onclick="openDeleteConfirm(${r.id},'${escHtml(r.name || '')}')">🗑️ ลบ</button>
+              <button class="btn-del-modal" onclick="openDeleteConfirm(${r.id},'${escHtml(r.name || '')}')">🗑️ ลบ</button>
             </div>
           </td>
         </tr>

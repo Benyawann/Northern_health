@@ -3945,8 +3945,28 @@ tr:hover td {
 
 .btn-edit { display:inline-flex; align-items:center; gap:4px; padding:5px 11px; background:#378ADD; color:#fff; border:none; border-radius:6px; font-size:11px; font-family:'Kanit',sans-serif; cursor:pointer; transition:all 0.15s; }
 .btn-edit:hover { background:#2E6DB8; }
-.btn-del { display:inline-flex; align-items:center; gap:4px; padding:5px 11px; background:#fff; color:#E04031; border:1px solid #E04031; border-radius:6px; font-size:11px; font-family:'Kanit',sans-serif; cursor:pointer; transition:all 0.15s; }
-.btn-del:hover { background:#FCEBEB; }
+.btn-del-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background:#E04031;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-del-modal:hover {
+  background: #C03025 ;
+}
+
+.btn-del-modal:active {
+  transform: translateY(0);
+}
 
 .btn-add { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; background:linear-gradient(135deg,#1D9E75,#0F6E56); color:#fff; border:none; border-radius:9px; font-size:13px; font-family:'Kanit',sans-serif; cursor:pointer; font-weight:500; transition:all 0.15s; box-shadow:0 2px 8px rgba(29,158,117,0.3); }
 .btn-add:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(29,158,117,0.4); }
@@ -3984,6 +4004,53 @@ tr:hover td {
 .pw-toast { position:fixed; bottom:24px; right:24px; background:#fff; border-radius:10px; padding:12px 18px; box-shadow:0 8px 32px rgba(0,0,0,0.15); border-left:4px solid #1D9E75; font-size:13px; display:none; z-index:9999; min-width:240px; font-family:'Kanit',sans-serif; }
 
 .required { color:#E04031; }
+
+ /* PDF Dropzone */
+.pdf-dropzone {
+    border: 2px dashed rgba(29, 158, 117, 0.35);
+    border-radius: 10px;
+    padding: 20px 16px;
+    background: #f9fdfb;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+    min-height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+    
+.pdf-dropzone:hover,
+.pdf-dropzone.drag-over {
+    border-color: #1D9E75;
+    background: #E6F7F1;
+}
+    
+.pdf-drop-icon { margin-bottom: 8px; }
+    
+.pdf-drop-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1D9E75;
+}
+    
+.pdf-drop-sub {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 3px;
+}
+    
+.pdf-selected-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #E6F7F1;
+    border: 1px solid rgba(29, 158, 117, 0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 100%;
+    text-align: left;
+}
 
 @media(max-width:768px) {
     .pw-container { padding:12px 12px 60px; }
