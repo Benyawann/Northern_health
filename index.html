@@ -20,10 +20,10 @@
   <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
 
   <div class="topnav-links">
-  <a class="nav-link active" onclick="window.location.href='index.html'">ภาพรวม</a>
-  <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">Living Will</a>
+  <a class="nav-link active" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
+  <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
   <a class="nav-link" onclick="window.location.href='4pw.html'">4PW</a>
-  <a class="nav-link" onclick="window.location.href='network.html'">ทำเนียบเครือข่ายตามเครื่องมือ</a>
+  
   
   <!-- ✅ เมนู HIA แบบ Dropdown (ใส่ตรงนี้) -->
   <div class="nav-dropdown">
@@ -34,6 +34,7 @@
       <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
     </ul>
   </div>
+  <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
 </div>
 
   <div class="topnav-right">
@@ -931,6 +932,14 @@ function renderModalRows(items) {
     container.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;">🔍 ไม่พบข้อมูล</div>';
     return;
   }
+ 
+  // ตรวจสอบว่า login หรือยัง
+  let loggedIn = false;
+  try {
+    const u = JSON.parse(localStorage.getItem('user')||'null');
+    if (u && u.loggedIn && (new Date()-new Date(u.loginTime))/(1000*60*60) < 24) loggedIn = true;
+  } catch(e) {}
+ 
   container.innerHTML = items.map(r => {
     const name = r?.charter_name || r?.title || '(ไม่มีชื่อ)';
     const prov = r?.province || '—';
@@ -943,7 +952,7 @@ function renderModalRows(items) {
     const pubDate = r?.publish_date;
     const imgUrl = r?.image_url;
     const pdfUrl = r?.pdf_url;
-
+ 
     let pdfFull = null;
     if (pdfUrl) {
       if (pdfUrl.startsWith('http')) pdfFull = pdfUrl;
@@ -952,7 +961,7 @@ function renderModalRows(items) {
         pdfFull = `${SUPABASE_URL}/storage/v1/object/public/charter-pdfs/${clean}`;
       }
     }
-
+ 
     return `
     <div class="charter-card">
       ${imgUrl
@@ -968,9 +977,13 @@ function renderModalRows(items) {
         <div class="charter-card-meta">ประเด็น: ${title || '—'}</div>
         <div class="charter-card-meta" style="color:#1D9E75;">แกนนำ: ${leader}</div>
         <div class="charter-card-meta" style="color:#378ADD;">นักวิชาการ: ${academic}</div>
-        ${phone ? `<div class="charter-card-meta">เบอร์โทร: ${phone}</div>` : ''}
+        ${phone !== '—' ? `<div class="charter-card-meta">เบอร์โทร: ${phone}</div>` : ''}
         <div class="charter-card-actions">
           ${pdfFull ? `<a href="${pdfFull}" target="_blank" class="btn-sm green">📄 ดู PDF</a>` : ''}
+          ${loggedIn && r?.id ? `
+            <button class="btn-edit-modal" onclick="openEditRecord(${r.id})">✏️ แก้ไข</button>
+            <button class="btn-del-modal" onclick="openDelRecord(${r.id},'${(name).replace(/'/g,"\\'")}')">🗑️ ลบ</button>
+          ` : ''}
         </div>
       </div>
     </div>`;
@@ -989,6 +1002,98 @@ function filterModalRows() {
   }
   $('modal-count').textContent = filtered.length;
   renderModalRows(filtered);
+}
+
+let pendingDelRecordId = null;
+ 
+async function openEditRecord(id) {
+  const { data, error } = await db.from('data_charter').select('*').eq('id', id).single();
+  if (error || !data) { showToast('โหลดข้อมูลไม่สำเร็จ','','error'); return; }
+ 
+  document.getElementById('edit-record-id').value = data.id;
+  document.getElementById('edit-charter-name').value = data.charter_name || '';
+  document.getElementById('edit-province').value = data.province || '';
+  document.getElementById('edit-district').value = data.district || '';
+  document.getElementById('edit-subdistrict').value = data.subdistrict || '';
+  document.getElementById('edit-title').value = data.title || '';
+  document.getElementById('edit-publish-date').value = data.publish_date || '';
+  document.getElementById('edit-leader').value = data.leader || '';
+  document.getElementById('edit-academic').value = data.academic_supporter || '';
+  document.getElementById('edit-pdf-url').value = data.pdf_url || '';
+ 
+  document.getElementById('edit-record-ov').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+ 
+function closeEditRecord() {
+  document.getElementById('edit-record-ov').classList.remove('show');
+  document.body.style.overflow = '';
+}
+ 
+async function saveEditRecord() {
+  const id = document.getElementById('edit-record-id').value;
+  const charter_name = document.getElementById('edit-charter-name').value.trim();
+  const province = document.getElementById('edit-province').value;
+  const district = document.getElementById('edit-district').value.trim();
+  const subdistrict = document.getElementById('edit-subdistrict').value.trim();
+  const title = document.getElementById('edit-title').value;
+  const publish_date = document.getElementById('edit-publish-date').value.trim();
+  const leader = document.getElementById('edit-leader').value.trim();
+  const academic_supporter = document.getElementById('edit-academic').value.trim();
+  const pdf_url = document.getElementById('edit-pdf-url').value.trim();
+ 
+  if (!charter_name || !province) {
+    showToast('กรุณากรอกชื่อธรรมนูญและจังหวัด','','error'); return;
+  }
+ 
+  const payload = {
+    charter_name, province, district: district||null,
+    subdistrict: subdistrict||null, title: title||null,
+    publish_date: publish_date||null, leader: leader||null,
+    academic_supporter: academic_supporter||null, pdf_url: pdf_url||null
+  };
+ 
+  const { error } = await db.from('data_charter').update(payload).eq('id', id);
+  if (error) { showToast('อัปเดตไม่สำเร็จ: '+error.message,'','error'); return; }
+ 
+  showToast('✅ อัปเดตข้อมูลเรียบร้อย','','success');
+  closeEditRecord();
+ 
+  // รีโหลดข้อมูลและอัปเดต modal
+  await loadData();
+  // อัปเดต modalAllRows
+  const updatedRows = modalAllRows.map(r => r.id == id ? {...r, ...payload} : r);
+  modalAllRows = updatedRows;
+  renderModalRows(updatedRows);
+}
+
+function openDelRecord(id, name) {
+  pendingDelRecordId = id;
+  document.getElementById('del-record-msg').textContent = `คุณต้องการลบ "${name}" ใช่หรือไม่?`;
+  document.getElementById('del-record-ov').style.display = 'flex';
+}
+ 
+function closeDelRecord() {
+  document.getElementById('del-record-ov').style.display = 'none';
+  pendingDelRecordId = null;
+}
+ 
+async function confirmDelRecord() {
+  if (!pendingDelRecordId) return;
+  const { error } = await db.from('data_charter').delete().eq('id', pendingDelRecordId);
+  if (error) { showToast('ลบไม่สำเร็จ: '+error.message,'','error'); return; }
+ 
+  showToast('🗑️ ลบข้อมูลเรียบร้อย','','success');
+  closeDelRecord();
+ 
+  // ลบออกจาก modalAllRows และ allCharters
+  modalAllRows = modalAllRows.filter(r => r.id != pendingDelRecordId);
+  allCharters = allCharters.filter(r => r.id != pendingDelRecordId);
+  filteredCharters = filteredCharters.filter(r => r.id != pendingDelRecordId);
+  renderModalRows(modalAllRows);
+  renderAll();
+ 
+  if (modalAllRows.length === 0) closeMapModal();
 }
 
 function closeMapModal() {

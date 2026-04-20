@@ -3899,3 +3899,199 @@ tr:hover td {
     padding-top: 50px; /* ✅ เว้นระยะด้านบนไม่ให้เนื้อหาทับเมนู */
   }
 }
+
+/* ════════════════════════════════
+   🔘 MODAL ACTION BUTTONS (Map Modal)
+   ════════════════════════════════ */
+.charter-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-edit-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #378ADD 0%, #2E6DB8 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(55, 138, 221, 0.2);
+}
+
+.btn-edit-modal:hover {
+  background: linear-gradient(135deg, #2E6DB8 0%, #255A99 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(55, 138, 221, 0.3);
+}
+
+.btn-edit-modal:active {
+  transform: translateY(0);
+}
+
+.btn-del-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #E04031 0%, #C03025 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(224, 64, 49, 0.2);
+}
+
+.btn-del-modal:hover {
+  background: linear-gradient(135deg, #C03025 0%, #A0281F 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(224, 64, 49, 0.3);
+}
+
+.btn-del-modal:active {
+  transform: translateY(0);
+}
+
+/* ════════════════════════════════
+   🗑️ DELETE CONFIRM MODAL
+   ════════════════════════════════ */
+.del-confirm-ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.del-confirm-ov.show {
+  display: flex;
+}
+
+.del-confirm-box {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: slideUp 0.3s ease;
+}
+
+.del-confirm-icon {
+  width: 56px;
+  height: 56px;
+  background: #FFF4E6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 28px;
+}
+
+.del-confirm-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.del-confirm-msg {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.del-confirm-name {
+  font-weight: 500;
+  color: #E04031;
+  display: block;
+  margin: 4px 0;
+}
+
+.del-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.del-confirm-actions button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.del-confirm-cancel {
+  background: #f0f0ec;
+  color: #555;
+}
+
+.del-confirm-cancel:hover {
+  background: #e0e0dc;
+}
+
+.del-confirm-delete {
+  background: linear-gradient(135deg, #E04031 0%, #C03025 100%);
+  color: white;
+}
+
+.del-confirm-delete:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+/* Responsive for mobile */
+@media (max-width: 480px) {
+  .del-confirm-box {
+    padding: 20px;
+    margin: 0 12px;
+  }
+  
+  .del-confirm-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .del-confirm-actions button {
+    min-height: 44px;
+  }
+}
