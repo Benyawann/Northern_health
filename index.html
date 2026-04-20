@@ -225,6 +225,19 @@
 <!-- TOAST -->
 <div id="toast-notification" style="position:fixed;top:20px;right:20px;background:white;border-radius:10px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,0.15);border-left:4px solid var(--green);display:none;z-index:9999;min-width:260px;"></div>
 
+<!-- DELETE CONFIRM MODAL -->
+<div id="del-record-ov" class="del-confirm-ov">
+  <div class="del-confirm-box">
+    <div class="del-confirm-icon">🗑️</div>
+    <div class="del-confirm-title">ยืนยันการลบ</div>
+    <p class="del-confirm-msg" id="del-record-msg">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
+    <div class="del-confirm-actions">
+      <button class="del-confirm-cancel" onclick="closeDelRecord()">ยกเลิก</button>
+      <button class="del-confirm-delete" onclick="confirmDelRecord()">🗑️ ลบ</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
 const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
