@@ -1094,40 +1094,56 @@ function closeDelRecord() {
 async function confirmDelRecord() {
   if (!pendingDelRecordId) return;
 
-  // หา record เพื่อเอา pdf_url และ image_url มาลบไฟล์
   const record = allCharters.find(r => r.id == pendingDelRecordId);
 
-  // ลบไฟล์จาก Storage ก่อน
-  if (record?.pdf_url) {
+  // ── ฟังก์ชันช่วยดึง storage path จาก public URL ──
+  function getStoragePath(url, bucketName) {
+    if (!url) return null;
     try {
-      const fileName = record.pdf_url.split('/').pop();
-      await db.storage.from('charter-pdfs').remove([fileName]);
-    } catch(e) {
-      console.warn('ลบ PDF ไม่สำเร็จ:', e);
-    }
+      // URL รูปแบบ: .../storage/v1/object/public/BUCKET_NAME/PATH
+      const marker = `/object/public/${bucketName}/`;
+      const idx = url.indexOf(marker);
+      if (idx !== -1) return decodeURIComponent(url.slice(idx + marker.length));
+      // fallback: เอาแค่ชื่อไฟล์
+      return decodeURIComponent(url.split('/').pop());
+    } catch { return url.split('/').pop(); }
   }
 
+  // ลบ PDF
+  if (record?.pdf_url) {
+    try {
+      const path = getStoragePath(record.pdf_url, 'charter-pdfs');
+      if (path) {
+        const { error } = await db.storage.from('charter-pdfs').remove([path]);
+        if (error) console.warn('ลบ PDF ไม่สำเร็จ:', error.message);
+        else console.log('✅ ลบ PDF แล้ว:', path);
+      }
+    } catch(e) { console.warn('ลบ PDF error:', e); }
+  }
+
+  // ลบรูปภาพ
   if (record?.image_url) {
     try {
-      const fileName = record.image_url.split('/').pop();
-      await db.storage.from('charter-images').remove([fileName]);
-    } catch(e) {
-      console.warn('ลบรูปภาพไม่สำเร็จ:', e);
-    }
+      const path = getStoragePath(record.image_url, 'charter-images');
+      if (path) {
+        const { error } = await db.storage.from('charter-images').remove([path]);
+        if (error) console.warn('ลบรูปภาพไม่สำเร็จ:', error.message);
+        else console.log('✅ ลบรูปภาพแล้ว:', path);
+      }
+    } catch(e) { console.warn('ลบรูปภาพ error:', e); }
   }
 
   // ลบ record จาก database
   const { error } = await db.from('data_charter').delete().eq('id', pendingDelRecordId);
-  if (error) { 
-    showToast('ลบไม่สำเร็จ: ' + error.message, '', 'error'); 
-    return; 
+  if (error) {
+    showToast('ลบไม่สำเร็จ: ' + error.message, '', 'error');
+    return;
   }
 
   showToast('🗑️ ลบข้อมูลเรียบร้อย', '', 'success');
   closeDelRecord();
   closeMapModal();
 
-  // รีเซ็ตและโหลดข้อมูลใหม่
   await loadData();
   renderAll();
 }
