@@ -7,422 +7,737 @@
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/4pw_style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  
+  <style>
+    /* PDF Dropzone */
+    .pdf-dropzone {
+      border: 2px dashed rgba(29, 158, 117, 0.35);
+      border-radius: 10px;
+      padding: 20px 16px;
+      background: #f9fdfb;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .pdf-dropzone:hover,
+    .pdf-dropzone.drag-over {
+      border-color: #1D9E75;
+      background: #E6F7F1;
+    }
+    
+    .pdf-drop-icon { margin-bottom: 8px; }
+    
+    .pdf-drop-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1D9E75;
+    }
+    
+    .pdf-drop-sub {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 3px;
+    }
+    
+    .pdf-selected-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #E6F7F1;
+      border: 1px solid rgba(29, 158, 117, 0.25);
+      border-radius: 8px;
+      padding: 10px 12px;
+      width: 100%;
+      text-align: left;
+    }
+  </style>
 </head>
+
 <body>
-<div class="app">
+  <div class="app">
 
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
-    <div class="topnav-links">
-      <a class="nav-link" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
-      <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
-      <a class="nav-link active" onclick="window.location.href='4pw.html'">4PW</a>
-      <div class="nav-dropdown">
-        <div class="nav-link nav-dropdown-toggle" onclick="toggleHiaMenu(event)">HIA <span class="arrow">▼</span></div>
-        <ul class="nav-submenu" id="hia-submenu">
-          <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
-        </ul>
+    <!-- ========== TOP NAV ========== -->
+    <nav class="topnav">
+      <div class="topnav-logo" onclick="window.location.href='index.html'">
+        🌿 Data Area North
       </div>
-      <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
-    </div>
-    <div class="topnav-right">
-      <div id="auth-logged-out">
-        <button onclick="window.location.href='login.html'" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/><path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          เข้าสู่ระบบ
-        </button>
-      </div>
-      <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
-        <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">U</div>
-        <div style="min-width:0;">
-          <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;">ผู้ใช้</div>
-          <div id="user-role" style="font-size:10px;color:#888;">user</div>
+      
+      <div class="topnav-links">
+        <a class="nav-link" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
+        <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
+        <a class="nav-link active" onclick="window.location.href='4pw.html'">4PW</a>
+        
+        <div class="nav-dropdown">
+          <div class="nav-link nav-dropdown-toggle" onclick="toggleHiaMenu(event)">
+            HIA <span class="arrow">▼</span>
+          </div>
+          <ul class="nav-submenu" id="hia-submenu">
+            <li>
+              <a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">
+                📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก
+              </a>
+            </li>
+          </ul>
         </div>
-        <button onclick="handleLogout()" style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        </button>
+        
+        <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
       </div>
-    </div>
-  </nav>
+      
+      <div class="topnav-right">
+        <!-- Auth: Logged Out -->
+        <div id="auth-logged-out">
+          <button onclick="window.location.href='login.html'" 
+                  style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            เข้าสู่ระบบ
+          </button>
+        </div>
 
-  <div class="main">
-    <div class="pw-container">
-      <div class="pw-header">
-        <div class="pw-title">ฐานข้อมูล 4PW</div>
-      </div>
-
-      <!-- FILTER BAR -->
-      <div class="pw-filter-bar">
-        <input type="text" id="pw-search" placeholder="🔍 ค้นหาชื่อรายงาน..." oninput="applyFilters()">
-        <select id="pw-year" onchange="applyFilters()">
-          <option value="all">ปี พ.ศ.</option>
-        </select>
-        <select id="pw-province" onchange="applyFilters()">
-          <option value="all">จังหวัด</option>
-        </select>
-        <button onclick="resetFilters()" style="padding:8px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#555;color:#fff;font-size:12px;font-family:'Kanit',sans-serif;cursor:pointer;">ล้างตัวกรอง</button>
-        <div id="btn-add-wrap" style="display:none;">
-          <button class="btn-add" onclick="openAddModal()">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            เพิ่มข้อมูลใหม่
+        <!-- Auth: Logged In -->
+        <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
+          <div id="user-avatar" 
+               style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">
+            U
+          </div>
+          <div style="min-width:0;">
+            <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;">ผู้ใช้</div>
+            <div id="user-role" style="font-size:10px;color:#888;">user</div>
+          </div>
+          <button onclick="handleLogout()" 
+                  style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
           </button>
         </div>
       </div>
+    </nav>
 
-      <!-- TABLE -->
-      <div class="pw-table-wrap">
-        <table class="pw-table">
-          <thead>
-            <tr>
-              <th style="width:44%">ชื่อรายงาน</th>
-              <th style="width:12%">ปี พ.ศ.</th>
-              <th style="width:14%">จังหวัด</th>
-              <th style="width:14%"></th>
-              <th id="th-actions" style="width:16%;display:none;"></th>
-            </tr>
-          </thead>
-          <tbody id="pw-tbody">
-            <tr><td colspan="5" class="pw-empty">กำลังโหลด...</td></tr>
-          </tbody>
-        </table>
-        <div class="pw-pager" id="pw-pager" style="display:none;">
-          <span class="pw-pager-info" id="pw-pager-info"></span>
-          <button class="pw-pager-btn" id="pw-prev" onclick="changePage(-1)">‹ ก่อนหน้า</button>
-          <button class="pw-pager-btn" id="pw-next" onclick="changePage(1)">ถัดไป ›</button>
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main">
+      <div class="pw-container">
+        <div class="pw-header">
+          <div class="pw-title">ฐานข้อมูล 4PW</div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="pw-filter-bar">
+          <input type="text" id="pw-search" placeholder="🔍 ค้นหาชื่อรายงาน..." oninput="applyFilters()">
+          <select id="pw-year" onchange="applyFilters()">
+            <option value="all">ปี พ.ศ.</option>
+          </select>
+          <select id="pw-province" onchange="applyFilters()">
+            <option value="all">จังหวัด</option>
+          </select>
+          <button onclick="resetFilters()" 
+                  style="padding:8px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#555;color:#fff;font-size:12px;font-family:'Kanit',sans-serif;cursor:pointer;">
+            ล้างตัวกรอง
+          </button>
+          <div id="btn-add-wrap" style="display:none;">
+            <button class="btn-add" onclick="openAddModal()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              เพิ่มข้อมูลใหม่
+            </button>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="pw-table-wrap">
+          <table class="pw-table">
+            <thead>
+              <tr>
+                <th style="width:44%">ชื่อรายงาน</th>
+                <th style="width:12%">ปี พ.ศ.</th>
+                <th style="width:14%">จังหวัด</th>
+                <th style="width:14%"></th>
+                <th id="th-actions" style="width:16%;display:none;"></th>
+              </tr>
+            </thead>
+            <tbody id="pw-tbody">
+              <tr><td colspan="5" class="pw-empty">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+          
+          <div class="pw-pager" id="pw-pager" style="display:none;">
+            <span class="pw-pager-info" id="pw-pager-info"></span>
+            <button class="pw-pager-btn" id="pw-prev" onclick="changePage(-1)">‹ ก่อนหน้า</button>
+            <button class="pw-pager-btn" id="pw-next" onclick="changePage(1)">ถัดไป ›</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ADD / EDIT MODAL -->
-<div class="pw-modal-ov" id="pw-modal-ov">
-  <div class="pw-modal">
-    <h3 id="pw-modal-title">เพิ่มข้อมูล 4PW</h3>
-    <input type="hidden" id="modal-id">
+  <!-- ========== ADD / EDIT MODAL ========== -->
+  <div class="pw-modal-ov" id="pw-modal-ov">
+    <div class="pw-modal">
+      <h3 id="pw-modal-title">เพิ่มข้อมูล 4PW</h3>
+      <input type="hidden" id="modal-id">
 
-    <div class="form-group">
-      <label>ชื่อรายงาน <span class="required">*</span></label>
-      <input type="text" id="modal-name" placeholder="ชื่อรายงาน 4PW">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="form-group">
-        <label>ปี พ.ศ. <span class="required">*</span></label>
-        <input type="number" id="modal-year" placeholder="เช่น 2567" min="2500" max="2600">
+        <label>ชื่อรายงาน <span class="required">*</span></label>
+        <input type="text" id="modal-name" placeholder="ป้อนชื่อรายงาน">
       </div>
-      <div class="form-group">
-        <label>จังหวัด <span class="required">*</span></label>
-        <select id="modal-province">
-          <option value="">เลือกจังหวัด</option>
-          <option>เชียงใหม่</option><option>เชียงราย</option><option>ลำปาง</option>
-          <option>ลำพูน</option><option>แม่ฮ่องสอน</option><option>พะเยา</option>
-          <option>แพร่</option><option>น่าน</option><option>อุตรดิตถ์</option>
-          <option>ตาก</option><option>สุโขทัย</option><option>พิษณุโลก</option>
-          <option>เพชรบูรณ์</option><option>กำแพงเพชร</option><option>พิจิตร</option>
-          <option>นครสวรรค์</option><option>อุทัยธานี</option><option>ชัยนาท</option>
-        </select>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>ปี พ.ศ. <span class="required">*</span></label>
+          <input type="text" id="modal-year" placeholder="ป้อนปีพ.ศ">
+        </div>
+        <div class="form-group">
+          <label>จังหวัด <span class="required">*</span></label>
+          <select id="modal-province">
+            <option value="">เลือกจังหวัด</option>
+            <option>เชียงใหม่</option><option>เชียงราย</option><option>ลำปาง</option>
+            <option>ลำพูน</option><option>แม่ฮ่องสอน</option><option>พะเยา</option>
+            <option>แพร่</option><option>น่าน</option><option>อุตรดิตถ์</option>
+            <option>ตาก</option><option>สุโขทัย</option><option>พิษณุโลก</option>
+            <option>เพชรบูรณ์</option><option>กำแพงเพชร</option><option>พิจิตร</option>
+            <option>นครสวรรค์</option><option>อุทัยธานี</option><option>ชัยนาท</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label>ลิงก์ไฟล์ PDF <span class="required">*</span></label>
-      <input type="url" id="modal-pdf" placeholder="https://...">
-      <div style="font-size:11px;color:#aaa;margin-top:4px;">วางลิงก์ URL ของไฟล์ PDF โดยตรง</div>
-    </div>
-    <div class="form-group">
-      <label>หมายเหตุ (ไม่บังคับ)</label>
-      <input type="text" id="modal-note" placeholder="รายละเอียดเพิ่มเติม">
-    </div>
 
-    <div class="pw-modal-actions">
-      <button class="btn-modal-cancel2" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn-modal-save" onclick="saveRecord()">บันทึก</button>
+      <!-- PDF DRAG & DROP ZONE -->
+      <div class="form-group">
+        <label>ไฟล์ PDF <span class="required">*</span></label>
+        <div id="pdf-dropzone" class="pdf-dropzone" onclick="document.getElementById('pdf-file-input').click()">
+          <input type="file" id="pdf-file-input" accept=".pdf,application/pdf" 
+                 style="display:none" onchange="handleFileSelect(this.files[0])">
+          
+          <!-- Default Drop Content -->
+          <div id="pdf-drop-content">
+            <div class="pdf-drop-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="3" width="18" height="24" rx="2" stroke="#1D9E75" stroke-width="1.5" fill="#E6F7F1"/>
+                <path d="M16 3v6h6" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 20v-7M13 16l3-3 3 3" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="0" y="18" width="32" height="14" rx="3" fill="#1D9E75" opacity="0.1"/>
+                <path d="M6 26h20M16 22v8" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="pdf-drop-text">ลากไฟล์ PDF มาวางที่นี่</div>
+            <div class="pdf-drop-sub">หรือคลิกเพื่อเลือกไฟล์ · รองรับเฉพาะ .pdf</div>
+          </div>
+          
+          <!-- Selected File Info -->
+          <div id="pdf-selected-info" style="display:none;" class="pdf-selected-info">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="3" y="1" width="11" height="17" rx="1.5" fill="#E6F7F1" stroke="#1D9E75" stroke-width="1.2"/>
+              <path d="M10 1v5h5" stroke="#1D9E75" stroke-width="1.2"/>
+              <path d="M6 10h8M6 13h5" stroke="#1D9E75" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+            <span id="pdf-filename" style="font-size:13px;color:#1a1a1a;font-weight:500;"></span>
+            <span id="pdf-filesize" style="font-size:11px;color:#888;"></span>
+            <button onclick="clearPdfFile(event)" 
+                    style="margin-left:auto;border:none;background:none;color:#E04031;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">
+              ×
+            </button>
+          </div>
+        </div>
+        
+        <!-- Existing PDF Link (Edit Mode) -->
+        <div id="pdf-existing-wrap" style="display:none;margin-top:6px;">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;">ไฟล์ปัจจุบัน:</div>
+          <a id="pdf-existing-link" href="#" target="_blank" 
+             style="font-size:12px;color:#185FA5;word-break:break-all;"></a>
+          <div style="font-size:11px;color:#aaa;margin-top:2px;">อัพโหลดไฟล์ใหม่เพื่อแทนที่</div>
+        </div>
+        
+        <!-- Upload Progress -->
+        <div id="pdf-upload-progress" style="display:none;margin-top:8px;">
+          <div style="font-size:12px;color:#666;margin-bottom:4px;" id="pdf-upload-label">กำลังอัพโหลด...</div>
+          <div style="background:#e8e8e8;border-radius:4px;height:6px;overflow:hidden;">
+            <div id="pdf-progress-bar" 
+                 style="height:100%;background:#1D9E75;border-radius:4px;transition:width 0.3s;width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pw-modal-actions">
+        <button class="btn-modal-cancel2" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-modal-save" id="btn-modal-save" onclick="saveRecord()">บันทึก</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- CONFIRM DELETE -->
-<div class="pw-confirm-ov" id="pw-confirm-ov">
-  <div class="pw-confirm-box">
-    <div style="font-size:32px;margin-bottom:10px;">🗑️</div>
-    <h4>ลบรายการ</h4>
-    <p id="pw-confirm-msg">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
-    <div class="pw-confirm-actions">
-      <button class="btn-modal-cancel2" style="flex:1" onclick="closeConfirm()">ยกเลิก</button>
-      <button style="flex:1;padding:9px 16px;background:#E04031;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:'Kanit',sans-serif;cursor:pointer;" onclick="confirmDelete()">ลบ</button>
+  <!-- ========== CONFIRM DELETE MODAL ========== -->
+  <div class="pw-confirm-ov" id="pw-confirm-ov">
+    <div class="pw-confirm-box">
+      <div style="font-size:32px;margin-bottom:10px;">🗑️</div>
+      <h4>ลบรายการ</h4>
+      <p id="pw-confirm-msg">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
+      <div class="pw-confirm-actions">
+        <button class="btn-modal-cancel2" style="flex:1" onclick="closeConfirm()">ยกเลิก</button>
+        <button style="flex:1;padding:9px 16px;background:#E04031;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:'Kanit',sans-serif;cursor:pointer;" 
+                onclick="confirmDelete()">
+          ลบ
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- TOAST -->
-<div class="pw-toast" id="pw-toast"></div>
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <div class="pw-toast" id="pw-toast"></div>
 
-<script>
-const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <!-- ========== JAVASCRIPT ========== -->
+  <script>
+    // ─── CONFIG ─────────────────────────────────────────────
+    const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const STORAGE_BUCKET = '4pw-pdfs';
 
-const PAGE_SIZE = 15;
-let allRecords = [];
-let filtered = [];
-let currentPage = 1;
-let pendingDeleteId = null;
-let isLoggedIn = false;
+    const PAGE_SIZE = 15;
+    let allRecords = [];
+    let filtered = [];
+    let currentPage = 1;
+    let pendingDeleteId = null;
+    let isLoggedIn = false;
+    let selectedPdfFile = null;
 
-const $ = id => document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
-// ─── AUTH ─────────────────────────────────────────────
-function updateAuthUI() {
-  const out = $('auth-logged-out'), inn = $('auth-logged-in');
-  const addWrap = $('btn-add-wrap');
-  const thActions = $('th-actions');
-  try {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      const hoursDiff = (new Date() - new Date(user.loginTime)) / (1000*60*60);
-      if (hoursDiff < 24 && user.loggedIn) {
-        out.style.display = 'none';
-        inn.style.display = 'flex';
-        const n=$('user-name'), ro=$('user-role'), av=$('user-avatar');
-        if(n) n.textContent = user.name||user.username||'ผู้ใช้';
-        if(ro) ro.textContent = user.role||'user';
-        if(av) av.textContent = (user.name||user.username||'U').charAt(0).toUpperCase();
-        isLoggedIn = true;
-        if(addWrap) addWrap.style.display = 'block';
-        if(thActions) thActions.style.display = '';
-        renderTable();
+    // ─── AUTH ─────────────────────────────────────────────
+    function updateAuthUI() {
+      const out = $('auth-logged-out'), inn = $('auth-logged-in');
+      const addWrap = $('btn-add-wrap');
+      const thActions = $('th-actions');
+      
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          const hoursDiff = (new Date() - new Date(user.loginTime)) / (1000 * 60 * 60);
+          
+          if (hoursDiff < 24 && user.loggedIn) {
+            out.style.display = 'none';
+            inn.style.display = 'flex';
+            
+            const n = $('user-name'), ro = $('user-role'), av = $('user-avatar');
+            if (n) n.textContent = user.name || user.username || 'ผู้ใช้';
+            if (ro) ro.textContent = user.role || 'user';
+            if (av) av.textContent = (user.name || user.username || 'U').charAt(0).toUpperCase();
+            
+            isLoggedIn = true;
+            if (addWrap) addWrap.style.display = 'block';
+            if (thActions) thActions.style.display = '';
+            renderTable();
+            return;
+          }
+        }
+      } catch (e) {}
+      
+      out.style.display = 'block';
+      inn.style.display = 'none';
+      isLoggedIn = false;
+      if (addWrap) addWrap.style.display = 'none';
+      if (thActions) thActions.style.display = 'none';
+      renderTable();
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('user');
+      updateAuthUI();
+      showToast('ออกจากระบบเรียบร้อย');
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    // ─── LOAD DATA ────────────────────────────────────────
+    async function loadData() {
+      const { data, error } = await db
+        .from('data_4pw')
+        .select('*')
+        .order('year', { ascending: false });
+      
+      if (error) {
+        console.error(error);
         return;
       }
+      allRecords = data || [];
+      populateFilterOptions();
+      applyFilters();
     }
-  } catch(e) {}
-  out.style.display='block'; inn.style.display='none';
-  isLoggedIn = false;
-  if(addWrap) addWrap.style.display='none';
-  if(thActions) thActions.style.display='none';
-  renderTable();
-}
 
-function handleLogout() {
-  localStorage.removeItem('user');
-  updateAuthUI();
-  showToast('ออกจากระบบเรียบร้อย');
-  setTimeout(() => location.reload(), 1000);
-}
+    function populateFilterOptions() {
+      const years = [...new Set(allRecords.map(r => r.year).filter(Boolean))].sort((a, b) => b - a);
+      const provinces = [...new Set(allRecords.map(r => r.province).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
+      
+      const ySel = $('pw-year');
+      ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + 
+        years.map(y => `<option value="${y}">${y}</option>`).join('');
+      
+      const pSel = $('pw-province');
+      pSel.innerHTML = '<option value="all">จังหวัด</option>' + 
+        provinces.map(p => `<option value="${p}">${p}</option>`).join('');
+    }
 
-// ─── LOAD DATA ────────────────────────────────────────
-async function loadData() {
-  const { data, error } = await db.from('data_4pw').select('*').order('year', { ascending: false });
-  if (error) { console.error(error); return; }
-  allRecords = data || [];
-  populateFilterOptions();
-  applyFilters();
-}
+    function applyFilters() {
+      const q = ($('pw-search').value || '').trim().toLowerCase();
+      const year = $('pw-year').value;
+      const province = $('pw-province').value;
+      
+      filtered = allRecords.filter(r => {
+        if (year !== 'all' && String(r.year) !== year) return false;
+        if (province !== 'all' && r.province !== province) return false;
+        if (q && !((r.name || '') + (r.province || '')).toLowerCase().includes(q)) return false;
+        return true;
+      });
+      
+      currentPage = 1;
+      renderTable();
+    }
 
-function populateFilterOptions() {
-  const years = [...new Set(allRecords.map(r => r.year).filter(Boolean))].sort((a,b) => b-a);
-  const provinces = [...new Set(allRecords.map(r => r.province).filter(Boolean))].sort((a,b) => a.localeCompare(b,'th'));
+    function resetFilters() {
+      $('pw-search').value = '';
+      $('pw-year').value = 'all';
+      $('pw-province').value = 'all';
+      applyFilters();
+    }
 
-  const ySel = $('pw-year');
-  ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    // ─── RENDER TABLE ─────────────────────────────────────
+    function renderTable() {
+      const tbody = $('pw-tbody');
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+      
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageData = filtered.slice(start, start + PAGE_SIZE);
 
-  const pSel = $('pw-province');
-  pSel.innerHTML = '<option value="all">จังหวัด</option>' + provinces.map(p=>`<option value="${p}">${p}</option>`).join('');
-}
+      if (!pageData.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="pw-empty">🔍 ไม่พบข้อมูล</td></tr>`;
+        $('pw-pager').style.display = 'none';
+        return;
+      }
 
-function applyFilters() {
-  const q = ($('pw-search').value||'').trim().toLowerCase();
-  const year = $('pw-year').value;
-  const province = $('pw-province').value;
+      tbody.innerHTML = pageData.map(r => `
+        <tr>
+          <td>
+            <div style="font-weight:500;color:#1a1a1a;line-height:1.4;">${escHtml(r.name || '(ไม่มีชื่อ)')}</div>
+            ${r.note ? `<div style="font-size:11px;color:#aaa;margin-top:2px;">${escHtml(r.note)}</div>` : ''}
+          </td>
+          <td><span class="badge-year">${r.year || '—'}</span></td>
+          <td><span class="badge-prov">${escHtml(r.province || '—')}</span></td>
+          <td>
+            ${r.pdf_url
+              ? `<a class="btn-download" href="${r.pdf_url}" target="_blank">
+                   <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                     <path d="M7 2v7M4 7l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                     <path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                   </svg>
+                   ดาวน์โหลด
+                 </a>`
+              : `<span style="font-size:12px;color:#ccc;">ไม่มีไฟล์</span>`}
+          </td>
+          <td style="${isLoggedIn ? '' : 'display:none'}">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn-edit" onclick="openEditModal(${r.id})">✏️ แก้ไข</button>
+              <button class="btn-del" onclick="openDeleteConfirm(${r.id},'${escHtml(r.name || '')}')">🗑️ ลบ</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
 
-  filtered = allRecords.filter(r => {
-    if (year !== 'all' && String(r.year) !== year) return false;
-    if (province !== 'all' && r.province !== province) return false;
-    if (q && !((r.name||'')+(r.province||'')).toLowerCase().includes(q)) return false;
-    return true;
-  });
-  currentPage = 1;
-  renderTable();
-}
+      const pager = $('pw-pager');
+      $('pw-pager-info').textContent = `แสดง ${start + 1}–${Math.min(start + PAGE_SIZE, total)} จาก ${total} รายการ`;
+      $('pw-prev').disabled = currentPage <= 1;
+      $('pw-next').disabled = currentPage >= totalPages;
+      pager.style.display = totalPages > 1 ? 'flex' : 'none';
+    }
 
-function resetFilters() {
-  $('pw-search').value = '';
-  $('pw-year').value = 'all';
-  $('pw-province').value = 'all';
-  applyFilters();
-}
+    function changePage(dir) {
+      currentPage += dir;
+      renderTable();
+    }
 
-// ─── RENDER TABLE ─────────────────────────────────────
-function renderTable() {
-  const tbody = $('pw-tbody');
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
-  if (currentPage > totalPages) currentPage = totalPages;
-  const start = (currentPage-1)*PAGE_SIZE;
-  const pageData = filtered.slice(start, start+PAGE_SIZE);
+    // ─── PDF FILE HANDLING ────────────────────────────────
+    function handleFileSelect(file) {
+      if (!file) return;
+      
+      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        showToast('กรุณาเลือกเฉพาะไฟล์ .pdf', true);
+        return;
+      }
+      
+      if (file.size > 50 * 1024 * 1024) {
+        showToast('ไฟล์ขนาดใหญ่เกินไป (สูงสุด 50MB)', true);
+        return;
+      }
+      
+      selectedPdfFile = file;
+      $('pdf-drop-content').style.display = 'none';
+      
+      const info = $('pdf-selected-info');
+      info.style.display = 'flex';
+      $('pdf-filename').textContent = file.name;
+      $('pdf-filesize').textContent = formatFileSize(file.size);
+    }
 
-  if (!pageData.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="pw-empty">🔍 ไม่พบข้อมูล</td></tr>`;
-    $('pw-pager').style.display = 'none';
-    return;
-  }
+    function clearPdfFile(e) {
+      e.stopPropagation();
+      selectedPdfFile = null;
+      $('pdf-file-input').value = '';
+      $('pdf-drop-content').style.display = '';
+      $('pdf-selected-info').style.display = 'none';
+    }
 
-  tbody.innerHTML = pageData.map(r => `
-    <tr>
-      <td>
-        <div style="font-weight:500;color:#1a1a1a;line-height:1.4;">${escHtml(r.name||'(ไม่มีชื่อ)')}</div>
-        ${r.note ? `<div style="font-size:11px;color:#aaa;margin-top:2px;">${escHtml(r.note)}</div>` : ''}
-      </td>
-      <td><span class="badge-year">${r.year||'—'}</span></td>
-      <td><span class="badge-prov">${escHtml(r.province||'—')}</span></td>
-      <td>
-        ${r.pdf_url
-          ? `<a class="btn-download" href="${r.pdf_url}" target="_blank">
-               <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 7l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-               ดาวน์โหลด
-             </a>`
-          : `<span style="font-size:12px;color:#ccc;">ไม่มีไฟล์</span>`}
-      </td>
-      <td style="${isLoggedIn ? '' : 'display:none'}">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn-edit" onclick="openEditModal(${r.id})">✏️ แก้ไข</button>
-          <button class="btn-del" onclick="openDeleteConfirm(${r.id},'${escHtml(r.name||'')}')">🗑️ ลบ</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
 
-  const pager = $('pw-pager');
-  $('pw-pager-info').textContent = `แสดง ${start+1}–${Math.min(start+PAGE_SIZE, total)} จาก ${total} รายการ`;
-  $('pw-prev').disabled = currentPage <= 1;
-  $('pw-next').disabled = currentPage >= totalPages;
-  pager.style.display = totalPages > 1 ? 'flex' : 'none';
-}
+    function setupDropzone() {
+      const zone = $('pdf-dropzone');
+      if (!zone) return;
+      
+      zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        zone.classList.add('drag-over');
+      });
+      
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+      
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelect(file);
+      });
+    }
 
-function changePage(dir) {
-  currentPage += dir;
-  renderTable();
-}
+    // ─── UPLOAD PDF TO SUPABASE STORAGE ──────────────────
+    async function uploadPdf(file) {
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+      const path = `${timestamp}_${safeName}`;
 
-// ─── ADD / EDIT MODAL ─────────────────────────────────
-function openAddModal() {
-  $('pw-modal-title').textContent = 'เพิ่มข้อมูล 4PW';
-  $('modal-id').value = '';
-  $('modal-name').value = '';
-  $('modal-year').value = '';
-  $('modal-province').value = '';
-  $('modal-pdf').value = '';
-  $('modal-note').value = '';
-  $('pw-modal-ov').classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
+      $('pdf-upload-progress').style.display = 'block';
+      $('pdf-upload-label').textContent = 'กำลังอัพโหลด...';
+      $('pdf-progress-bar').style.width = '30%';
 
-function openEditModal(id) {
-  const r = allRecords.find(x => x.id === id);
-  if (!r) return;
-  $('pw-modal-title').textContent = 'แก้ไขข้อมูล 4PW';
-  $('modal-id').value = r.id;
-  $('modal-name').value = r.name||'';
-  $('modal-year').value = r.year||'';
-  $('modal-province').value = r.province||'';
-  $('modal-pdf').value = r.pdf_url||'';
-  $('modal-note').value = r.note||'';
-  $('pw-modal-ov').classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
+      const { data, error } = await db.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, file, {
+          contentType: 'application/pdf',
+          upsert: false
+        });
 
-function closeModal() {
-  $('pw-modal-ov').classList.remove('show');
-  document.body.style.overflow = '';
-}
+      if (error) {
+        $('pdf-upload-progress').style.display = 'none';
+        throw error;
+      }
 
-async function saveRecord() {
-  const id = $('modal-id').value;
-  const name = $('modal-name').value.trim();
-  const year = parseInt($('modal-year').value);
-  const province = $('modal-province').value;
-  const pdf_url = $('modal-pdf').value.trim();
-  const note = $('modal-note').value.trim();
+      $('pdf-progress-bar').style.width = '80%';
 
-  if (!name || !year || !province || !pdf_url) {
-    showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true); return;
-  }
+      const { data: urlData } = db.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(path);
 
-  const payload = { name, year, province, pdf_url, note: note||null };
+      $('pdf-progress-bar').style.width = '100%';
+      $('pdf-upload-label').textContent = 'อัพโหลดสำเร็จ ✓';
 
-  let error;
-  if (id) {
-    ({ error } = await db.from('data_4pw').update(payload).eq('id', id));
-  } else {
-    payload.created_at = new Date().toISOString();
-    ({ error } = await db.from('data_4pw').insert([payload]));
-  }
+      return urlData.publicUrl;
+    }
 
-  if (error) { showToast('เกิดข้อผิดพลาด: '+error.message, true); return; }
-  showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
-  closeModal();
-  await loadData();
-}
+    // ─── ADD / EDIT MODAL ─────────────────────────────────
+    function resetPdfZone() {
+      selectedPdfFile = null;
+      if ($('pdf-file-input')) $('pdf-file-input').value = '';
+      if ($('pdf-drop-content')) $('pdf-drop-content').style.display = '';
+      if ($('pdf-selected-info')) $('pdf-selected-info').style.display = 'none';
+      if ($('pdf-upload-progress')) $('pdf-upload-progress').style.display = 'none';
+      if ($('pdf-progress-bar')) $('pdf-progress-bar').style.width = '0%';
+      if ($('pdf-existing-wrap')) $('pdf-existing-wrap').style.display = 'none';
+    }
 
-// ─── DELETE ───────────────────────────────────────────
-function openDeleteConfirm(id, name) {
-  pendingDeleteId = id;
-  $('pw-confirm-msg').textContent = `คุณต้องการลบ "${name}" ใช่หรือไม่?`;
-  $('pw-confirm-ov').classList.add('show');
-}
+    function openAddModal() {
+      $('pw-modal-title').textContent = 'เพิ่มข้อมูล 4PW';
+      $('modal-id').value = '';
+      $('modal-name').value = '';
+      $('modal-year').value = '';
+      $('modal-province').value = '';
+      resetPdfZone();
+      $('pw-modal-ov').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
 
-function closeConfirm() {
-  $('pw-confirm-ov').classList.remove('show');
-  pendingDeleteId = null;
-}
+    function openEditModal(id) {
+      const r = allRecords.find(x => x.id === id);
+      if (!r) return;
+      
+      $('pw-modal-title').textContent = 'แก้ไขข้อมูล 4PW';
+      $('modal-id').value = r.id;
+      $('modal-name').value = r.name || '';
+      $('modal-year').value = r.year || '';
+      $('modal-province').value = r.province || '';
+      resetPdfZone();
+      
+      if (r.pdf_url) {
+        $('pdf-existing-wrap').style.display = 'block';
+        $('pdf-existing-link').href = r.pdf_url;
+        $('pdf-existing-link').textContent = r.pdf_url.split('/').pop() || r.pdf_url;
+      }
+      
+      $('pw-modal-ov').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
 
-async function confirmDelete() {
-  if (!pendingDeleteId) return;
-  const { error } = await db.from('data_4pw').delete().eq('id', pendingDeleteId);
-  if (error) { showToast('เกิดข้อผิดพลาด: '+error.message, true); return; }
-  showToast('🗑️ ลบข้อมูลเรียบร้อย');
-  closeConfirm();
-  await loadData();
-}
+    function closeModal() {
+      $('pw-modal-ov').classList.remove('show');
+      document.body.style.overflow = '';
+      resetPdfZone();
+    }
 
-// ─── HELPERS ──────────────────────────────────────────
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+    async function saveRecord() {
+      const id = $('modal-id').value;
+      const name = $('modal-name').value.trim();
+      const year = parseInt($('modal-year').value);
+      const province = $('modal-province').value;
 
-let toastTimer;
-function showToast(msg, isError=false) {
-  const t = $('pw-toast');
-  t.textContent = msg;
-  t.style.borderLeftColor = isError ? '#E04031' : '#1D9E75';
-  t.style.display = 'block';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.style.display='none'; }, 3000);
-}
+      if (!name || !year || !province) {
+        showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
+        return;
+      }
 
-function toggleHiaMenu(e) {
-  e.stopPropagation(); e.preventDefault();
-  document.getElementById('hia-submenu').classList.toggle('show');
-  e.currentTarget.classList.toggle('active');
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.nav-dropdown')) {
-    document.getElementById('hia-submenu')?.classList.remove('show');
-  }
-});
+      if (!id && !selectedPdfFile) {
+        showToast('กรุณาเลือกไฟล์ PDF', true);
+        return;
+      }
 
-// ─── INIT ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  updateAuthUI();
-  await loadData();
+      const saveBtn = $('btn-modal-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'กำลังบันทึก...';
 
-  $('pw-modal-ov').addEventListener('click', e => { if(e.target === $('pw-modal-ov')) closeModal(); });
-  $('pw-confirm-ov').addEventListener('click', e => { if(e.target === $('pw-confirm-ov')) closeConfirm(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeConfirm(); }
-  });
-});
-</script>
+      try {
+        let pdf_url = null;
+
+        if (selectedPdfFile) {
+          pdf_url = await uploadPdf(selectedPdfFile);
+        }
+
+        const payload = { name, year, province, note: note || null };
+        if (pdf_url) payload.pdf_url = pdf_url;
+
+        let error;
+        if (id) {
+          ({ error } = await db.from('data_4pw').update(payload).eq('id', id));
+        } else {
+          payload.created_at = new Date().toISOString();
+          ({ error } = await db.from('data_4pw').insert([payload]));
+        }
+
+        if (error) {
+          showToast('เกิดข้อผิดพลาด: ' + error.message, true);
+          return;
+        }
+        
+        showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
+        closeModal();
+        await loadData();
+
+      } catch (err) {
+        showToast('อัพโหลดไฟล์ไม่สำเร็จ: ' + (err.message || 'ลองใหม่อีกครั้ง'), true);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'บันทึก';
+        $('pdf-upload-progress').style.display = 'none';
+      }
+    }
+
+    // ─── DELETE ───────────────────────────────────────────
+    function openDeleteConfirm(id, name) {
+      pendingDeleteId = id;
+      $('pw-confirm-msg').textContent = `คุณต้องการลบ "${name}" ใช่หรือไม่?`;
+      $('pw-confirm-ov').classList.add('show');
+    }
+
+    function closeConfirm() {
+      $('pw-confirm-ov').classList.remove('show');
+      pendingDeleteId = null;
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+      
+      const { error } = await db.from('data_4pw').delete().eq('id', pendingDeleteId);
+      
+      if (error) {
+        showToast('เกิดข้อผิดพลาด: ' + error.message, true);
+        return;
+      }
+      
+      showToast('🗑️ ลบข้อมูลเรียบร้อย');
+      closeConfirm();
+      await loadData();
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    let toastTimer;
+    function showToast(msg, isError = false) {
+      const t = $('pw-toast');
+      t.textContent = msg;
+      t.style.borderLeftColor = isError ? '#E04031' : '#1D9E75';
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function toggleHiaMenu(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      document.getElementById('hia-submenu').classList.toggle('show');
+      e.currentTarget.classList.toggle('active');
+    }
+    
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.getElementById('hia-submenu')?.classList.remove('show');
+      }
+    });
+
+    // ─── INIT ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      updateAuthUI();
+      await loadData();
+      setupDropzone();
+
+      $('pw-modal-ov').addEventListener('click', e => {
+        if (e.target === $('pw-modal-ov')) closeModal();
+      });
+      
+      $('pw-confirm-ov').addEventListener('click', e => {
+        if (e.target === $('pw-confirm-ov')) closeConfirm();
+      });
+      
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeModal();
+          closeConfirm();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
