@@ -587,36 +587,53 @@
     }
 
     async function saveRecord() {
-      const id = $('modal-id').value;
-      const name = $('modal-name').value.trim();
-      const year = parseInt($('modal-year').value);
-      const province = $('modal-province').value.trim();
+        const id = $('modal-id').value;
+        const name = $('modal-name').value.trim();
+        const year = parseInt($('modal-year').value);
+        const province = $('modal-province').value.trim();
 
-      if (!name || !year || !province) {
-        showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
+        if (!name || !year || !province) {
+            showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
         return;
-      }
+        }
 
-      if (!id && !selectedPdfFile) {
-        showToast('กรุณาเลือกไฟล์ PDF', true);
+        if (!id && !selectedPdfFile) {
+            showToast('กรุณาเลือกไฟล์ PDF', true);
         return;
-      }
+        }
 
-      const saveBtn = $('btn-modal-save');
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'กำลังบันทึก...';
+        const saveBtn = $('btn-modal-save');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'กำลังบันทึก...';
 
-  try {
-    let pdf_url = null;
+        try {
+            let pdf_url = null;
 
-    if (selectedPdfFile) {
-      // ✅ ตรวจสอบก่อนอัพโหลด
-      if (!STORAGE_BUCKET || STORAGE_BUCKET.trim() === '') {
-        throw new Error('❌ ไม่ได้ตั้งค่า STORAGE_BUCKET');
-      }
-      
-      pdf_url = await uploadPdf(selectedPdfFile);
-    }
+            if (selectedPdfFile) {
+                if (!STORAGE_BUCKET || STORAGE_BUCKET.trim() === '') {
+                    throw new Error('❌ ไม่ได้ตั้งค่า STORAGE_BUCKET');
+                }
+
+                // ถ้าเป็นการแก้ไข และมีไฟล์เก่า → ลบไฟล์เก่าก่อน
+                if (id) {
+                    const oldRecord = allRecords.find(r => r.id === parseInt(id));
+                    if (oldRecord?.pdf_url) {
+                        try {
+                            const oldFileName = oldRecord.pdf_url.split('/').pop();
+                            const { error: delErr } = await db.storage
+                                .from(STORAGE_BUCKET)
+                                .remove([oldFileName]);
+                                if (delErr) {
+                                    console.warn('ลบไฟล์เก่าไม่สำเร็จ:', delErr.message);
+                                }
+                            } catch (e) {
+                                console.warn('Storage delete old file error:', e);
+                            }
+                        }
+                    }
+                // อัพโหลดไฟล์ใหม่
+                pdf_url = await uploadPdf(selectedPdfFile);
+            }
 
     const payload = { name, year, province };
     if (pdf_url) payload.pdf_url = pdf_url;
@@ -633,7 +650,7 @@
       showToast('เกิดข้อผิดพลาด: ' + error.message, true);
       return;
     }
-    
+
     showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
     closeModal();
     await loadData();
