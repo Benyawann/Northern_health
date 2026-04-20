@@ -149,18 +149,12 @@
           <input type="text" id="modal-year" placeholder="ป้อนปีพ.ศ">
         </div>
         <div class="form-group">
-          <label>จังหวัด <span class="required">*</span></label>
-          <select id="modal-province">
-            <option value="">เลือกจังหวัด</option>
-            <option>เชียงใหม่</option><option>เชียงราย</option><option>ลำปาง</option>
-            <option>ลำพูน</option><option>แม่ฮ่องสอน</option><option>พะเยา</option>
-            <option>แพร่</option><option>น่าน</option><option>อุตรดิตถ์</option>
-            <option>ตาก</option><option>สุโขทัย</option><option>พิษณุโลก</option>
-            <option>เพชรบูรณ์</option><option>กำแพงเพชร</option><option>พิจิตร</option>
-            <option>นครสวรรค์</option><option>อุทัยธานี</option><option>ชัยนาท</option>
-          </select>
+            <label>จังหวัด <span class="required">*</span></label>
+            <input type="text" id="modal-province" placeholder="พิมพ์ชื่อจังหวัด" 
+                list="province-suggestions" autocomplete="off">
         </div>
       </div>
+
 
       <!-- PDF DRAG & DROP ZONE -->
       <div class="form-group">
@@ -250,7 +244,7 @@
     const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const STORAGE_BUCKET = '4pw-pdfs';
+    const STORAGE_BUCKET = '4pw-pdf';
 
     const PAGE_SIZE = 15;
     let allRecords = [];
@@ -473,36 +467,74 @@
 
     // ─── UPLOAD PDF TO SUPABASE STORAGE ──────────────────
     async function uploadPdf(file) {
-      const timestamp = Date.now();
-      const safeName = file.name.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
-      const path = `${timestamp}_${safeName}`;
+        try {
+            const timestamp = Date.now();
+            // ✅ ลบอักขระพิเศษทั้งหมดที่ไม่ปลอดภัย
+            const safeName = file.name
+                .normalize('NFD')                          
+                .replace(/[\u0E00-\u0E7F]/g, '')          
+                .replace(/[^a-zA-Z0-9._-]/g, '_')         
+                .replace(/\s+/g, '_')                     
+                .replace(/_+/g, '_')                      
+                .toLowerCase()
+                .slice(0, 100); 
+    
+            const path = `${timestamp}_${safeName}`;
 
-      $('pdf-upload-progress').style.display = 'block';
-      $('pdf-upload-label').textContent = 'กำลังอัพโหลด...';
-      $('pdf-progress-bar').style.width = '30%';
+            // แสดงความคืบหน้า
+            $('pdf-upload-progress').style.display = 'block';
+            $('pdf-upload-label').textContent = 'กำลังอัพโหลด...';
+            $('pdf-progress-bar').style.width = '30%';
 
-      const { data, error } = await db.storage
-        .from(STORAGE_BUCKET)
-        .upload(path, file, {
-          contentType: 'application/pdf',
-          upsert: false
-        });
+            // ✅ อัพโหลดไฟล์
+            const { data, error } = await db.storage
+              .from(STORAGE_BUCKET)
+              .upload(path, file, {
+                contentType: 'application/pdf',
+                upsert: false,
+                cacheControl: '3600'
+              });
 
-      if (error) {
-        $('pdf-upload-progress').style.display = 'none';
-        throw error;
-      }
+            if (error) {
+              console.error('Upload error:', error);
+              $('pdf-upload-progress').style.display = 'none';
+              
+              let errorMsg = error.message || 'อัพโหลดไม่สำเร็จ';
+              if (error.statusCode === '400') {
+                errorMsg = '❌ ชื่อไฟล์ไม่ถูกต้อง หรือ Bucket ไม่รองรับ';
+              } else if (error.statusCode === '401') {
+                errorMsg = '❌ ไม่มีสิทธิ์อัพโหลด (ตรวจสอบ Policy)';
+              } else if (error.statusCode === '413') {
+                errorMsg = '❌ ไฟล์ใหญ่เกินไป';
+              }
+              
+              throw new Error(errorMsg);
+            }
 
-      $('pdf-progress-bar').style.width = '80%';
+            $('pdf-progress-bar').style.width = '80%';
 
-      const { data: urlData } = db.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(path);
+            // ✅ แก้ไขตรงนี้: ใช้ 'data' แทน 'urlData'
+            const { data: urlData } = db.storage
+              .from(STORAGE_BUCKET)
+              .getPublicUrl(path);
 
-      $('pdf-progress-bar').style.width = '100%';
-      $('pdf-upload-label').textContent = 'อัพโหลดสำเร็จ ✓';
+              console.log('PDF URL:', urlData.publicUrl);
 
-      return urlData.publicUrl;
+            // ตรวจสอบให้แน่ใจว่ามี publicUrl จริงๆ
+            if (!urlData || !urlData.publicUrl) {
+              console.error('Public URL Data:', urlData); // สำหรับ Debug
+              throw new Error('ไม่สามารถสร้างลิงก์ดาวน์โหลดได้ (ตรวจสอบชื่อ Bucket และ Policy)');
+            }
+
+            $('pdf-progress-bar').style.width = '100%';
+            $('pdf-upload-label').textContent = '✅ อัพโหลดสำเร็จ';
+
+            return urlData.publicUrl;
+
+          } catch (err) {
+            console.error('Upload failed:', err);
+            throw err; 
+          }
     }
 
     // ─── ADD / EDIT MODAL ─────────────────────────────────
@@ -558,7 +590,7 @@
       const id = $('modal-id').value;
       const name = $('modal-name').value.trim();
       const year = parseInt($('modal-year').value);
-      const province = $('modal-province').value;
+      const province = $('modal-province').value.trim();
 
       if (!name || !year || !province) {
         showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
@@ -571,44 +603,50 @@
       }
 
       const saveBtn = $('btn-modal-save');
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'กำลังบันทึก...';
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'กำลังบันทึก...';
 
-      try {
-        let pdf_url = null;
+  try {
+    let pdf_url = null;
 
-        if (selectedPdfFile) {
-          pdf_url = await uploadPdf(selectedPdfFile);
-        }
-
-        const payload = { name, year, province, note: note || null };
-        if (pdf_url) payload.pdf_url = pdf_url;
-
-        let error;
-        if (id) {
-          ({ error } = await db.from('data_4pw').update(payload).eq('id', id));
-        } else {
-          payload.created_at = new Date().toISOString();
-          ({ error } = await db.from('data_4pw').insert([payload]));
-        }
-
-        if (error) {
-          showToast('เกิดข้อผิดพลาด: ' + error.message, true);
-          return;
-        }
-        
-        showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
-        closeModal();
-        await loadData();
-
-      } catch (err) {
-        showToast('อัพโหลดไฟล์ไม่สำเร็จ: ' + (err.message || 'ลองใหม่อีกครั้ง'), true);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'บันทึก';
-        $('pdf-upload-progress').style.display = 'none';
+    if (selectedPdfFile) {
+      // ✅ ตรวจสอบก่อนอัพโหลด
+      if (!STORAGE_BUCKET || STORAGE_BUCKET.trim() === '') {
+        throw new Error('❌ ไม่ได้ตั้งค่า STORAGE_BUCKET');
       }
+      
+      pdf_url = await uploadPdf(selectedPdfFile);
     }
+
+    const payload = { name, year, province };
+    if (pdf_url) payload.pdf_url = pdf_url;
+
+    let error;
+    if (id) {
+      ({ error } = await db.from('data_4pw').update(payload).eq('id', id));
+    } else {
+      ({ error } = await db.from('data_4pw').insert([payload]));
+    }
+
+    if (error) {
+      console.error('Database error:', error);
+      showToast('เกิดข้อผิดพลาด: ' + error.message, true);
+      return;
+    }
+    
+    showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
+    closeModal();
+    await loadData();
+
+  } catch (err) {
+    console.error('Save error:', err);
+    showToast('❌ ' + (err.message || 'เกิดข้อผิดพลาดที่ไม่คาดคิด'), true);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'บันทึก';
+    $('pdf-upload-progress').style.display = 'none';
+  }
+}
 
     // ─── DELETE ───────────────────────────────────────────
     function openDeleteConfirm(id, name) {

@@ -3991,6 +3991,14 @@ tr:hover td {
 .btn-modal-save { padding:9px 20px; background:#1D9E75; color:#fff; border:none; border-radius:8px; font-size:13px; font-family:'Kanit',sans-serif; cursor:pointer; }
 .btn-modal-save:hover { background:#0F6E56; }
 .btn-modal-cancel2 { padding:9px 16px; background:#f0f0ec; color:#555; border:none; border-radius:8px; font-size:13px; font-family:'Kanit',sans-serif; cursor:pointer; }
+/* เพิ่มในไฟล์ style.css หรือใน <style> */
+
+
+/* Datalist styling */
+#province-suggestions {
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+}
 
 /* CONFIRM DELETE */
 .pw-confirm-ov { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9100; display:none; align-items:center; justify-content:center; padding:16px; }
