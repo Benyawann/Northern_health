@@ -1093,20 +1093,43 @@ function closeDelRecord() {
  
 async function confirmDelRecord() {
   if (!pendingDelRecordId) return;
+
+  // หา record เพื่อเอา pdf_url และ image_url มาลบไฟล์
+  const record = allCharters.find(r => r.id == pendingDelRecordId);
+
+  // ลบไฟล์จาก Storage ก่อน
+  if (record?.pdf_url) {
+    try {
+      const fileName = record.pdf_url.split('/').pop();
+      await db.storage.from('charter-pdfs').remove([fileName]);
+    } catch(e) {
+      console.warn('ลบ PDF ไม่สำเร็จ:', e);
+    }
+  }
+
+  if (record?.image_url) {
+    try {
+      const fileName = record.image_url.split('/').pop();
+      await db.storage.from('charter-images').remove([fileName]);
+    } catch(e) {
+      console.warn('ลบรูปภาพไม่สำเร็จ:', e);
+    }
+  }
+
+  // ลบ record จาก database
   const { error } = await db.from('data_charter').delete().eq('id', pendingDelRecordId);
-  if (error) { showToast('ลบไม่สำเร็จ: '+error.message,'','error'); return; }
- 
-  showToast('🗑️ ลบข้อมูลเรียบร้อย','','success');
+  if (error) { 
+    showToast('ลบไม่สำเร็จ: ' + error.message, '', 'error'); 
+    return; 
+  }
+
+  showToast('🗑️ ลบข้อมูลเรียบร้อย', '', 'success');
   closeDelRecord();
- 
-  // ลบออกจาก modalAllRows และ allCharters
-  modalAllRows = modalAllRows.filter(r => r.id != pendingDelRecordId);
-  allCharters = allCharters.filter(r => r.id != pendingDelRecordId);
-  filteredCharters = filteredCharters.filter(r => r.id != pendingDelRecordId);
-  renderModalRows(modalAllRows);
+  closeMapModal();
+
+  // รีเซ็ตและโหลดข้อมูลใหม่
+  await loadData();
   renderAll();
- 
-  if (modalAllRows.length === 0) closeMapModal();
 }
 
 function closeMapModal() {
