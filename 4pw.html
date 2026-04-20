@@ -661,18 +661,42 @@
     }
 
     async function confirmDelete() {
-      if (!pendingDeleteId) return;
+        if (!pendingDeleteId) return;
+  
+        // หา record ที่จะลบ เพื่อเอา pdf_url มาลบไฟล์ด้วย
+        const record = allRecords.find(r => r.id === pendingDeleteId);
+  
+        // ลบไฟล์จาก Storage ก่อน (ถ้ามี)
+        if (record?.pdf_url) {
+            try {
+                // ดึงชื่อไฟล์จาก URL
+                const urlParts = record.pdf_url.split('/');
+                const fileName = urlParts[urlParts.length - 1];
       
-      const { error } = await db.from('data_4pw').delete().eq('id', pendingDeleteId);
+                const { error: storageError } = await db.storage
+                    .from(STORAGE_BUCKET)
+                    .remove([fileName]);
       
-      if (error) {
-        showToast('เกิดข้อผิดพลาด: ' + error.message, true);
-        return;
-      }
-      
-      showToast('🗑️ ลบข้อมูลเรียบร้อย');
-      closeConfirm();
-      await loadData();
+                if (storageError) {
+                    console.warn('ลบไฟล์จาก Storage ไม่สำเร็จ:', storageError.message);
+                    // ไม่ return ออก ยังลบ record ต่อได้
+                }
+            } catch (e) {
+                console.warn('Storage delete error:', e);
+            }
+        }
+  
+        // ลบ record จาก database
+        const { error } = await db.from('data_4pw').delete().eq('id', pendingDeleteId);
+  
+        if (error) {
+            showToast('เกิดข้อผิดพลาด: ' + error.message, true);
+            return;
+        }
+  
+        showToast('🗑️ ลบข้อมูลเรียบร้อย');
+        closeConfirm();
+        await loadData();
     }
 
     // ─── HELPERS ──────────────────────────────────────────
