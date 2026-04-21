@@ -12,7 +12,6 @@ body {
     background: #f5f4f0; 
     color: #1a1a1a; 
     font-size: 14px;
-    /* ✅ ป้องกันการเลื่อนของ body */
     overflow: auto;
     height: 100vh;
 }
@@ -50,6 +49,41 @@ body {
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; }
 
     body { background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+
+    /* ===================================================
+       ลบสีฟ้า autofill ของ Chrome/Safari/Edge ทุกช่อง
+       =================================================== */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+      box-shadow: 0 0 0 1000px #ffffff inset !important;
+      -webkit-text-fill-color: #1a1a1a !important;
+      background-color: #ffffff !important;
+      transition: background-color 99999s ease-in-out 0s;
+    }
+
+    /* ลบ outline สีฟ้าของ browser ทุกช่อง */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-input:focus-visible,
+    .form-select:focus-visible,
+    .form-textarea:focus-visible {
+      outline: none;
+    }
 
     .topnav {
       background: #fff;
@@ -213,12 +247,18 @@ body {
       color: var(--text);
       background: white;
       outline: none;
+      -webkit-appearance: none;
+      appearance: none;
       transition: border-color 0.15s, box-shadow 0.15s;
       width: 100%;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--green);
       box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+      outline: none;
+    }
+    .form-input:focus-visible, .form-select:focus-visible, .form-textarea:focus-visible {
+      outline: none;
     }
     .form-input::placeholder { color: #bbb; }
     .form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
@@ -338,6 +378,7 @@ body {
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
+      outline: none;
     }
     .btn-cancel:hover { background: var(--bg); }
 
@@ -356,6 +397,7 @@ body {
       align-items: center;
       gap: 6px;
       box-shadow: 0 2px 8px rgba(29,158,117,0.3);
+      outline: none;
     }
     .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(29,158,117,0.4); }
     .btn-save:active { transform: translateY(0); }
