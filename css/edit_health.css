@@ -320,21 +320,6 @@ body {
     .form-select.changed ~ .changed-badge,
     .form-textarea.changed ~ .changed-badge { display: inline; }
 
-    /* ── UNSAVED BAR ── */
-    .unsaved-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: white;
-      border-top: 1px solid var(--border-solid);
-      padding: 12px 24px;
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
-      z-index: 200;
-      gap: 12px;
-    }
-    .unsaved-bar.show { display: flex; }
     .unsaved-text { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
     .unsaved-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); animation: pulse 1.5s ease infinite; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
