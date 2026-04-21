@@ -1282,14 +1282,16 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// ✅ Toggle เมนูมือถือ
 function toggleMobileMenu() {
   const menu = document.getElementById('topnav-links');
-  const btn = document.getElementById('mobile-toggle');
-  
+  const btn  = document.getElementById('mobile-toggle');
+  const right = document.querySelector('.topnav-right');
+
   if (menu && btn) {
     menu.classList.toggle('active');
-    btn.classList.toggle('active'); // เพื่อเปลี่ยนรูปปุ่มเป็นกากบาท
+    btn.classList.toggle('active');
+    // ใช้ class แทน style เพื่อชนะ !important ใน CSS
+    if (right) right.classList.toggle('menu-open', menu.classList.contains('active'));
   }
 }
 
@@ -1392,13 +1394,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ✅ ปิดเมนูเมื่อเปลี่ยนขนาดหน้าจอ (ป้องกันเมนูค้าง)
 window.addEventListener('resize', () => {
   if (window.innerWidth > 768) {
-    const menu = document.getElementById('topnav-links');
-    const btn = document.getElementById('mobile-toggle');
-    if (menu) menu.classList.remove('active');
-    if (btn) btn.classList.remove('active');
+    const menu  = document.getElementById('topnav-links');
+    const btn   = document.getElementById('mobile-toggle');
+    const right = document.querySelector('.topnav-right');
+    if (menu)  menu.classList.remove('active');
+    if (btn)   btn.classList.remove('active');
+    if (right) right.classList.remove('menu-open');
   }
 });
 </script>

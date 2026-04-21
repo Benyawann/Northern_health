@@ -4165,166 +4165,33 @@ tr:hover td {
   color: var(--muted, #aaa);
 }
 
+/* ========== RESPONSIVE FOOTER ========== */
 @media (max-width: 768px) {
   .site-footer {
     height: auto;
-    padding: 16px; /* ✅ เพิ่มระยะรอบข้างให้สม่ำเสมอ */
+    padding: 10px 16px;
     flex-direction: column;
-    align-items: flex-start; /* ✅ ชิดซ้ายทั้งหมด */
-    gap: 12px; /* ✅ ระยะห่างระหว่างแต่ละบรรทัด */
+    align-items: flex-start;
+    gap: 8px;
   }
   
   .footer-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    width: 100%;
+    gap: 8px;
   }
   
   .footer-content {
-    flex-direction: column; /* ✅ ซ้อนแนวตั้ง: องค์กร -> ติดต่อ */
-    align-items: flex-start;
-    gap: 8px;
-    width: 100%;
-  }
-  
-  /* ✅ แยก "ผู้พัฒนา", "อีเมล", "โทร" ให้คนละบรรทัด */
-  .footer-contact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    width: 100%;
-    font-size: 11px;
-  }
-  
-  .footer-divider {
-    display: none; /* ✅ ซ่อนเส้นคั่นแนวตั้งในมือถือ */
+    flex-wrap: wrap;
+    gap: 8px 16px;
   }
   
   .footer-copyright {
     margin-left: 0;
     width: 100%;
     text-align: left;
-    border-top: 1px solid var(--border); /* ✅ เส้นคั่นก่อนลิขสิทธิ์ */
-    padding-top: 12px;
-    font-size: 11px;
-    color: var(--muted, #aaa);
-  }
-}
-
-/* ── modal-box: เต็มความสูงบนมือถือ ── */
-@media (max-width: 768px) {
-  .modal-ov {
-    padding: 0;
-    align-items: flex-end;         /* ดันขึ้นมาจากขอบล่าง */
-  }
- 
-  .modal-box {
-    max-width: 100%;
-    width: 100%;
-    max-height: 92vh;
-    border-radius: 20px 20px 0 0;  /* โค้งแค่ด้านบน */
-  }
- 
-  /* ── modal header ── */
-  .modal-header {
-    padding: 14px 16px;
-  }
- 
-  /* ── modal search bar ── */
-  .modal-search-bar {
-    padding: 8px 16px;
-  }
- 
-  /* ── modal body ── */
-  .modal-body {
-    padding: 10px 14px 12px;
-  }
- 
-  /* ── modal footer ── */
-  .modal-footer {
-    padding: 10px 14px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
- 
-  .modal-footer .btn-sm {
-    min-height: 40px;
-    padding: 8px 20px;
-    font-size: 13px;
-  }
- 
-  /* ── charter card ── */
-  .charter-card {
-    flex-direction: row;           /* คงแนวนอน image+body */
-    gap: 10px;
-    padding: 10px;
-  }
- 
-  .charter-card-img {
-    width: 48px;
-    height: 60px;
-    flex-shrink: 0;
-  }
- 
-  .charter-card-title {
-    font-size: 12px;
-    word-break: break-word;
-    white-space: normal;
-  }
- 
-  .charter-card-meta {
-    font-size: 11px;
-  }
- 
-  /* ── action buttons: wrap ให้เต็มแถว ── */
-  .charter-card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
- 
-  .charter-card-actions .btn-sm,
-  .charter-card-actions .btn-edit-modal,
-  .charter-card-actions .btn-del-modal {
-    flex: 1 1 auto;               /* ขยายเท่ากัน */
-    min-width: 80px;
-    justify-content: center;
-    padding: 8px 10px;
-    font-size: 12px;
-    min-height: 36px;
-  }
- 
-  /* ── ปุ่มปิด modal (✕): ใหญ่ขึ้นสำหรับนิ้ว ── */
-  .modal-close-btn {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    font-size: 22px;
-  }
-}
- 
-/* จอเล็กมาก (iPhone SE ฯลฯ) */
-@media (max-width: 390px) {
-  .charter-card {
-    flex-direction: column;        /* ซ้อนแนวตั้งเมื่อจอแคบ */
-    align-items: flex-start;
-  }
- 
-  .charter-card-img {
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 6px;
-  }
- 
-  .charter-card-actions .btn-sm,
-  .charter-card-actions .btn-edit-modal,
-  .charter-card-actions .btn-del-modal {
-    flex: 1 1 100%;               /* เต็มแถวเดียวกัน */
-    min-height: 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
   }
 }
 
@@ -4543,5 +4410,54 @@ tr:hover td {
   #auth-logged-in {
     gap: 0 !important;
     padding: 0 !important;
+  }
+}
+
+/* ── ซ่อน user icon เมื่อเมนูมือถือเปิด ── */
+@media (max-width: 768px) {
+  .topnav-right.menu-open {
+    display: none !important;
+  }
+}
+
+.charter-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.charter-card-actions .btn-sm,
+.charter-card-actions .btn-edit-modal,
+.charter-card-actions .btn-del-modal {
+  flex: 1 1 auto;
+  min-width: 80px;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 400px) {
+  .charter-card {
+    flex-direction: column;
+  }
+
+  .charter-card-img {
+    width: 100% !important;
+    height: 100px !important;
+  }
+
+  .charter-card-actions {
+    flex-direction: column;
+  }
+
+  .charter-card-actions .btn-sm,
+  .charter-card-actions .btn-edit-modal,
+  .charter-card-actions .btn-del-modal {
+    width: 100%;
+    min-height: 40px;
+    font-size: 12px;
+    padding: 8px 12px;
   }
 }
