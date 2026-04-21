@@ -13,67 +13,69 @@
 <body>
   <div class="app">
 
-    <!-- ========== TOP NAV ========== -->
     <nav class="topnav">
-      <div class="topnav-logo" onclick="window.location.href='index.html'">
-        🌿 Data Area North
-      </div>
-      
-      <div class="topnav-links">
-        <a class="nav-link" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
-        <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
-        <a class="nav-link active" onclick="window.location.href='4pw.html'">4PW</a>
-        
-        <div class="nav-dropdown">
-          <div class="nav-link nav-dropdown-toggle" onclick="toggleHiaMenu(event)">
-            HIA <span class="arrow">▼</span>
-          </div>
-          <ul class="nav-submenu" id="hia-submenu">
-            <li>
-              <a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">
-                📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก
-              </a>
-            </li>
-          </ul>
-        </div>
-        
-        <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
-      </div>
-      
-      <div class="topnav-right">
-        <!-- Auth: Logged Out -->
-        <div id="auth-logged-out">
-          <button onclick="window.location.href='login.html'" 
-                  style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/>
-              <path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-            เข้าสู่ระบบ
-          </button>
-        </div>
+  <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
 
-        <!-- Auth: Logged In -->
-        <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
-          <div id="user-avatar" 
-               style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">
-            U
-          </div>
-          <div style="min-width:0;">
-            <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;">ผู้ใช้</div>
-            <div id="user-role" style="font-size:10px;color:#888;">user</div>
-          </div>
-          <button onclick="handleLogout()" 
-                  style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-              <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
+  
+  <!-- ✅ ปุ่ม Hamburger (แสดงเฉพาะมือถือ) -->
+  <button class="mobile-toggle" id="mobile-toggle" aria-label="เปิดเมนู" onclick="toggleMobileMenu()">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+
+  <div class="topnav-links" id="topnav-links">
+  <a class="nav-link" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
+  <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
+  <a class="nav-link active" onclick="window.location.href='4pw.html'">4PW</a>
+  
+  
+  <!-- ✅ เมนู HIA แบบ Dropdown (ใส่ตรงนี้) -->
+  <div class="nav-dropdown">
+    <div class="nav-link nav-dropdown-toggle" onclick="toggleHiaMenu(event)">
+      HIA <span class="arrow">▼</span>
+    </div>
+    <ul class="nav-submenu" id="hia-submenu">
+      <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
+    </ul>
+  </div>
+  <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
+</div>
+
+  <div class="topnav-right">
+    <!-- Auth: logged out -->
+    <div id="auth-logged-out">
+      <button onclick="window.location.href='login.html'"
+        style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1px solid var(--border);border-radius:8px;color:#1a1a1a;font-size:12px;font-weight:500;cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        เข้าสู่ระบบ
+      </button>
+    </div>
+
+    <!-- Auth: logged in -->
+    <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
+      <div id="user-avatar" 
+        style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">
+        U
       </div>
-    </nav>
+      <div style="min-width:0;">
+        <div id="user-name" style="font-size:12px;font-weight:500;color:#1a1a1a;white-space:nowrap;">ผู้ใช้</div>
+        <div id="user-role" style="font-size:10px;color:#888;">user</div>
+      </div>
+      <button onclick="handleLogout()"
+        style="width:28px;height:28px;border:none;background:#f5f3f0;border-radius:50%;color:#e41515;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M8.5 3.5L12 7L8.5 10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 7H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M3 12V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
 
     <!-- ========== MAIN CONTENT ========== -->
     <div class="main">
@@ -585,6 +587,112 @@
       document.body.style.overflow = '';
       resetPdfZone();
     }
+
+    // ✅ Toggle เมนูมือถือ
+function toggleMobileMenu() {
+  const menu = document.getElementById('topnav-links');
+  const btn = document.getElementById('mobile-toggle');
+  
+  if (menu && btn) {
+    menu.classList.toggle('active');
+    btn.classList.toggle('active'); // เพื่อเปลี่ยนรูปปุ่มเป็นกากบาท
+  }
+}
+
+// ✅ ปรับปรุง toggleHiaMenu ให้รองรับมือถือ (ปิดเมนูหลักเมื่อคลิกรายการย่อย)
+function toggleHiaMenu(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = e.currentTarget;
+  
+  if (submenu) {
+    submenu.classList.toggle('show');
+    if (toggle) toggle.classList.toggle('active');
+  }
+  
+  // ถ้าเป็นมือถือ ให้เลื่อนไปเห็นเมนูย่อย
+  if (window.innerWidth <= 768 && submenu.classList.contains('show')) {
+    submenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ✅ ปิดเมนูเมื่อคลิกที่อื่น (รวมถึงเมื่อคลิกลิงก์)
+document.addEventListener('click', (e) => {
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = document.querySelector('.nav-dropdown-toggle');
+  const mobileMenu = document.getElementById('topnav-links');
+  const mobileBtn = document.getElementById('mobile-toggle');
+  
+  // ปิด submenu HIA
+  if (submenu && !e.target.closest('.nav-dropdown')) {
+    submenu.classList.remove('show');
+    if (toggle) toggle.classList.remove('active');
+  }
+  
+  // ปิดเมนูมือถือเมื่อคลิกลิงก์ (เพื่อให้หน้าเปลี่ยนและเมนูหุบ)
+  if (mobileMenu && mobileMenu.classList.contains('active') && 
+      e.target.closest('.nav-link') && !e.target.closest('.nav-dropdown-toggle')) {
+    mobileMenu.classList.remove('active');
+    if (mobileBtn) mobileBtn.classList.remove('active');
+  }
+});
+
+// ✅ Toggle User Menu on Mobile
+function toggleUserMenu() {
+  if (window.innerWidth <= 768) {
+    const menu = document.createElement('div');
+    menu.id = 'mobile-user-menu';
+    menu.style.cssText = `
+      position: absolute;
+      top: 52px;
+      right: 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 999;
+      min-width: 140px;
+    `;
+    menu.innerHTML = `
+      <div style="padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text);">
+        ${document.getElementById('user-name')?.textContent || 'ผู้ใช้'}
+      </div>
+      <div style="padding: 8px 16px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);">
+        ${document.getElementById('user-role')?.textContent || 'user'}
+      </div>
+      <button onclick="handleLogout(); document.getElementById('mobile-user-menu')?.remove();" 
+        style="width: 100%; padding: 8px 16px; text-align: left; font-size: 13px; color: var(--red); background: none; border: none; cursor: pointer;">
+        🚪 ออกจากระบบ
+      </button>
+    `;
+    
+    // ลบเมนูเก่าถ้ามี
+    document.getElementById('mobile-user-menu')?.remove();
+    document.body.appendChild(menu);
+    
+    // ปิดเมื่อคลิกที่อื่น
+    setTimeout(() => {
+      document.addEventListener('click', function closeMenu(e) {
+        if (!e.target.closest('#mobile-user-menu') && !e.target.closest('#user-avatar')) {
+          menu.remove();
+          document.removeEventListener('click', closeMenu);
+        }
+      });
+    }, 100);
+  }
+}
+
+// ✅ เพิ่ม onclick ที่ avatar
+document.addEventListener('DOMContentLoaded', () => {
+  const avatar = document.getElementById('user-avatar');
+  if (avatar) {
+    avatar.style.cursor = 'pointer';
+    avatar.onclick = toggleUserMenu;
+  }
+});
 
     async function saveRecord() {
         const id = $('modal-id').value;
