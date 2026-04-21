@@ -3929,12 +3929,40 @@ tr:hover td {
 .pw-filter-bar select { flex:1; min-width:130px; }
 .pw-filter-bar input:focus, .pw-filter-bar select:focus { border-color:#1D9E75; }
 
-.pw-table-wrap { background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:12px; overflow:hidden; }
-.pw-table { width:100%; border-collapse:collapse; font-size:13px; }
-.pw-table th { background:#f8f8f5; font-weight:500; color:#555; text-align:left; padding:12px 14px; border-bottom:1px solid rgba(0,0,0,0.08); font-size:12px; }
-.pw-table td { padding:12px 14px; border-bottom:1px solid rgba(0,0,0,0.06); color:#1a1a1a; vertical-align:middle; }
-.pw-table tr:last-child td { border-bottom:none; }
-.pw-table tr:hover td { background:#fafaf8; }
+.pw-table-wrap {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  overflow-x: auto;                    /* ← เพิ่ม scroll แนวนอน */
+  -webkit-overflow-scrolling: touch;   /* ← smooth scroll iOS */
+  overflow-y: hidden;
+}
+
+.pw-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 580px;                    /* ← ป้องกันตารางถูกบีบ */
+}
+.pw-table th {
+  background: #f8f8f5;
+  font-weight: 500;
+  color: #555;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  font-size: 12px;
+  white-space: nowrap;                 /* ← ป้องกัน header ตัดบรรทัด */
+}
+.pw-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  color: #1a1a1a;
+  vertical-align: middle;
+  white-space: nowrap;                 /* ← ป้องกันข้อความในเซลล์ตัดบรรทัด */
+}
+.pw-table tr:last-child td { border-bottom: none; }
+.pw-table tr:hover td { background: #fafaf8; }
 
 .badge-year { display:inline-block; background:#E6F7F1; color:#0F6E56; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500; }
 .badge-prov { display:inline-block; background:#E6F1FB; color:#185FA5; padding:3px 10px; border-radius:20px; font-size:11px; }
@@ -4335,4 +4363,22 @@ tr:hover td {
     font-size: 11px;
     color: var(--muted, #aaa);
   }
+}
+
+@media (max-width: 768px) {
+  .pw-table-wrap {
+    border-radius: 12px;
+    /* hint เงาขวาให้รู้ว่า scroll ได้ */
+    background:
+      linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+      linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%,
+      radial-gradient(farthest-side at 0 50%, rgba(0,0,0,0.08), transparent),
+      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.08), transparent) 0 100%;
+    background-repeat: no-repeat;
+    background-color: white;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .pw-table td:first-child { min-width: 180px; }  /* คอลัมน์ชื่อรายงาน */
 }
