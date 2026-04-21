@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แก้ไขข้อมูลธรรมนูญสุขภาพ</title>
+  <title>แก้ไขข้อมูลธรรมนูญสุขภาพ – Data Area North</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
@@ -91,7 +91,7 @@
               <div class="status-dot-indicator" id="status-dot"></div>
               <select class="form-select" id="f-status" onchange="updateStatusDot()">
                 <option value="">— ไม่ระบุ —</option>
-                <option value="กระบวนการยกร่าง">ยกร่าง</option>
+                <option value="กระบวนการยกร่าง">กระบวนการยกร่าง</option>
                 <option value="รับฟังความคิดเห็น">รับฟังความคิดเห็น</option>
                 <option value="ประกาศใช้">ประกาศใช้</option>
                 <option value="ขับเคลื่อน">ขับเคลื่อน</option>
@@ -232,6 +232,20 @@
 
   </div><!-- /form-wrap -->
 </div><!-- /main -->
+
+<!-- UNSAVED BAR -->
+<div class="unsaved-bar" id="unsaved-bar">
+  <div class="unsaved-text">
+    <div class="unsaved-dot"></div>
+    มีการแก้ไขที่ยังไม่ได้บันทึก
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn-cancel" style="font-size:12px;padding:7px 14px;" onclick="resetForm()">ยกเลิกการแก้ไข</button>
+    <button class="btn-save" style="font-size:12px;padding:7px 16px;" onclick="saveRecord()">
+      <span>บันทึก</span>
+    </button>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div id="toast"></div>
