@@ -4224,7 +4224,7 @@ tr:hover td {
    ========================================= */
 @media (max-width: 768px) {
   
-  /* 1. แก้ไข Topnav: ให้ความสูงยืดหยุ่นและเป็นจุดอ้างอิง */
+  /* 1. Topnav ยืดหยุ่น & เป็นจุดอ้างอิง */
   .topnav {
     height: auto !important;
     min-height: 52px;
@@ -4233,20 +4233,15 @@ tr:hover td {
     align-items: center;
     row-gap: 0;
     z-index: 1000;
-    position: sticky;
-    top: 0;
+    position: relative; /* ✅ สำคัญสำหรับ absolute */
     background: #fff;
     border-bottom: 1px solid var(--border);
-    /* ✅ เพิ่ม: ทำให้เป็นจุดอ้างอิงสำหรับลูกที่ใช้ position: absolute */
-    position: relative;
   }
 
-  /* 2. ✅ ซ่อนโลโก้ในโหมดมือถือ */
-  .topnav-logo {
-    display: none !important;
-  }
+  /* 2. ซ่อนโลโก้ */
+  .topnav-logo { display: none !important; }
 
-  /* 3. ปุ่ม Hamburger: ดันไปขวาสุด */
+  /* 3. ปุ่ม Hamburger */
   .mobile-toggle {
     order: 2;
     display: flex !important;
@@ -4258,7 +4253,7 @@ tr:hover td {
     cursor: pointer;
   }
 
-  /* 4. เมนูหลัก: ให้ลงมาแถวใหม่เต็มความกว้าง */
+  /* 4. เมนูหลัก */
   .topnav-links {
     order: 3;
     width: 100%;
@@ -4270,12 +4265,8 @@ tr:hover td {
     background: #fff;
     animation: slideDown 0.2s ease;
   }
+  .topnav-links.active { display: flex !important; }
 
-  .topnav-links.active {
-    display: flex !important;
-  }
-
-  /* 5. สไตล์ลิงก์ในเมนูมือถือ */
   .topnav-links .nav-link {
     padding: 12px 0;
     font-size: 14px;
@@ -4283,105 +4274,66 @@ tr:hover td {
     width: 100%;
     text-align: center;
   }
-  .topnav-links .nav-link:last-child {
-    border-bottom: none;
-  }
+  .topnav-links .nav-link:last-child { border-bottom: none; }
 
-  /* 6. Dropdown HIA ในมือถือ */
-  .nav-dropdown {
-    width: 100%;
-  }
+  /* 5. Dropdown HIA */
+  .nav-dropdown { width: 100%; }
   .nav-dropdown-toggle {
     justify-content: center;
     padding: 12px 0;
     border-bottom: 1px solid rgba(0,0,0,0.05);
   }
   .nav-submenu {
-    position: static;
-    box-shadow: none;
-    border: none;
-    padding-left: 0;
-    background: #fafaf8;
-    margin-top: 0;
-    display: none;
-    max-height: none;
-    opacity: 1;
-    text-align: center;
+    position: static; box-shadow: none; border: none;
+    padding-left: 0; background: #fafaf8; margin-top: 0;
+    display: none; max-height: none; opacity: 1; text-align: center;
   }
-  .nav-submenu.show {
-    display: block;
-  }
+  .nav-submenu.show { display: block; }
   .nav-submenu .nav-link {
-    padding: 8px 0;
-    font-size: 13px;
-    color: var(--muted, #666);
-    border: none;
+    padding: 8px 0; font-size: 13px; color: var(--muted, #666); border: none;
   }
 
-  /* 7. ✅ ส่วน Auth (Login/User): ยึดมุมขวาบนสุด */
+  /* 6. ✅ ส่วน User: ยึดมุมขวาบนสุด */
   .topnav-right {
     order: 1;
-    position: absolute;      /* ✅ ลอยออกจากปกติ */
-    top: 50%;                /* ✅ กึ่งกลางแนวตั้ง */
-    right: 16px;             /* ✅ ชิดขวา เว้นระยะ 16px */
-    transform: translateY(-50%); /* ✅ จัดกึ่งกลางเป๊ะๆ */
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
     width: auto;
     justify-content: flex-end;
-    padding: 0;
-    margin: 0;
-    border: none;
-    z-index: 102;            /* ✅ อยู่เหนือปุ่มเมนู */
-    display: flex !important;
+    padding: 0; margin: 0; border: none;
+    z-index: 102;
+    display: flex !important; /* ✅ แสดงปกติเมื่อเมนูปิด */
     align-items: center;
     gap: 8px;
   }
 
-  /* ✅ ซ่อนชื่อผู้ใช้และบทบาทในมือถือ (แสดงเฉพาะไอคอน) */
-  #auth-logged-in #user-name,
-  #auth-logged-in #user-role {
+  /* ✅ ซ่อน User Icon ทันทีเมื่อเมนูเปิด (มีคลาส .active) */
+  .topnav-links.active ~ .topnav-right {
     display: none !important;
   }
 
-  /* ✅ ปรับ Avatar ให้เป็นไอคอนกลมเล็กๆ */
+  /* ✅ ซ่อนชื่อ/บทบาทในมือถือ */
+  #auth-logged-in #user-name,
+  #auth-logged-in #user-role { display: none !important; }
+
+  /* ✅ ปรับ Avatar */
   #auth-logged-in #user-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 14px !important;
-    margin: 0 !important;
+    width: 36px !important; height: 36px !important;
+    font-size: 14px !important; margin: 0 !important;
   }
 
-  /* ✅ ปรับปุ่ม Logout ให้เป็นไอคอนเล็กๆ */
-  #auth-logged-in button[onclick="handleLogout()"] {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    background: #f5f3f0 !important;
-    border: 1px solid var(--border) !important;
-  }
-  
-  #auth-logged-in button[onclick="handleLogout()"] svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
+  /* ✅ ซ่อนปุ่มออกจากระบบในมือถือ */
+  #auth-logged-in button[onclick="handleLogout()"] { display: none !important; }
+  #auth-logged-in { gap: 0 !important; }
 
-  /* ✅ จัดเรียงไอคอนให้ชิดกัน */
-  #auth-logged-in {
-    gap: 6px !important;
-    padding: 4px 0 !important;
-  }
-
-  /* ✅ ปุ่มเข้าสู่ระบบ (กรณียังไม่ได้ล็อกอิน) - ซ่อนข้อความ */
+  /* ✅ ปุ่มเข้าสู่ระบบ (ซ่อนข้อความ) */
   #auth-logged-out button {
-    padding: 8px !important;
-    min-width: 40px !important;
+    padding: 8px !important; min-width: 40px !important;
     justify-content: center !important;
   }
-  #auth-logged-out button span {
-    display: none !important;
-  }
+  #auth-logged-out button span { display: none !important; }
 
   /* ✅ Animation */
   @keyframes slideDown {
@@ -4389,16 +4341,14 @@ tr:hover td {
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ✅ แปลงปุ่มเมนูเป็นรูปกากบาท */
-  .mobile-toggle.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  .mobile-toggle.active .hamburger-line:nth-child(2) {
-    opacity: 0;
-  }
-  .mobile-toggle.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(4px, -4px);
-  }
+  /* ✅ ปุ่ม Hamburger เป็นกากบาท */
+  .mobile-toggle.active .hamburger-line:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .mobile-toggle.active .hamburger-line:nth-child(2) { opacity: 0; }
+  .mobile-toggle.active .hamburger-line:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+}
+
+  
+
 
   /* ✅ ซ่อนปุ่มออกจากระบบในมือถือ */
   #auth-logged-in button[onclick="handleLogout()"] {
