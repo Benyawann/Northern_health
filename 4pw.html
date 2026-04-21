@@ -639,23 +639,27 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ✅ Toggle User Menu on Mobile
+// ✅ Toggle User Menu on Mobile (แบบเลื่อนตามหน้าจอ)
 function toggleUserMenu() {
   if (window.innerWidth <= 768) {
     const menu = document.createElement('div');
     menu.id = 'mobile-user-menu';
+    
+    // ✅ แก้ไขตรงนี้: เปลี่ยน position เป็น 'fixed' และเพิ่ม z-index สูงๆ
     menu.style.cssText = `
-      position: absolute;
-      top: 52px;
+      position: fixed;              /* ✅ เปลี่ยนจาก absolute เป็น fixed */
+      top: 60px;                    /* ✅ ปรับระยะจากด้านบนให้พอดีกับ topnav */
       right: 16px;
       background: white;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 9999;                /* ✅ เพิ่มค่าให้สูงกว่าองค์ประกอบอื่น */
       min-width: 140px;
+      animation: slideDown 0.2s ease; /* ✅ เพิ่มอนิเมชั่นให้นุ่มนวล */
     `;
+    
     menu.innerHTML = `
       <div style="padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text);">
         ${document.getElementById('user-name')?.textContent || 'ผู้ใช้'}
