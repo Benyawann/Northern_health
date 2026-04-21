@@ -4292,29 +4292,47 @@ tr:hover td {
 @media (max-width: 768px) {
   .site-footer {
     height: auto;
-    /* ✅ มือถือ: ปรับเป็น 16px ให้ตรงกับ .main */
-    padding: 10px 16px; 
+    padding: 16px; /* ✅ เพิ่มระยะรอบข้างให้สม่ำเสมอ */
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: flex-start; /* ✅ ชิดซ้ายทั้งหมด */
+    gap: 12px; /* ✅ ระยะห่างระหว่างแต่ละบรรทัด */
   }
   
   .footer-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 12px;
+    margin:5px;
+    width: 100%;
   }
   
   .footer-content {
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    flex-direction: column; /* ✅ ซ้อนแนวตั้ง: องค์กร -> ติดต่อ */
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  /* ✅ แยก "ผู้พัฒนา", "อีเมล", "โทร" ให้คนละบรรทัด */
+  .footer-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+    font-size: 11px;
+  }
+  
+  .footer-divider {
+    display: none; /* ✅ ซ่อนเส้นคั่นแนวตั้งในมือถือ */
   }
   
   .footer-copyright {
     margin-left: 0;
     width: 100%;
     text-align: left;
-    border-top: 1px solid var(--border);
-    padding-top: 8px;
+    border-top: 1px solid var(--border); /* ✅ เส้นคั่นก่อนลิขสิทธิ์ */
+    padding-top: 12px;
+    font-size: 11px;
+    color: var(--muted, #aaa);
   }
 }
