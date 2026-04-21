@@ -4398,9 +4398,6 @@ tr:hover td {
     transform: rotate(-45deg) translate(4px, -4px);
   }
 
-  
-
-
   /* ✅ ซ่อนปุ่มออกจากระบบในมือถือ */
   #auth-logged-in button[onclick="handleLogout()"] {
     display: none !important;
