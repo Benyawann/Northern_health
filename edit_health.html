@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แก้ไขข้อมูลธรรมนูญสุขภาพ – Data Area North</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/edit_health.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
+  <div class="topnav-right"></div>
+</nav>
+
+<div class="main">
+
+  <div class="page-header">
+    <button class="back-btn" onclick="goBack()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M9 11L5 7L9 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      กลับหน้าหลัก
+    </button>
+    <div class="page-title">แก้ไขข้อมูลธรรมนูญสุขภาพ</div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading-wrap" class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">กำลังโหลดข้อมูล...</div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error-wrap" class="error-wrap">
+    <div class="error-icon">⚠️</div>
+    <div class="error-title">ไม่พบข้อมูล</div>
+    <div class="error-msg" id="error-msg">ไม่สามารถโหลดข้อมูลได้</div>
+    <br>
+    <button class="btn-cancel" style="margin-top:12px;" onclick="goBack()">← กลับหน้าหลัก</button>
+  </div>
+
+  <!-- FORM -->
+  <div id="form-wrap" class="form-wrap">
+
+    <!-- PREVIEW HEADER -->
+    <div class="charter-preview">
+      <div class="charter-preview-img" id="preview-img-box">📄</div>
+      <div class="charter-preview-info">
+        <div class="charter-preview-name" id="preview-name">—</div>
+      </div>
+      <a id="preview-pdf-link" href="#" target="_blank"
+        style="padding:7px 14px;background:var(--blue);color:white;border-radius:8px;font-size:12px;text-decoration:none;display:none;align-items:center;gap:5px;white-space:nowrap;">
+        📄 ดู PDF เดิม
+      </a>
+    </div>
+
+    <!-- SECTION 1: ข้อมูลพื้นฐาน -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon section-green">📋</div>
+        <div class="form-section-title">ข้อมูลพื้นฐาน</div>
+      </div>
+      <div class="form-section-body">
+        <div class="form-grid form-grid-1" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">ชื่อธรรมนูญสุขภาพ <span>*</span></label>
+            <input class="form-input" id="f-charter-name" type="text" placeholder="เช่น ธรรมนูญสุขภาพตำบลบ้านนา ปี 2567">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">ประเด็นธรรมนูญ</label>
+            <input class="form-input" id="f-title" type="text" placeholder="เช่น ผู้สูงอายุ, เด็กและเยาวชน">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">วันที่ประกาศใช้ <small>(พ.ศ.)</small></label>
+            <input class="form-input" id="f-publish-date" type="text" placeholder="เช่น 1 มกราคม 2567">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">สถานะธรรมนูญ</label>
+            <div class="status-select-wrap">
+              <div class="status-dot-indicator" id="status-dot"></div>
+              <select class="form-select" id="f-status" onchange="updateStatusDot()">
+                <option value="">— ไม่ระบุ —</option>
+                <option value="กระบวนการยกร่าง">กระบวนการยกร่าง</option>
+                <option value="รับฟังความคิดเห็น">รับฟังความคิดเห็น</option>
+                <option value="ประกาศใช้">ประกาศใช้</option>
+                <option value="ขับเคลื่อน">ขับเคลื่อน</option>
+                <option value="ประเมินผล">ประเมินผล</option>
+                <option value="ทบทวนและปรับปรุง">ทบทวนและปรับปรุง</option>
+              </select>
+            </div>
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: ที่ตั้ง -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon section-blue">📍</div>
+        <div class="form-section-title">ที่ตั้ง</div>
+      </div>
+      <div class="form-section-body">
+
+        <!-- เขต -->
+        <div class="form-grid form-grid-1" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">เขตสุขภาพ</label>
+            <select class="form-select" id="f-zone" onchange="updateZoneBadge()">
+              <option value="">— ไม่ระบุเขต —</option>
+              <option value="เขต 1">เขต 1</option>
+              <option value="เขต 2">เขต 2</option>
+              <option value="เขต 3">เขต 3</option>
+            </select>
+            <div id="zone-badge-wrap" style="display:none;">
+              <span class="zone-badge" id="zone-badge">📍 —</span>
+            </div>
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+
+        <!-- จังหวัด / อำเภอ / ตำบล -->
+        <div class="form-grid form-grid-3">
+          <div class="form-group">
+            <label class="form-label">จังหวัด <span>*</span></label>
+            <select class="form-select" id="f-province">
+              <option value="">— เลือกจังหวัด —</option>
+              <option>เชียงใหม่</option><option>เชียงราย</option>
+              <option>ลำปาง</option><option>ลำพูน</option>
+              <option>แม่ฮ่องสอน</option><option>พะเยา</option>
+              <option>แพร่</option><option>น่าน</option>
+              <option>อุตรดิตถ์</option><option>ตาก</option>
+              <option>สุโขทัย</option><option>พิษณุโลก</option>
+              <option>เพชรบูรณ์</option><option>กำแพงเพชร</option>
+              <option>พิจิตร</option><option>นครสวรรค์</option>
+              <option>อุทัยธานี</option><option>ชัยนาท</option>
+            </select>
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">อำเภอ</label>
+            <input class="form-input" id="f-district" type="text" placeholder="ป้อนชื่ออำเภอ">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ตำบล</label>
+            <input class="form-input" id="f-subdistrict" type="text" placeholder="ป้อนชื่อตำบล">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: บุคลากร -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon section-amber">👥</div>
+        <div class="form-section-title">บุคลากร / ผู้รับผิดชอบ</div>
+      </div>
+      <div class="form-section-body">
+        <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">แกนนำชุมชน</label>
+            <input class="form-input" id="f-leader" type="text" placeholder="ชื่อ-นามสกุล แกนนำ">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">นักวิชาการสนับสนุน</label>
+            <input class="form-input" id="f-academic" type="text" placeholder="ชื่อ-นามสกุล นักวิชาการ">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">เบอร์โทรศัพท์</label>
+            <input class="form-input" id="f-phone" type="tel" placeholder="0X-XXXX-XXXX">
+            <span class="changed-badge">● มีการแก้ไข</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: ไฟล์และรูปภาพ -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon section-purple">📁</div>
+        <div class="form-section-title">ไฟล์และรูปภาพ</div>
+      </div>
+      <div class="form-section-body">
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">อัปโหลดรูปปกใหม่</label>
+            <div class="upload-zone" id="img-upload-zone">
+              <input type="file" id="img-file-input" accept="image/*" onchange="handleImageFile(this)">
+              <div class="upload-zone-icon">🖼️</div>
+              <div class="upload-zone-text"><strong>คลิกหรือลากไฟล์มาวาง</strong><br>PNG, JPG, WEBP — ไม่เกิน 5MB</div>
+            </div>
+            <div id="img-preview-box" style="display:none;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">อัปโหลดไฟล์ PDF ใหม่</label>
+            <div class="upload-zone" id="pdf-upload-zone">
+              <input type="file" id="pdf-file-input" accept=".pdf" onchange="handlePdfFile(this)">
+              <div class="upload-zone-icon">📄</div>
+              <div class="upload-zone-text"><strong>คลิกหรือลากไฟล์มาวาง</strong><br>ไฟล์ PDF เท่านั้น — ไม่เกิน 20MB</div>
+            </div>
+            <div id="pdf-preview-box" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="goBack()">ยกเลิก</button>
+      <button class="btn-save" id="save-btn" onclick="saveRecord()">
+        <div class="btn-spinner"></div>
+        <span class="btn-label">💾 บันทึกการเปลี่ยนแปลง</span>
+      </button>
+    </div>
+
+  </div><!-- /form-wrap -->
+</div><!-- /main -->
+
+<!-- UNSAVED BAR -->
+<div class="unsaved-bar" id="unsaved-bar">
+  <div class="unsaved-text">
+    <div class="unsaved-dot"></div>
+    มีการแก้ไขที่ยังไม่ได้บันทึก
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn-cancel" style="font-size:12px;padding:7px 14px;" onclick="resetForm()">ยกเลิกการแก้ไข</button>
+    <button class="btn-save" style="font-size:12px;padding:7px 16px;" onclick="saveRecord()">
+      <span>บันทึก</span>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STATUS_COLORS = {
+  'กระบวนการยกร่าง': '#EF9F27',
+  'รับฟังความคิดเห็น': '#81CCC5',
+  'ประกาศใช้': '#1D9E75',
+  'ขับเคลื่อน': '#378ADD',
+  'ประเมินผล': '#9B59B6',
+  'ทบทวนและปรับปรุง': '#D4537E',
+};
+
+// ── STATE ────────────────────────────────────────────────────
+let recordId = null;
+let originalData = {};
+let newImgFile = null;
+let newPdfFile = null;
+let hasChanges = false;
+
+const $ = id => document.getElementById(id);
+
+// ── HELPERS ──────────────────────────────────────────────────
+function getVal(id) {
+  const el = $(id);
+  return el ? el.value.trim() : '';
+}
+
+function setVal(id, val) {
+  const el = $(id);
+  if (el) el.value = val || '';
+}
+
+function showToast(title, type = 'success', dur = 3500) {
+  const t = $('toast');
+  const colors = { success: '#1D9E75', error: '#E04031', info: '#378ADD', warn: '#EF9F27' };
+  t.style.borderLeftColor = colors[type] || colors.success;
+  t.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">
+    <div style="font-size:20px;">${type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '✅'}</div>
+    <div style="font-size:13px;font-weight:500;color:#1a1a1a;">${title}</div>
+  </div>`;
+  t.className = 'toast-in';
+  t.style.display = 'block';
+  setTimeout(() => {
+    t.className = 'toast-out';
+    setTimeout(() => { t.style.display = 'none'; t.className = ''; }, 300);
+  }, dur);
+}
+
+function getUrlParam(key) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
+function goBack() {
+  if (hasChanges && !confirm('มีการแก้ไขที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้?')) return;
+  window.location.href = 'index.html';
+}
+
+function updateStatusDot() {
+  const val = getVal('f-status');
+  $('status-dot').style.background = STATUS_COLORS[val] || '#ddd';
+}
+
+function updateZoneBadge() {
+  const val = getVal('f-zone');
+  const wrap = $('zone-badge-wrap');
+  const badge = $('zone-badge');
+  if (val) {
+    const num = parseInt(val.replace(/[^0-9]/g, '')) || 0;
+    const hue = (num * 30) % 360;
+    badge.textContent = `📍 ${val}`;
+    badge.style.background = `hsl(${hue}, 60%, 93%)`;
+    badge.style.color = `hsl(${hue}, 60%, 28%)`;
+    badge.style.borderColor = `hsl(${hue}, 50%, 78%)`;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function fillSelect(id, value) {
+  const el = $(id);
+  if (!el || value == null || value === '') return;
+  const strVal = String(value);
+  for (const opt of el.options) {
+    if (opt.value === strVal) { el.value = strVal; return; }
+  }
+  // partial match (e.g. "เขต 1" inside longer text)
+  for (const opt of el.options) {
+    if (opt.value && (opt.value.includes(strVal) || strVal.includes(opt.value))) {
+      el.value = opt.value; return;
+    }
+  }
+  // add new option
+  const opt = document.createElement('option');
+  opt.value = strVal; opt.textContent = strVal;
+  el.appendChild(opt);
+  el.value = strVal;
+}
+
+// ── LOAD ─────────────────────────────────────────────────────
+async function loadRecord(id) {
+  $('loading-wrap').style.display = 'flex';
+  $('error-wrap').style.display = 'none';
+  $('form-wrap').style.display = 'none';
+
+  const { data, error } = await db.from('data_charter').select('*').eq('id', id).single();
+  $('loading-wrap').style.display = 'none';
+
+  if (error || !data) {
+    $('error-wrap').style.display = 'block';
+    $('error-msg').textContent = error?.message || 'ไม่พบรายการ ID: ' + id;
+    return;
+  }
+
+  originalData = { ...data };
+  populateForm(data);
+  $('form-wrap').style.display = 'block';
+}
+
+function populateForm(d) {
+  $('preview-name').textContent = d.charter_name || '(ไม่มีชื่อ)';
+
+  if (d.image_url) {
+    $('preview-img-box').innerHTML = `<img src="${d.image_url}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;" onerror="this.parentElement.textContent='📄'">`;
+  }
+  if (d.pdf_url) {
+    const pdfLink = $('preview-pdf-link');
+    const fullUrl = d.pdf_url.startsWith('http') ? d.pdf_url :
+      `${SUPABASE_URL}/storage/v1/object/public/charter-pdfs/${d.pdf_url.replace(/^\//, '')}`;
+    pdfLink.href = fullUrl;
+    pdfLink.style.display = 'flex';
+  }
+
+  setVal('f-charter-name', d.charter_name);
+  setVal('f-title', d.title);
+  setVal('f-publish-date', d.publish_date);
+  fillSelect('f-status', d.status || d.charter_status);
+  fillSelect('f-zone', d.zone || d.health_zone || d.zone_number);
+  fillSelect('f-province', d.province);
+  setVal('f-district', d.district);
+  setVal('f-subdistrict', d.subdistrict);
+  setVal('f-leader', d.leader);
+  setVal('f-academic', d.academic_supporter);
+  setVal('f-phone', d.phone || d.tel || d.contact_phone);
+  setVal('f-pdf-url', d.pdf_url);
+  setVal('f-image-url', d.image_url);
+
+  updateStatusDot();
+  updateZoneBadge();
+  trackChanges();
+}
+
+// ── CHANGE TRACKING ──────────────────────────────────────────
+const FIELD_MAP = {
+  'f-charter-name': 'charter_name',
+  'f-title':        'title',
+  'f-publish-date': 'publish_date',
+  'f-status':       'status',
+  'f-zone':         'zone',
+  'f-province':     'province',
+  'f-district':     'district',
+  'f-subdistrict':  'subdistrict',
+  'f-leader':       'leader',
+  'f-academic':     'academic_supporter',
+  'f-phone':        'phone',
+  'f-pdf-url':      'pdf_url',
+  'f-image-url':    'image_url',
+};
+
+function trackChanges() {
+  Object.keys(FIELD_MAP).forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+      const origVal = String(originalData[FIELD_MAP[id]] || '');
+      el.classList.toggle('changed', el.value.trim() !== origVal.trim());
+      checkUnsaved();
+      if (id === 'f-zone') updateZoneBadge();
+    });
+  });
+}
+
+function checkUnsaved() {
+  const anyChanged = document.querySelectorAll('.form-input.changed,.form-select.changed,.form-textarea.changed').length > 0;
+  hasChanges = anyChanged || newImgFile !== null || newPdfFile !== null;
+  // unsaved-bar exists in this file, safe to use
+  $('unsaved-bar').classList.toggle('show', hasChanges);
+}
+
+function resetForm() {
+  if (!confirm('ยืนยันยกเลิกการแก้ไขทั้งหมด?')) return;
+  populateForm(originalData);
+  newImgFile = null; newPdfFile = null;
+  $('img-preview-box').style.display = 'none';
+  $('pdf-preview-box').style.display = 'none';
+  document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
+  hasChanges = false;
+  $('unsaved-bar').classList.remove('show');
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────
+function handleImageFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('รูปภาพต้องไม่เกิน 5MB', 'error'); input.value = ''; return; }
+  newImgFile = file;
+  const url = URL.createObjectURL(file);
+  const box = $('img-preview-box');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="preview-box">
+    <img class="preview-thumb" src="${url}">
+    <div class="preview-info">
+      <div class="preview-name">${file.name}</div>
+      <div class="preview-size">${(file.size/1024).toFixed(0)} KB</div>
+    </div>
+    <button class="preview-remove" onclick="clearFile('img')">✕</button>
+  </div>`;
+  checkUnsaved();
+}
+
+function handlePdfFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { showToast('ไฟล์ PDF ต้องไม่เกิน 20MB', 'error'); input.value = ''; return; }
+  newPdfFile = file;
+  const box = $('pdf-preview-box');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="preview-box">
+    <div style="width:40px;height:50px;background:#E6F1FB;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(55,138,221,0.2);">📄</div>
+    <div class="preview-info">
+      <div class="preview-name">${file.name}</div>
+      <div class="preview-size" style="color:var(--blue);">${(file.size/1024/1024).toFixed(1)} MB</div>
+    </div>
+    <button class="preview-remove" onclick="clearFile('pdf')">✕</button>
+  </div>`;
+  checkUnsaved();
+}
+
+function clearFile(type) {
+  if (type === 'img') {
+    newImgFile = null;
+    $('img-file-input').value = '';
+    $('img-preview-box').style.display = 'none';
+    $('img-preview-box').innerHTML = '';
+  } else {
+    newPdfFile = null;
+    $('pdf-file-input').value = '';
+    $('pdf-preview-box').style.display = 'none';
+    $('pdf-preview-box').innerHTML = '';
+  }
+  checkUnsaved();
+}
+
+function openUrlPreview(type) {
+  const url = type === 'pdf' ? getVal('f-pdf-url') : getVal('f-image-url');
+  if (!url) { showToast('กรุณาใส่ URL ก่อน', 'warn'); return; }
+  const fullUrl = url.startsWith('http') ? url :
+    `${SUPABASE_URL}/storage/v1/object/public/${type === 'pdf' ? 'charter-pdfs' : 'charter-images'}/${url.replace(/^\//, '')}`;
+  window.open(fullUrl, '_blank');
+}
+
+// ── UPLOAD ───────────────────────────────────────────────────
+
+// แยก path ของไฟล์จาก public URL ของ Supabase Storage
+function extractStoragePath(publicUrl, bucket) {
+  if (!publicUrl) return null;
+  try {
+    // รูปแบบ URL: .../storage/v1/object/public/{bucket}/{path}
+    const marker = `/object/public/${bucket}/`;
+    const idx = publicUrl.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(publicUrl.slice(idx + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+// ลบไฟล์เก่าออกจาก Storage (ไม่ throw ถ้าลบไม่ได้)
+async function deleteOldFile(oldUrl, bucket) {
+  const path = extractStoragePath(oldUrl, bucket);
+  if (!path) return; // ไม่ใช่ URL ของ Storage นี้ ข้ามได้
+  try {
+    const { error } = await db.storage.from(bucket).remove([path]);
+    if (error) console.warn(`ลบไฟล์เก่าไม่สำเร็จ (${bucket}/${path}):`, error.message);
+    else console.log(`ลบไฟล์เก่าสำเร็จ: ${bucket}/${path}`);
+  } catch (e) {
+    console.warn('deleteOldFile error:', e);
+  }
+}
+
+async function uploadFile(file, bucket) {
+  const ext = file.name.split('.').pop();
+  const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await db.storage.from(bucket).upload(filename, file, { contentType: file.type, upsert: false });
+  if (error) throw new Error(error.message);
+  const { data: { publicUrl } } = db.storage.from(bucket).getPublicUrl(filename);
+  return publicUrl;
+}
+
+// ── SAVE ─────────────────────────────────────────────────────
+async function saveRecord() {
+  const btn = $('save-btn');
+  const name = getVal('f-charter-name');
+  const province = getVal('f-province');
+
+  if (!name) { showToast('กรุณากรอกชื่อธรรมนูญสุขภาพ', 'error'); $('f-charter-name').focus(); return; }
+  if (!province) { showToast('กรุณาเลือกจังหวัด', 'error'); $('f-province').focus(); return; }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-label').textContent = 'กำลังบันทึก...';
+
+  try {
+    let imageUrl = getVal('f-image-url') || null;
+    let pdfUrl   = getVal('f-pdf-url')   || null;
+
+    if (newImgFile) {
+      showToast('กำลังอัปโหลดรูปภาพ...', 'info', 60000);
+      // ลบรูปเก่าก่อน (ถ้ามี)
+      const oldImageUrl = originalData.image_url || null;
+      if (oldImageUrl) await deleteOldFile(oldImageUrl, 'charter-images');
+      // อัปโหลดรูปใหม่
+      imageUrl = await uploadFile(newImgFile, 'charter-images');
+    }
+    if (newPdfFile) {
+      showToast('กำลังอัปโหลด PDF...', 'info', 60000);
+      // ลบ PDF เก่าก่อน (ถ้ามี)
+      const oldPdfUrl = originalData.pdf_url || null;
+      if (oldPdfUrl) await deleteOldFile(oldPdfUrl, 'charter-pdfs');
+      // อัปโหลด PDF ใหม่
+      pdfUrl = await uploadFile(newPdfFile, 'charter-pdfs');
+    }
+
+    const payload = {
+      charter_name:       name,
+      title:              getVal('f-title')        || null,
+      publish_date:       getVal('f-publish-date') || null,
+      status:             getVal('f-status')       || null,
+      zone:               getVal('f-zone')         || null,
+      province:           province,
+      district:           getVal('f-district')     || null,
+      subdistrict:        getVal('f-subdistrict')  || null,
+      leader:             getVal('f-leader')        || null,
+      academic_supporter: getVal('f-academic')     || null,
+      phone:              getVal('f-phone')         || null,
+      pdf_url:            pdfUrl,
+      image_url:          imageUrl,
+    };
+
+    const { error } = await db.from('data_charter').update(payload).eq('id', recordId);
+    if (error) throw new Error(error.message);
+
+    // Success
+    originalData = { ...originalData, ...payload };
+    hasChanges = false;
+    newImgFile = null;
+    newPdfFile = null;
+    document.querySelectorAll('.changed').forEach(el => el.classList.remove('changed'));
+    $('unsaved-bar').classList.remove('show');
+    $('preview-name').textContent = name;
+
+    showToast('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 25); // หน่วงเวลาเล็กน้อยให้ผู้ใช้เห็นข้อความยืนยันก่อน
+
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาด: ' + err.message, 'error', 7000);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-label').textContent = '💾 บันทึกการเปลี่ยนแปลง';
+  }
+}
+
+// ── DRAG & DROP ───────────────────────────────────────────────
+function setupDragDrop() {
+  ['img-upload-zone', 'pdf-upload-zone'].forEach(zoneId => {
+    const zone = $(zoneId);
+    if (!zone) return;
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      if (zoneId === 'img-upload-zone') {
+        if (!file.type.startsWith('image/')) { showToast('กรุณาเลือกไฟล์รูปภาพ', 'error'); return; }
+        handleImageFile({ files: [file] });
+      } else {
+        if (file.type !== 'application/pdf') { showToast('กรุณาเลือกไฟล์ PDF', 'error'); return; }
+        handlePdfFile({ files: [file] });
+      }
+    });
+  });
+}
+
+window.addEventListener('beforeunload', e => {
+  if (hasChanges) { e.preventDefault(); e.returnValue = ''; }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  recordId = getUrlParam('id');
+  if (!recordId) {
+    $('loading-wrap').style.display = 'none';
+    $('error-wrap').style.display = 'block';
+    $('error-msg').textContent = 'ไม่พบ ID ใน URL กรุณาเปิดหน้านี้จากปุ่มแก้ไขในแผนที่';
+    return;
+  }
+  setupDragDrop();
+  loadRecord(recordId);
+});
+</script>
+</body>
+</html>
