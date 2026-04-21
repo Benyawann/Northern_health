@@ -11,7 +11,6 @@
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/style.css">
 
-
 </head>
 <body>
 <div class="app">
@@ -19,7 +18,15 @@
   <nav class="topnav">
   <div class="topnav-logo" onclick="window.location.href='index.html'">🌿 Data Area North</div>
 
-  <div class="topnav-links">
+  
+  <!-- ✅ ปุ่ม Hamburger (แสดงเฉพาะมือถือ) -->
+  <button class="mobile-toggle" id="mobile-toggle" aria-label="เปิดเมนู" onclick="toggleMobileMenu()">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+
+  <div class="topnav-links" id="topnav-links">
   <a class="nav-link active" onclick="window.location.href='index.html'">ธรรมนูญสุขภาพ</a>
   <a class="nav-link" href="https://infocenter.nationalhealth.or.th/ข้อมูลผู้ป่วยที่มีการว/" target="_blank">มาตรา 12</a>
   <a class="nav-link" onclick="window.location.href='4pw.html'">4PW</a>
@@ -189,7 +196,7 @@
       <div class="footer-contact">
         <span><span class="contact-label">ผู้พัฒนา:</span>นางสาวเบญวรรณ สาธุชน</span>
         <span><span class="contact-label">อีเมล:</span> <a href="mailto:benyawansathuchon@gmail.com" class="contact-link" target="_blank" style="text-decoration: none; color:var(--muted, #aaa)">benyawansathuchon@gmail.com</a></span>
-        <span><span class="contact-label">โทร:</span> 063-542-0279</span>
+        <span><span class="contact-label">โทร:</span> 063 542 0279</span>
       </div>
     </div>
     
@@ -902,7 +909,7 @@ function buildMarkers(data) {
     const m = L.marker(coords, { icon }).addTo(mainLayer);
     m.bindTooltip(`
       <b>${label}</b><br>
-      <span style="font-size:11px;color:#555;">${cnt} ธรรมนูญสุขภาพ</span>
+      <span style="font-size:11px;color:#555;">ธรรมนูญสุขภาพ: ${cnt} ฉบับ</span>
     `, { direction:'top', offset:[0,-size/2-4], opacity:0.95 });
     m.on('click', () => openMapModal(label, rows));
   });
@@ -1046,6 +1053,7 @@ let pendingDelRecordId = null;
 async function openEditRecord(id) {
   const { data, error } = await db.from('data_charter').select('*').eq('id', id).single();
   if (error || !data) { showToast('โหลดข้อมูลไม่สำเร็จ','','error'); return; }
+  window.open(`edit_health.html?id=${id}`, '_blank');
  
   document.getElementById('edit-record-id').value = data.id;
   document.getElementById('edit-charter-name').value = data.charter_name || '';
@@ -1271,6 +1279,122 @@ window.addEventListener('scroll', () => {
   } else {
     nav.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
     nav.style.borderBottomColor = 'var(--border)'; // หรือค่าสีเดิม
+  }
+});
+
+// ✅ Toggle เมนูมือถือ
+function toggleMobileMenu() {
+  const menu = document.getElementById('topnav-links');
+  const btn = document.getElementById('mobile-toggle');
+  
+  if (menu && btn) {
+    menu.classList.toggle('active');
+    btn.classList.toggle('active'); // เพื่อเปลี่ยนรูปปุ่มเป็นกากบาท
+  }
+}
+
+// ✅ ปรับปรุง toggleHiaMenu ให้รองรับมือถือ (ปิดเมนูหลักเมื่อคลิกรายการย่อย)
+function toggleHiaMenu(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = e.currentTarget;
+  
+  if (submenu) {
+    submenu.classList.toggle('show');
+    if (toggle) toggle.classList.toggle('active');
+  }
+  
+  // ถ้าเป็นมือถือ ให้เลื่อนไปเห็นเมนูย่อย
+  if (window.innerWidth <= 768 && submenu.classList.contains('show')) {
+    submenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ✅ ปิดเมนูเมื่อคลิกที่อื่น (รวมถึงเมื่อคลิกลิงก์)
+document.addEventListener('click', (e) => {
+  const submenu = document.getElementById('hia-submenu');
+  const toggle = document.querySelector('.nav-dropdown-toggle');
+  const mobileMenu = document.getElementById('topnav-links');
+  const mobileBtn = document.getElementById('mobile-toggle');
+  
+  // ปิด submenu HIA
+  if (submenu && !e.target.closest('.nav-dropdown')) {
+    submenu.classList.remove('show');
+    if (toggle) toggle.classList.remove('active');
+  }
+  
+  // ปิดเมนูมือถือเมื่อคลิกลิงก์ (เพื่อให้หน้าเปลี่ยนและเมนูหุบ)
+  if (mobileMenu && mobileMenu.classList.contains('active') && 
+      e.target.closest('.nav-link') && !e.target.closest('.nav-dropdown-toggle')) {
+    mobileMenu.classList.remove('active');
+    if (mobileBtn) mobileBtn.classList.remove('active');
+  }
+});
+
+// ✅ Toggle User Menu on Mobile
+function toggleUserMenu() {
+  if (window.innerWidth <= 768) {
+    const menu = document.createElement('div');
+    menu.id = 'mobile-user-menu';
+    menu.style.cssText = `
+      position: absolute;
+      top: 52px;
+      right: 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 999;
+      min-width: 140px;
+    `;
+    menu.innerHTML = `
+      <div style="padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text);">
+        ${document.getElementById('user-name')?.textContent || 'ผู้ใช้'}
+      </div>
+      <div style="padding: 8px 16px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);">
+        ${document.getElementById('user-role')?.textContent || 'user'}
+      </div>
+      <button onclick="handleLogout(); document.getElementById('mobile-user-menu')?.remove();" 
+        style="width: 100%; padding: 8px 16px; text-align: left; font-size: 13px; color: var(--red); background: none; border: none; cursor: pointer;">
+        🚪 ออกจากระบบ
+      </button>
+    `;
+    
+    // ลบเมนูเก่าถ้ามี
+    document.getElementById('mobile-user-menu')?.remove();
+    document.body.appendChild(menu);
+    
+    // ปิดเมื่อคลิกที่อื่น
+    setTimeout(() => {
+      document.addEventListener('click', function closeMenu(e) {
+        if (!e.target.closest('#mobile-user-menu') && !e.target.closest('#user-avatar')) {
+          menu.remove();
+          document.removeEventListener('click', closeMenu);
+        }
+      });
+    }, 100);
+  }
+}
+
+// ✅ เพิ่ม onclick ที่ avatar
+document.addEventListener('DOMContentLoaded', () => {
+  const avatar = document.getElementById('user-avatar');
+  if (avatar) {
+    avatar.style.cursor = 'pointer';
+    avatar.onclick = toggleUserMenu;
+  }
+});
+
+// ✅ ปิดเมนูเมื่อเปลี่ยนขนาดหน้าจอ (ป้องกันเมนูค้าง)
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    const menu = document.getElementById('topnav-links');
+    const btn = document.getElementById('mobile-toggle');
+    if (menu) menu.classList.remove('active');
+    if (btn) btn.classList.remove('active');
   }
 });
 </script>
