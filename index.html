@@ -157,6 +157,7 @@
           <div class="card-sub">แสดงสัดส่วนแต่ละขั้นตอนการดำเนินงาน</div>
           <div id="status-chart-container">
             <div style="text-align:center;padding:20px;color:#aaa;font-size:12px;">กำลังโหลด...</div>
+            <select id="gf-status" style="display:none;"></select>
           </div>
         </div>
 
@@ -412,6 +413,7 @@ function applyFilters() {
   const type   = $('gf-type')?.value || 'all';
   const year   = $('gf-year')?.value || 'all';
   const q      = ($('gf-search')?.value || '').trim().toLowerCase();
+  const status = $('gf-status')?.value || 'all';
 
   filteredCharters = allCharters.filter(r => {
     const p = getProvince(r);
@@ -421,6 +423,8 @@ function applyFilters() {
     if (sub  !== 'all' && r?.subdistrict !== sub) return false;
     if (title !== 'all' && r?.title !== title) return false;
     if (type !== 'all' && (r?.charter_type || '') !== type) return false;
+    if (status !== 'all' && (r?.status || r?.charter_status || '') !== status) return false;
+
     if (year !== 'all') {
       const ry = thYear(r?.publish_date);
       if (ry !== parseInt(year)) return false;
@@ -466,11 +470,24 @@ function fillSelect(id, items, label) {
   if (prev && prev !== 'all') el.value = prev;
 }
 
+// เดิม
 function resetFilters() {
   ['gf-search','gf-zone','gf-province','gf-district','gf-subdistrict','gf-title','gf-type','gf-year'].forEach(id => {
     const el = $(id);
     if (el) el.tagName === 'INPUT' ? el.value = '' : el.value = 'all';
   });
+  applyFilters();
+}
+
+// แก้เป็น
+function resetFilters() {
+  ['gf-search','gf-zone','gf-province','gf-district','gf-subdistrict','gf-title','gf-type','gf-year'].forEach(id => {
+    const el = $(id);
+    if (el) el.tagName === 'INPUT' ? el.value = '' : el.value = 'all';
+  });
+  // reset status filter ด้วย
+  const statusSel = $('gf-status');
+  if (statusSel) statusSel.value = 'all';
   applyFilters();
 }
 
@@ -501,7 +518,6 @@ function renderStatusChart() {
   const total = data.length;
   if (!total) { container.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa;font-size:12px;">ไม่พบข้อมูล</div>'; return; }
 
-  // นับตาม status column หรือใช้ title เป็น fallback
   const counts = {};
   STATUS_STAGES.forEach(s => counts[s.key] = 0);
   let unknown = 0;
@@ -512,22 +528,34 @@ function renderStatusChart() {
     else unknown++;
   });
 
-  // ถ้าไม่มี status column เลย แสดงว่า "ประกาศใช้" ทั้งหมด
   const hasStatus = Object.values(counts).some(v => v > 0);
-  if (!hasStatus) {
-    counts['ประกาศใช้'] = data.length;
-    unknown = 0;
-  }
+  if (!hasStatus) { counts['ประกาศใช้'] = data.length; unknown = 0; }
+
+  // อ่าน status ที่กำลัง filter อยู่
+  const activeStatus = $('gf-status')?.value || 'all';
 
   container.innerHTML = STATUS_STAGES.map(s => {
     const cnt = counts[s.key] || 0;
     const pct = total > 0 ? Math.round((cnt/total)*100) : 0;
+    const isActive = activeStatus === s.key;
     return `
-      <div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div onclick="filterByStatus('${s.key}')" style="
+        margin-bottom:8px;
+        padding:8px 10px;
+        border-radius:8px;
+        border:1.5px solid ${isActive ? s.color : 'transparent'};
+        background:${isActive ? s.color+'18' : '#fafaf8'};
+        cursor:${cnt > 0 ? 'pointer' : 'default'};
+        transition:all 0.15s;
+        opacity:${cnt === 0 ? '0.45' : '1'};
+      "
+      onmouseover="if(${cnt}>0) this.style.background='${s.color}18'"
+      onmouseout="this.style.background='${isActive ? s.color+'18' : '#fafaf8'}'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
           <div style="display:flex;align-items:center;gap:6px;">
             <div style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0;"></div>
-            <span style="font-size:12px;color:var(--text);">${s.label}</span>
+            <span style="font-size:12px;color:var(--text);font-weight:${isActive?'600':'400'};">${s.label}</span>
+            ${isActive ? `<span style="font-size:9px;background:${s.color};color:white;padding:1px 6px;border-radius:10px;">กำลังดู</span>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:11px;color:var(--muted);">${cnt} ฉบับ</span>
@@ -539,15 +567,38 @@ function renderStatusChart() {
         </div>
       </div>`;
   }).join('') + (unknown > 0 ? `
-    <div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+    <div style="margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#fafaf8;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
         <div style="display:flex;align-items:center;gap:6px;">
           <div style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;"></div>
           <span style="font-size:12px;color:var(--text);">ไม่ระบุสถานะ</span>
         </div>
         <span style="font-size:11px;color:var(--muted);">${unknown} ฉบับ</span>
       </div>
-    </div>` : '');
+    </div>` : '') +
+  (activeStatus !== 'all' ? `
+    <button onclick="filterByStatus('all')" style="
+      width:100%;margin-top:4px;padding:7px;border-radius:7px;
+      border:1px dashed #ccc;background:white;color:#888;
+      font-size:11px;font-family:'Kanit',sans-serif;cursor:pointer;
+      transition:all 0.15s;
+    " onmouseover="this.style.borderColor='#999'" onmouseout="this.style.borderColor='#ccc'">
+      ✕ ล้างตัวกรองสถานะ
+    </button>` : '');
+}
+
+function filterByStatus(status) {
+  // สร้าง hidden select ถ้ายังไม่มี
+  let sel = $('gf-status');
+  if (!sel) {
+    sel = document.createElement('select');
+    sel.id = 'gf-status';
+    sel.style.display = 'none';
+    document.body.appendChild(sel);
+  }
+  sel.innerHTML = `<option value="${status}">${status}</option>`;
+  sel.value = status;
+  applyFilters();
 }
 
 // ── ZONE SUMMARY ──────────────────────────────────────────
