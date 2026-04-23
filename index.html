@@ -1050,23 +1050,7 @@ function filterModalRows() {
 let pendingDelRecordId = null;
  
 async function openEditRecord(id) {
-  const { data, error } = await db.from('data_charter').select('*').eq('id', id).single();
-  if (error || !data) { showToast('โหลดข้อมูลไม่สำเร็จ','','error'); return; }
-  window.open(`edit_health.html?id=${id}`, '_blank');
- 
-  document.getElementById('edit-record-id').value = data.id;
-  document.getElementById('edit-charter-name').value = data.charter_name || '';
-  document.getElementById('edit-province').value = data.province || '';
-  document.getElementById('edit-district').value = data.district || '';
-  document.getElementById('edit-subdistrict').value = data.subdistrict || '';
-  document.getElementById('edit-title').value = data.title || '';
-  document.getElementById('edit-publish-date').value = data.publish_date || '';
-  document.getElementById('edit-leader').value = data.leader || '';
-  document.getElementById('edit-academic').value = data.academic_supporter || '';
-  document.getElementById('edit-pdf-url').value = data.pdf_url || '';
- 
-  document.getElementById('edit-record-ov').classList.add('show');
-  document.body.style.overflow = 'hidden';
+  window.location.href = `edit_health.html?id=${id}`;
 }
  
 function closeEditRecord() {
