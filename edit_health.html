@@ -438,8 +438,6 @@ function trackChanges() {
 function checkUnsaved() {
   const anyChanged = document.querySelectorAll('.form-input.changed,.form-select.changed,.form-textarea.changed').length > 0;
   hasChanges = anyChanged || newImgFile !== null || newPdfFile !== null;
-  // unsaved-bar exists in this file, safe to use
-  $('unsaved-bar').classList.toggle('show', hasChanges);
 }
 
 function resetForm() {
