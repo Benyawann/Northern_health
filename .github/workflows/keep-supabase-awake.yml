@@ -13,7 +13,7 @@ jobs:
         run: |
           echo "🔍 Pinging Supabase..."
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://oaemdjvtphyrrfdxizzm.supabase.co/rest/v1/station_data?select=id&limit=1" \
+            "https://zfnualnoorhtdkrqwjpa.supabase.co/rest/v1/data_charter?select=id&limit=1" \
             -H "apikey: ${SUPABASE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_KEY}")
           
