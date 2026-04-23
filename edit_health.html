@@ -564,8 +564,8 @@ async function saveRecord() {
   btn.querySelector('.btn-label').textContent = 'กำลังบันทึก...';
 
   try {
-    let imageUrl = getVal('f-image-url') || null;
-    let pdfUrl   = getVal('f-pdf-url')   || null;
+    let imageUrl = originalData.image_url || null;
+    let pdfUrl   = originalData.pdf_url   || null;
 
     if (newImgFile) {
       showToast('กำลังอัปโหลดรูปภาพ...', 'info', 60000);
