@@ -38,7 +38,7 @@
       HIA <span class="arrow">▼</span>
     </div>
     <ul class="nav-submenu" id="hia-submenu">
-      <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank" style="font-size: 14px;">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
+      <li><a class="nav-link" href="https://kokdatanewversion.vercel.app/" target="_blank">📊 เว็บไซต์ตรวจคุณภาพน้ำและดินในแม่น้ำกก</a></li>
     </ul>
   </div>
   <a class="nav-link" onclick="window.location.href='network.html'">ฐานข้อมูลเครือข่าย</a>
@@ -219,7 +219,7 @@
     <div class="modal-header">
       <div>
         <div id="modal-title" style="font-size:15px;font-weight:600;color:var(--text);">📍 พื้นที่</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;"><span id="modal-count">0</span> ธรรมนูญสุขภาพ</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">ธรรมนูญสุขภาพ: <span id="modal-count">0</span> ฉบับ</div>
       </div>
       <button class="modal-close-btn" onclick="closeMapModal()" aria-label="ปิด">✕</button>
     </div>
@@ -951,7 +951,7 @@ function buildMarkers(data) {
     const m = L.marker(coords, { icon }).addTo(mainLayer);
     m.bindTooltip(`
       <b>${label}</b><br>
-      <span style="font-size:11px;color:#555;">${cnt} ธรรมนูญสุขภาพ</span>
+      <span style="font-size:11px;color:#555;">ธรรมนูญสุขภาพ ${cnt} ฉบับ</span>
     `, { direction:'top', offset:[0,-size/2-4], opacity:0.95 });
     m.on('click', () => openMapModal(label, rows));
   });
