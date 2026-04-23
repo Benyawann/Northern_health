@@ -441,25 +441,118 @@ function applyFilters() {
 }
 
 function populateFilters() {
-  const provinces = [...new Set(allCharters.map(r=>r?.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  // จังหวัด: ดึงจาก allCharters ทั้งหมด
+  const provinces = [...new Set(allCharters.map(r=>r?.province).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'th'));
   fillSelect('gf-province', provinces, 'จังหวัด');
-  fillSelect('mf-province', provinces, 'จังหวัด');
 
-  const districts = [...new Set(allCharters.map(r=>r?.district).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-district', districts, 'อำเภอ');
-  fillSelect('mf-district', districts, 'อำเภอ');
-
-  const subs = [...new Set(allCharters.map(r=>r?.subdistrict).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-subdistrict', subs, 'ตำบล');
-  fillSelect('mf-subdistrict', subs, 'ตำบล');
-
-  const titles = [...new Set(allCharters.map(r=>r?.title).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  // ประเด็น
+  const titles = [...new Set(allCharters.map(r=>r?.title).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'th'));
   fillSelect('gf-title', titles, 'ประเด็น');
 
-  const years = [...new Set(allCharters.map(r=>thYear(r?.publish_date)).filter(Boolean))].sort((a,b)=>b-a);
+  // ปี
+  const years = [...new Set(allCharters.map(r=>thYear(r?.publish_date)).filter(Boolean))]
+    .sort((a,b)=>b-a);
   const ySel = $('gf-year');
   if (ySel) {
-    ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + 
+      years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  }
+
+  // อำเภอและตำบล: ให้เริ่มว่างก่อน (จะ populate เมื่อเลือกจังหวัด/อำเภอ)
+  const distSel = $('gf-district');
+  if (distSel) distSel.innerHTML = '<option value="all">อำเภอ</option>';
+  
+  const subSel = $('gf-subdistrict');
+  if (subSel) subSel.innerHTML = '<option value="all">ตำบล</option>';
+}
+
+function onProvinceChange() {
+  const province = $('gf-province')?.value;
+  const distSel = $('gf-district');
+  const subSel = $('gf-subdistrict');
+
+  if (distSel) distSel.innerHTML = '<option value="all">อำเภอ</option>';
+  if (subSel) subSel.innerHTML = '<option value="all">ตำบล</option>';
+
+  if (province && province !== 'all') {
+    const districts = [...new Set(
+      allCharters
+        .filter(r => cleanName(r?.province) === cleanName(province))
+        .map(r => r?.district)
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'th'));
+
+    if (distSel) {
+      distSel.innerHTML = '<option value="all">อำเภอ</option>' +
+        districts.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+  }
+  updateTitleFilter();
+  applyFilters();
+}
+
+// ฟังก์ชัน cascade: เมื่อเลือกอำเภอ
+function onDistrictChange() {
+  const province = $('gf-province')?.value;
+  const district = $('gf-district')?.value;
+  const subSel = $('gf-subdistrict');
+
+  // reset ตำบล
+  if (subSel) subSel.innerHTML = '<option value="all">ตำบล</option>';
+
+  if (district && district !== 'all') {
+    // กรองตำบลตามจังหวัด+อำเภอที่เลือก
+    const subs = [...new Set(
+      allCharters
+        .filter(r => {
+          const provMatch = !province || province === 'all' || cleanName(r?.province) === cleanName(province);
+          return provMatch && r?.district === district;
+        })
+        .map(r => r?.subdistrict)
+        .filter(Boolean)
+    )].sort((a,b) => a.localeCompare(b,'th'));
+
+    if (subSel) {
+      subSel.innerHTML = '<option value="all">ตำบล</option>' + 
+        subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    }
+  }
+  updateTitleFilter();
+  applyFilters();
+}
+
+// ฟังก์ชัน update ประเด็น ตาม context ที่เลือก
+function updateTitleFilter() {
+  const province = $('gf-province')?.value;
+  const district = $('gf-district')?.value;
+  const sub      = $('gf-subdistrict')?.value;
+  const titleSel = $('gf-title');
+  if (!titleSel) return;
+
+  const prevTitle = titleSel.value;
+
+  // กรองข้อมูลตาม context ปัจจุบัน (ก่อนกรอง title)
+  const contextRows = allCharters.filter(r => {
+    const p = getProvince(r);
+    if (province && province !== 'all' && p !== cleanName(province)) return false;
+    if (district && district !== 'all' && r?.district !== district) return false;
+    if (sub && sub !== 'all' && r?.subdistrict !== sub) return false;
+    return true;
+  });
+
+  const titles = [...new Set(contextRows.map(r => r?.title).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'th'));
+
+  titleSel.innerHTML = '<option value="all">ประเด็น</option>' +
+    titles.map(t => `<option value="${t}">${t}</option>`).join('');
+
+  // รักษาค่าเดิมถ้ายังอยู่ใน list
+  if (prevTitle && prevTitle !== 'all' && titles.includes(prevTitle)) {
+    titleSel.value = prevTitle;
+  } else {
+    titleSel.value = 'all';
   }
 }
 
@@ -471,22 +564,33 @@ function fillSelect(id, items, label) {
 }
 
 function resetFilters() {
-  ['gf-search','gf-zone','gf-province','gf-district','gf-subdistrict','gf-title','gf-type','gf-year'].forEach(id => {
+  ['gf-search','gf-zone','gf-title','gf-type','gf-year'].forEach(id => {
     const el = $(id);
     if (el) el.tagName === 'INPUT' ? el.value = '' : el.value = 'all';
   });
-  applyFilters();
-}
 
-// แก้เป็น
-function resetFilters() {
-  ['gf-search','gf-zone','gf-province','gf-district','gf-subdistrict','gf-title','gf-type','gf-year'].forEach(id => {
-    const el = $(id);
-    if (el) el.tagName === 'INPUT' ? el.value = '' : el.value = 'all';
-  });
-  // reset status filter ด้วย
+  const provSel = $('gf-province');
+  if (provSel) provSel.value = 'all';
+
+  const distSel = $('gf-district');
+  if (distSel) distSel.innerHTML = '<option value="all">อำเภอ</option>';
+
+  const subSel = $('gf-subdistrict');
+  if (subSel) subSel.innerHTML = '<option value="all">ตำบล</option>';
+
+  // ← restore ประเด็นทั้งหมด
+  const titles = [...new Set(allCharters.map(r => r?.title).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'th'));
+  const titleSel = $('gf-title');
+  if (titleSel) {
+    titleSel.innerHTML = '<option value="all">ประเด็น</option>' +
+      titles.map(t => `<option value="${t}">${t}</option>`).join('');
+    titleSel.value = 'all';
+  }
+
   const statusSel = $('gf-status');
   if (statusSel) statusSel.value = 'all';
+
   applyFilters();
 }
 
@@ -1292,7 +1396,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Filter strip events
   const debouncedFilter = debounce(applyFilters, 300);
   $('gf-search')?.addEventListener('input', debouncedFilter);
-  ['gf-zone','gf-province','gf-district','gf-subdistrict','gf-title','gf-type','gf-year'].forEach(id => {
+
+  // Cascading dropdowns
+  $('gf-province')?.addEventListener('change', onProvinceChange);
+  $('gf-district')?.addEventListener('change', onDistrictChange);
+  $('gf-subdistrict')?.addEventListener('change', () => {
+  updateTitleFilter();
+  applyFilters();
+});
+
+  // ตัวกรองอื่นๆ ที่ไม่ต้อง cascade
+  ['gf-zone','gf-title','gf-type','gf-year'].forEach(id => {
     $(id)?.addEventListener('change', applyFilters);
   });
 
