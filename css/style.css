@@ -93,7 +93,7 @@ body {
 
 .nav-link {
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: 14px;
   color: #666;
   border-radius: 7px;
   cursor: pointer;
@@ -787,12 +787,6 @@ td {
 .btn-view:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(55, 138, 221, 0.2);
-}
-
-/* ปุ่มดูแบบเล็ก */
-.btn-sm {
-  padding: 5px 12px;
-  font-size: 11px;
 }
 
 /* ปุ่ม PDF */
@@ -3862,7 +3856,7 @@ tr:hover td {
   .topnav-links {
     display: none; /* ซ่อนเมนูบนมือถือ หรือทำ hamburger menu */
   }
-  .topnav { padding: 0 14px; }
+  .topnav { padding: 0 17px; }
 }
 
 @media (max-width: 768px) {
@@ -4276,7 +4270,7 @@ tr:hover td {
   /* 5. สไตล์ลิงก์ในเมนูมือถือ */
   .topnav-links .nav-link {
     padding: 12px 0;
-    font-size: 14px;
+    font-size: 16px;
     border-bottom: 1px solid rgba(0,0,0,0.05);
     width: 100%;
     text-align: center;
@@ -4311,7 +4305,7 @@ tr:hover td {
   }
   .nav-submenu .nav-link {
     padding: 8px 0;
-    font-size: 13px;
+    font-size: 15px;
     color: var(--muted, #666);
     border: none;
   }
