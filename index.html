@@ -444,7 +444,6 @@ function populateFilters() {
   // จังหวัด: ดึงจาก allCharters ทั้งหมด
   const provinces = [...new Set(allCharters.map(r=>r?.province).filter(Boolean))]
     .sort((a,b)=>a.localeCompare(b,'th'));
-  fillSelect('gf-province', provinces, 'จังหวัด');
 
   // ประเด็น
   const titles = [...new Set(allCharters.map(r=>r?.title).filter(Boolean))]
@@ -459,6 +458,7 @@ function populateFilters() {
     ySel.innerHTML = '<option value="all">ปี พ.ศ.</option>' + 
       years.map(y=>`<option value="${y}">${y}</option>`).join('');
   }
+  onZoneChange();
 
   // อำเภอและตำบล: ให้เริ่มว่างก่อน (จะ populate เมื่อเลือกจังหวัด/อำเภอ)
   const distSel = $('gf-district');
@@ -490,6 +490,7 @@ function onProvinceChange() {
     }
   }
   updateTitleFilter();
+  updateYearFilter();
   applyFilters();
 }
 
@@ -520,11 +521,13 @@ function onDistrictChange() {
     }
   }
   updateTitleFilter();
+  updateYearFilter();
   applyFilters();
 }
 
 // ฟังก์ชัน update ประเด็น ตาม context ที่เลือก
 function updateTitleFilter() {
+  const zone     = $('gf-zone')?.value;
   const province = $('gf-province')?.value;
   const district = $('gf-district')?.value;
   const sub      = $('gf-subdistrict')?.value;
@@ -536,6 +539,7 @@ function updateTitleFilter() {
   // กรองข้อมูลตาม context ปัจจุบัน (ก่อนกรอง title)
   const contextRows = allCharters.filter(r => {
     const p = getProvince(r);
+    if (zone && zone !== 'all' && getZone(p) !== zone) return false;
     if (province && province !== 'all' && p !== cleanName(province)) return false;
     if (district && district !== 'all' && r?.district !== district) return false;
     if (sub && sub !== 'all' && r?.subdistrict !== sub) return false;
@@ -553,6 +557,38 @@ function updateTitleFilter() {
     titleSel.value = prevTitle;
   } else {
     titleSel.value = 'all';
+  }
+}
+
+function updateYearFilter() {
+  const zone     = $('gf-zone')?.value;
+  const province = $('gf-province')?.value;
+  const district = $('gf-district')?.value;
+  const sub      = $('gf-subdistrict')?.value;
+  const yearSel  = $('gf-year');
+  if (!yearSel) return;
+
+  const prevYear = yearSel.value;
+
+  const contextRows = allCharters.filter(r => {
+    const p = getProvince(r);
+    if (zone     && zone     !== 'all' && getZone(p) !== zone)          return false;
+    if (province && province !== 'all' && p !== cleanName(province))     return false;
+    if (district && district !== 'all' && r?.district !== district)      return false;
+    if (sub      && sub      !== 'all' && r?.subdistrict !== sub)        return false;
+    return true;
+  });
+
+  const years = [...new Set(contextRows.map(r => thYear(r?.publish_date)).filter(Boolean))]
+    .sort((a, b) => b - a);
+
+  yearSel.innerHTML = '<option value="all">ปี พ.ศ.</option>' +
+    years.map(y => `<option value="${y}">${y}</option>`).join('');
+
+  if (prevYear && prevYear !== 'all' && years.includes(parseInt(prevYear))) {
+    yearSel.value = prevYear;
+  } else {
+    yearSel.value = 'all';
   }
 }
 
@@ -578,19 +614,40 @@ function resetFilters() {
   const subSel = $('gf-subdistrict');
   if (subSel) subSel.innerHTML = '<option value="all">ตำบล</option>';
 
-  // ← restore ประเด็นทั้งหมด
-  const titles = [...new Set(allCharters.map(r => r?.title).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'th'));
-  const titleSel = $('gf-title');
-  if (titleSel) {
-    titleSel.innerHTML = '<option value="all">ประเด็น</option>' +
-      titles.map(t => `<option value="${t}">${t}</option>`).join('');
-    titleSel.value = 'all';
-  }
-
   const statusSel = $('gf-status');
   if (statusSel) statusSel.value = 'all';
 
+  updateTitleFilter();
+  updateYearFilter();  
+  applyFilters();
+}
+
+function onZoneChange() {
+  const zone = $('gf-zone')?.value;
+  const provSel = $('gf-province');
+  const distSel = $('gf-district');
+  const subSel  = $('gf-subdistrict');
+
+  // reset อำเภอ / ตำบล
+  if (distSel) distSel.innerHTML = '<option value="all">อำเภอ</option>';
+  if (subSel)  subSel.innerHTML  = '<option value="all">ตำบล</option>';
+
+  // กรองจังหวัดตามเขตที่เลือก + ต้องมีข้อมูลใน allCharters
+  if (provSel) {
+    let candidates = allCharters;
+    if (zone !== 'all') {
+      const allowedProvs = ZONE_MAP[zone] || [];
+      candidates = candidates.filter(r => allowedProvs.includes(cleanName(r?.province)));
+    }
+    const provinces = [...new Set(candidates.map(r => r?.province).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'th'));
+    
+    provSel.innerHTML = '<option value="all">จังหวัด</option>' +
+      provinces.map(p => `<option value="${p}">${p}</option>`).join('');
+  }
+
+  updateTitleFilter();
+  updateYearFilter();
   applyFilters();
 }
 
@@ -1402,11 +1459,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('gf-district')?.addEventListener('change', onDistrictChange);
   $('gf-subdistrict')?.addEventListener('change', () => {
   updateTitleFilter();
+  updateYearFilter();
   applyFilters();
 });
 
   // ตัวกรองอื่นๆ ที่ไม่ต้อง cascade
-  ['gf-zone','gf-title','gf-type','gf-year'].forEach(id => {
+  $('gf-zone')?.addEventListener('change', onZoneChange);
+  ['gf-title','gf-type','gf-year'].forEach(id => {
     $(id)?.addEventListener('change', applyFilters);
   });
 
