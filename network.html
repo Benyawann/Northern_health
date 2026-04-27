@@ -548,7 +548,7 @@ function renderTable() {
       </td>
       <td>
         <div class="nw-phone">
-          ${r.phone ? `<a href="tel:${r.phone}">${escHtml(r.phone)}</a>` : '—'}
+          ${r.phone ? escHtml(r.phone) : '—'}
         </div>
       </td>
       <td style="${isLoggedIn?'':'display:none'}">

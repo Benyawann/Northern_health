@@ -3188,6 +3188,15 @@ tr:hover td {
 
     .nw-search-input { flex: 3; min-width: 220px; }
 
+  .nw-modal input:-webkit-autofill,
+  .nw-modal input:-webkit-autofill:hover,
+  .nw-modal input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
     /* ── TYPE PILLS ── */
     .type-pills {
       display: flex;
@@ -3365,12 +3374,13 @@ tr:hover td {
       font-size: 12px;
       color: var(--text);
       white-space: nowrap;
+
     }
     .nw-phone a {
-      color: var(--blue);
+      color: var(--text);
       text-decoration: none;
     }
-    .nw-phone a:hover { text-decoration: underline; }
+    .nw-phone a:hover { text-decoration: none; }
 
     
 
