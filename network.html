@@ -374,25 +374,13 @@ function populateProvinceDropdown(selectId, zoneKey) {
     provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
 
   } else {
-    // ── modal: เปลี่ยนเป็น datalist แทน select ──
+    // modal ยังใช้ ZONES static เหมือนเดิม
     const provinces = (!zoneKey || zoneKey === 'all')
       ? ALL_PROVINCES
       : (ZONES[zoneKey]?.provinces || []);
 
-    // เติม datalist ให้ input
-    const datalist = document.getElementById('province-datalist');
-    if (datalist) {
-      datalist.innerHTML = '';
-      provinces.forEach(p => {
-        datalist.innerHTML += `<option value="${p}">`;
-      });
-    }
-
-    // clear ค่าเดิมใน input เมื่อเปลี่ยนเขต
-    const input = $(selectId);
-    if (input && input.tagName === 'INPUT') {
-      input.value = '';
-    }
+    sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>';
+    provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
   }
 }
 
@@ -606,7 +594,7 @@ function openEditModal(id) {
   $('modal-address').value = r.address||'';
   $('modal-phone').value = r.phone||'';
   populateProvinceDropdown('modal-province-sel', r.zone||'');
-  $('modal-province-sel').value = r.province||'';
+  setTimeout(()=>{ $('modal-province-sel').value = r.province||''; }, 50);
   $('nw-modal-ov').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
@@ -622,7 +610,7 @@ async function saveRecord() {
   const name = $('modal-name').value.trim();
   const type = $('modal-type').value;
   const zone = $('modal-zone').value;
-  const province = ($('modal-province-sel').value || '').trim();
+  const province = $('modal-province-sel').value;
 
   if (!name || !type || !zone || !province) {
     showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
