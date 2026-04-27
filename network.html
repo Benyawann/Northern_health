@@ -522,7 +522,7 @@ function renderTable() {
   const pageData = filtered.slice(start, start+PAGE_SIZE);
 
   if (!pageData.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="nw-empty">🔍 ไม่พบข้อมูล${allRecords.length === 0 ? ' (ตารางว่างเปล่า)' : ''}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="nw-empty">🔍 ไม่พบข้อมูล${allRecords.length === 0 ? '' : ''}</td></tr>`;
     $('nw-pager').style.display = 'none';
     return;
   }
