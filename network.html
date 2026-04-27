@@ -7,7 +7,6 @@
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="css/network.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 <body>
 <div class="app">
@@ -45,7 +44,7 @@
             <path d="M7 7C8.65685 7 10 5.65685 10 4C10 2.34315 8.65685 1 7 1C5.34315 1 4 2.34315 4 4C4 5.65685 5.34315 7 7 7Z" stroke="currentColor" stroke-width="1.2"/>
             <path d="M1 13C1 10.2386 3.68629 8 7 8C10.3137 8 13 10.2386 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
           </svg>
-            เข้าสู่ระบบ
+          เข้าสู่ระบบ
         </button>
       </div>
       <div id="auth-logged-in" style="display:none;align-items:center;gap:8px;">
@@ -76,12 +75,10 @@
 
       <!-- FILTER BAR -->
       <div class="nw-filter-bar">
-        <!-- Search -->
         <input type="text" id="nw-search" class="nw-search-input"
                placeholder="🔍 ค้นหาชื่อ องค์กร ที่อยู่..."
                oninput="applyFilters()">
 
-        <!-- Type Pills -->
         <div class="type-pills">
           <button class="type-pill active-all" data-type="all" onclick="setType('all')">ทั้งหมด</button>
           <button class="type-pill" data-type="thammanun" onclick="setType('thammanun')">🌿 ธรรมนูญสุขภาพ</button>
@@ -91,20 +88,16 @@
 
         <div class="filter-sep"></div>
 
-        <!-- Zone -->
         <select id="nw-zone" onchange="onZoneChange()" style="min-width:130px;">
           <option value="all">เขต</option>
         </select>
 
-        <!-- Province -->
         <select id="nw-province" onchange="applyFilters()" style="min-width:140px;">
           <option value="all">จังหวัด</option>
         </select>
 
-        <!-- Reset -->
         <button class="btn-reset-nw" onclick="resetFilters()">ล้างตัวกรอง</button>
 
-        <!-- Add (admin only) -->
         <div id="btn-add-wrap" style="display:none;">
           <button class="btn-add-nw" onclick="openAddModal()">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -153,61 +146,46 @@
     <h3 id="nw-modal-title">เพิ่มข้อมูลเครือข่าย</h3>
     <input type="hidden" id="modal-id">
 
-    <div class="form-grid-2">
-      <div class="form-group">
-        <label>ชื่อ <span class="required">*</span></label>
-        <input type="text" id="modal-name" placeholder="ป้อนชื่อ-นามสกุล">
-      </div>
-      <div class="form-group">
-        <label>องค์กร / หน่วยงาน</label>
-        <input type="text" id="modal-org" placeholder="ป้อนชื่อองค์กร">
-      </div>
+    <div class="form-group">
+      <label>ชื่อ / องค์กร <span class="required">*</span></label>
+      <input type="text" id="modal-name" placeholder="ป้อนชื่อหรือชื่อองค์กร">
     </div>
 
     <div class="form-grid-2">
       <div class="form-group">
         <label>ประเภท <span class="required">*</span></label>
         <select id="modal-type">
-          <option value="">-- เลือกประเภท --</option>
-          <option value="thammanun">ธรรมนูญสุขภาพ</option>
-          <option value="hia">HIA</option>
-          <option value="mat12">มาตรา 12</option>
+          <option value="">ประเภท</option>
+          <option value="ธรรมนูญสุขภาพ">ธรรมนูญสุขภาพ</option>
+          <option value="HIA">HIA</option>
+          <option value="มาตรา12">มาตรา 12</option>
         </select>
       </div>
       <div class="form-group">
         <label>เขต <span class="required">*</span></label>
         <select id="modal-zone" onchange="fillProvinceByZone('modal-province-sel')">
-          <option value="">-- เลือกเขต --</option>
+          <option value="">เขต</option>
         </select>
       </div>
     </div>
 
     <div class="form-group">
       <label>จังหวัด <span class="required">*</span></label>
-      <select id="modal-province-sel">
-        <option value="">-- เลือกจังหวัด --</option>
-      </select>
+      <input type="text" id="modal-province-sel" 
+         list="province-datalist" 
+         placeholder="ป้อนชื่อจังหวัด" 
+         autocomplete="off">
+      <datalist id="province-datalist"></datalist>
     </div>
 
     <div class="form-group">
       <label>ที่อยู่</label>
-      <textarea id="modal-address" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
-    </div>
-
-    <div class="form-grid-2">
-      <div class="form-group">
-        <label>เบอร์โทรศัพท์</label>
-        <input type="tel" id="modal-phone" placeholder="0xx-xxx-xxxx">
-      </div>
-      <div class="form-group">
-        <label>อีเมล</label>
-        <input type="email" id="modal-email" placeholder="example@email.com">
-      </div>
+      <textarea id="modal-address" placeholder="ป้อนที่อยู่"></textarea>
     </div>
 
     <div class="form-group">
-      <label>หมายเหตุ</label>
-      <input type="text" id="modal-note" placeholder="ข้อมูลเพิ่มเติม (ถ้ามี)">
+      <label>เบอร์โทรศัพท์</label>
+      <input type="tel" id="modal-phone" placeholder="ป้อนเบอร์โทรศัพท์">
     </div>
 
     <div class="nw-modal-actions">
@@ -222,25 +200,18 @@
 <div class="main">
 <footer class="site-footer">
   <div class="footer-container">
-    
-    <!-- ส่วนซ้าย: องค์กรและข้อมูลติดต่อ -->
     <div class="footer-content">
       <span class="footer-org">สำนักงานคณะกรรมการสุขภาพแห่งชาติ (สช.)</span>
-      
       <div class="footer-divider"></div>
-      
       <div class="footer-contact">
         <span><span class="contact-label">ผู้พัฒนา:</span>นางสาวเบญวรรณ สาธุชน</span>
         <span><span class="contact-label">อีเมล:</span> <a href="mailto:benyawansathuchon@gmail.com" class="contact-link" target="_blank" style="text-decoration: none; color:var(--muted, #aaa)">benyawansathuchon@gmail.com</a></span>
         <span><span class="contact-label">โทร:</span> 063 542 0279</span>
       </div>
     </div>
-    
-    <!-- ส่วนขวา: ลิขสิทธิ์ (ดันไปขวาด้วย margin-left: auto ใน CSS) -->
     <div class="footer-copyright">
       © 2026  National Health Commission Office (NHCO). All rights reserved.
     </div>
-    
   </div>
 </footer>
 </div>
@@ -266,6 +237,10 @@
 // ── CONFIG ────────────────────────────────────────────
 const SUPABASE_URL = 'https://zfnualnoorhtdkrqwjpa.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbnVhbG5vb3JodGRrcnF3anBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDkyNzEsImV4cCI6MjA5MDQyNTI3MX0._XuqPMrt9_Rx5aFybAqrxmKrlnU5g4JzKKz3aK2SORg';
+
+// ── ใช้ชื่อตาราง data_network ตรงกับ Supabase ──
+const TABLE_NAME = 'data_network';
+
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PAGE_SIZE = 20;
@@ -279,10 +254,11 @@ let isLoggedIn = false;
 const $ = id => document.getElementById(id);
 
 // ── ZONE / PROVINCE DATA ───────────────────────────────
+// zone ใน Supabase เก็บเป็น "เขต 1", "เขต 2", "เขต 3"
 const ZONES = {
-  '1': { name: 'เขต 1', provinces: ['เชียงใหม่','ลำพูน','ลำปาง','แม่ฮ่องสอน'] },
-  '2': { name: 'เขต 2', provinces: ['พิษณุโลก','ตาก','สุโขทัย','อุตรดิตถ์','เพชรบูรณ์'] },
-  '3': { name: 'เขต 3', provinces: ['นครสวรรค์','กำแพงเพชร','ชัยนาท','พิจิตร','อุทัยธานี'] },
+  'เขต 1': { name: 'เขต 1', provinces: ['เชียงใหม่','ลำพูน','ลำปาง','แม่ฮ่องสอน'] },
+  'เขต 2': { name: 'เขต 2', provinces: ['พิษณุโลก','ตาก','สุโขทัย','อุตรดิตถ์','เพชรบูรณ์'] },
+  'เขต 3': { name: 'เขต 3', provinces: ['นครสวรรค์','กำแพงเพชร','ชัยนาท','พิจิตร','อุทัยธานี'] },
 };
 
 const ALL_PROVINCES = Object.values(ZONES).flatMap(z => z.provinces).sort((a,b) => a.localeCompare(b,'th'));
@@ -327,23 +303,26 @@ function handleLogout() {
   setTimeout(()=>location.reload(), 1000);
 }
 
-// ── LOAD DATA ─────────────────────────────────────────
+// ── LOAD DATA จาก Supabase ตาราง data_network ─────────
 async function loadData() {
-  const { data, error } = await db
-    .from('network_contacts')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    showLoadingState();
+    const { data, error } = await db
+      .from(TABLE_NAME)
+      .select('*')
+      .order('id', { ascending: false });
 
-  if (error) {
-    // If table doesn't exist yet, show sample data
-    if (error.code === '42P01') {
-      allRecords = getSampleData();
+    if (error) {
+      console.error('Supabase error:', error);
+      showToast('❌ ไม่สามารถโหลดข้อมูลได้: ' + error.message, true);
+      allRecords = [];
     } else {
-      console.error(error);
-      allRecords = getSampleData();
+      allRecords = data || [];
     }
-  } else {
-    allRecords = data && data.length > 0 ? data : getSampleData();
+  } catch(err) {
+    console.error('Network error:', err);
+    showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', true);
+    allRecords = [];
   }
 
   populateZoneDropdown();
@@ -351,57 +330,74 @@ async function loadData() {
   applyFilters();
 }
 
-function getSampleData() {
-  return [
-    { id:1, name:'นายสมชาย ใจดี', org:'สำนักงานสาธารณสุขจังหวัดเชียงใหม่', type:'thammanun', zone:'1', province:'เชียงใหม่', address:'88 ถ.ศิริมังคลาจารย์ ต.สุเทพ อ.เมือง จ.เชียงใหม่ 50200', phone:'053-211-048', email:'somchai@cmo.moph.go.th', note:'' },
-    { id:2, name:'นางสาวสุภาพร รักษ์ไทย', org:'มหาวิทยาลัยเชียงใหม่', type:'hia', zone:'1', province:'เชียงใหม่', address:'239 ถ.นิมมานเหมินท์ อ.เมือง จ.เชียงใหม่ 50200', phone:'053-943-000', email:'supaporn@cmu.ac.th', note:'ผู้ประสานงาน HIA ภาคเหนือ' },
-    { id:3, name:'นายวิชัย ศรีสวัสดิ์', org:'โรงพยาบาลลำปาง', type:'mat12', zone:'1', province:'ลำปาง', address:'280 ถ.พหลโยธิน ต.หัวเวียง อ.เมือง จ.ลำปาง 52000', phone:'054-237-400', email:'wichai@lampanghospital.go.th', note:'' },
-    { id:4, name:'นางรัตนา พงษ์สุวรรณ', org:'สำนักงานสาธารณสุขจังหวัดพิษณุโลก', type:'thammanun', zone:'2', province:'พิษณุโลก', address:'31 ถ.พิชัยสงคราม อ.เมือง จ.พิษณุโลก 65000', phone:'055-252-030', email:'rattana@plkpho.moph.go.th', note:'' },
-    { id:5, name:'ดร.ประสงค์ เจริญวงศ์', org:'มหาวิทยาลัยนเรศวร', type:'hia', zone:'2', province:'พิษณุโลก', address:'99 ม.9 ต.ท่าโพธิ์ อ.เมือง จ.พิษณุโลก 65000', phone:'055-961-000', email:'prasong@nu.ac.th', note:'อาจารย์คณะสาธารณสุข' },
-    { id:6, name:'นางสาวอัมพร สุขเจริญ', org:'สำนักงานสาธารณสุขจังหวัดสุโขทัย', type:'mat12', zone:'2', province:'สุโขทัย', address:'235 ถ.นิกรเกษม ต.ธานี อ.เมือง จ.สุโขทัย 64000', phone:'055-611-212', email:'ampon@sukhothaisao.moph.go.th', note:'' },
-    { id:7, name:'นายธนวัฒน์ มีสุข', org:'โรงพยาบาลนครสวรรค์', type:'thammanun', zone:'3', province:'นครสวรรค์', address:'200 ถ.โกสีย์ใต้ ต.ปากน้ำโพ อ.เมือง จ.นครสวรรค์ 60000', phone:'056-219-888', email:'thanawat@nkswh.moph.go.th', note:'' },
-  ];
+function showLoadingState() {
+  $('nw-tbody').innerHTML = `<tr><td colspan="7" class="nw-empty">⏳ กำลังโหลดข้อมูลจาก Supabase...</td></tr>`;
 }
 
 // ── POPULATE DROPDOWNS ────────────────────────────────
 function populateZoneDropdown() {
+  // dropdown กรองหน้าตาราง
   const sel = $('nw-zone');
   sel.innerHTML = '<option value="all">เขต</option>';
-  Object.entries(ZONES).forEach(([k,v]) => {
-    sel.innerHTML += `<option value="${k}">${v.name}</option>`;
+  Object.keys(ZONES).forEach(k => {
+    sel.innerHTML += `<option value="${k}">${k}</option>`;
   });
 
+  // dropdown ใน modal
   const mSel = $('modal-zone');
-  mSel.innerHTML = '<option value="">-- เลือกเขต --</option>';
-  Object.entries(ZONES).forEach(([k,v]) => {
-    mSel.innerHTML += `<option value="${k}">${v.name}</option>`;
+  mSel.innerHTML = '<option value="">เขต</option>';
+  Object.keys(ZONES).forEach(k => {
+    mSel.innerHTML += `<option value="${k}">${k}</option>`;
   });
 }
 
 function populateProvinceDropdown(selectId, zoneKey) {
   const sel = $(selectId);
-  if (zoneKey === 'all' || !zoneKey) {
-    const provinces = [...new Set(allRecords.map(r=>r.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-    if (selectId === 'nw-province') {
-      sel.innerHTML = '<option value="all">จังหวัด</option>';
-      provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+
+  if (selectId === 'nw-province') {
+    let provinces;
+
+    if (zoneKey === 'all' || !zoneKey) {
+      // ไม่ได้เลือกเขต → แสดงจังหวัดที่มีข้อมูลทั้งหมด
+      provinces = [...new Set(allRecords.map(r => r.province).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'th'));
     } else {
-      sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>';
-      ALL_PROVINCES.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+      // ✅ แค่ filter จาก allRecords ตรงๆ ไม่ต้องเช็ค ZONES
+      provinces = [...new Set(
+        allRecords
+          .filter(r => r.zone === zoneKey && r.province)
+          .map(r => r.province)
+      )].sort((a, b) => a.localeCompare(b, 'th'));
     }
+
+    sel.innerHTML = '<option value="all">จังหวัด</option>';
+    provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+
   } else {
-    const provinces = ZONES[zoneKey]?.provinces || [];
-    if (selectId === 'nw-province') {
-      sel.innerHTML = '<option value="all">จังหวัด</option>';
-      provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
-    } else {
-      sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>';
-      provinces.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+    // ── modal: เปลี่ยนเป็น datalist แทน select ──
+    const provinces = (!zoneKey || zoneKey === 'all')
+      ? ALL_PROVINCES
+      : (ZONES[zoneKey]?.provinces || []);
+
+    // เติม datalist ให้ input
+    const datalist = document.getElementById('province-datalist');
+    if (datalist) {
+      datalist.innerHTML = '';
+      provinces.forEach(p => {
+        datalist.innerHTML += `<option value="${p}">`;
+      });
+    }
+
+    // clear ค่าเดิมใน input เมื่อเปลี่ยนเขต
+    const input = $(selectId);
+    if (input && input.tagName === 'INPUT') {
+      input.value = '';
     }
   }
 }
 
 function onZoneChange() {
+  $('nw-province').value = 'all'; // reset จังหวัดที่เลือกอยู่
   populateProvinceDropdown('nw-province', $('nw-zone').value);
   applyFilters();
 }
@@ -410,6 +406,14 @@ function fillProvinceByZone(selectId) {
   const zone = $('modal-zone').value;
   populateProvinceDropdown(selectId, zone);
 }
+
+// ── TYPE MAPPING ──────────────────────────────────────
+// map ค่า pill (thammanun/hia/mat12) → ค่าจริงใน Supabase
+const TYPE_DB_VALUES = {
+  thammanun: ['ธรรมนูญสุขภาพ', 'thammanun'],
+  hia:       ['HIA', 'hia'],
+  mat12:     ['มาตรา12', 'มาตรา 12', 'mat12'],
+};
 
 // ── FILTER ────────────────────────────────────────────
 function setType(type) {
@@ -429,11 +433,34 @@ function applyFilters() {
   const province = $('nw-province').value;
 
   filtered = allRecords.filter(r => {
-    if (currentType !== 'all' && r.type !== currentType) return false;
-    if (zone !== 'all' && String(r.zone) !== zone) return false;
+    // กรอง type pill
+    if (currentType !== 'all') {
+      const allowedValues = TYPE_DB_VALUES[currentType] || [];
+      if (!allowedValues.includes(r.type)) return false;
+    }
+    // กรอง zone dropdown
+    if (zone !== 'all' && r.zone !== zone) return false;
+    // กรอง province dropdown
     if (province !== 'all' && r.province !== province) return false;
+
+    // ── ค้นหาข้อความ: รวม type และ zone ด้วย ──
     if (q) {
-      const hay = ((r.name||'')+(r.org||'')+(r.address||'')+(r.province||'')+(r.phone||'')).toLowerCase();
+      const { label: typeLabel } = getTypeLabel(r.type);
+
+      // ✅ สร้าง zone แบบไม่มีเว้นวรรค เช่น "เขต 1" → "เขต1"
+      const zoneNoSpace = (r.zone || '').replace(/\s/g, '');
+
+      const hay = [
+        r.name    || '',
+        r.address || '',
+        r.province|| '',
+        r.phone   || '',
+        r.zone    || '',    // "เขต 1"
+        zoneNoSpace,        // "เขต1"
+        r.type    || '',
+        typeLabel || '',
+      ].join(' ').toLowerCase();
+
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -460,7 +487,12 @@ function resetFilters() {
 function updateStats() {
   const total = filtered.length;
   const counts = { thammanun:0, hia:0, mat12:0 };
-  filtered.forEach(r => { if(counts[r.type]!==undefined) counts[r.type]++; });
+  filtered.forEach(r => {
+    const t = r.type || '';
+    if (TYPE_DB_VALUES.thammanun.includes(t)) counts.thammanun++;
+    else if (TYPE_DB_VALUES.hia.includes(t))  counts.hia++;
+    else if (TYPE_DB_VALUES.mat12.includes(t)) counts.mat12++;
+  });
 
   $('nw-stats').innerHTML = `
     <div class="stat-chip">
@@ -483,8 +515,15 @@ function updateStats() {
 }
 
 // ── RENDER TABLE ──────────────────────────────────────
-const TYPE_LABELS = { thammanun:'ธรรมนูญสุขภาพ', hia:'HIA', mat12:'มาตรา 12' };
-const TYPE_CLASS  = { thammanun:'badge-thammanun', hia:'badge-hia', mat12:'badge-mat12' };
+// map ค่าจริงใน DB → label ที่แสดง + CSS class
+function getTypeLabel(type) {
+  if (!type) return { label: '—', cls: '' };
+  const t = type.trim();
+  if (TYPE_DB_VALUES.thammanun.includes(t)) return { label: 'ธรรมนูญสุขภาพ', cls: 'badge-thammanun' };
+  if (TYPE_DB_VALUES.hia.includes(t))       return { label: 'HIA',            cls: 'badge-hia' };
+  if (TYPE_DB_VALUES.mat12.includes(t))     return { label: 'มาตรา 12',       cls: 'badge-mat12' };
+  return { label: escHtml(t), cls: '' };
+}
 
 function renderTable() {
   const tbody = $('nw-tbody');
@@ -495,24 +534,23 @@ function renderTable() {
   const pageData = filtered.slice(start, start+PAGE_SIZE);
 
   if (!pageData.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="nw-empty">🔍 ไม่พบข้อมูล</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="nw-empty">🔍 ไม่พบข้อมูล${allRecords.length === 0 ? ' (ตารางว่างเปล่า)' : ''}</td></tr>`;
     $('nw-pager').style.display = 'none';
     return;
   }
 
-  tbody.innerHTML = pageData.map(r => `
+  tbody.innerHTML = pageData.map(r => {
+    const { label: typeLabel, cls: typeCls } = getTypeLabel(r.type);
+    return `
     <tr>
       <td>
         <div class="nw-name">${escHtml(r.name||'(ไม่มีชื่อ)')}</div>
-        ${r.org ? `<div class="nw-org">${escHtml(r.org)}</div>` : ''}
       </td>
       <td>
-        <span class="badge-type ${TYPE_CLASS[r.type]||''}">
-          ${TYPE_LABELS[r.type]||r.type||'—'}
-        </span>
+        <span class="badge-type ${typeCls}">${typeLabel}</span>
       </td>
       <td>
-        ${r.zone ? `<span class="badge-zone">เขต ${r.zone}</span>` : '—'}
+        ${r.zone ? `<span class="badge-zone">${escHtml(r.zone)}</span>` : '—'}
       </td>
       <td>
         ${r.province ? `<span class="badge-prov">${escHtml(r.province)}</span>` : '—'}
@@ -523,17 +561,16 @@ function renderTable() {
       <td>
         <div class="nw-phone">
           ${r.phone ? `<a href="tel:${r.phone}">${escHtml(r.phone)}</a>` : '—'}
-          ${r.email ? `<br><a href="mailto:${r.email}" style="font-size:11px;color:#888;">${escHtml(r.email)}</a>` : ''}
         </div>
       </td>
       <td style="${isLoggedIn?'':'display:none'}">
-        <div style="display:flex;gap:5px;flex-wrap:nowrap; white-space:nowrap">
+        <div style="display:flex;gap:5px;flex-wrap:nowrap;white-space:nowrap">
           <button class="btn-edit" onclick="openEditModal(${r.id})">✏️ แก้ไข</button>
           <button class="btn-del-modal" onclick="openDeleteConfirm(${r.id},'${escHtml(r.name||'')}')">🗑️ ลบ</button>
         </div>
       </td>
     </tr>
-  `).join('');
+  `;}).join('');
 
   const pager = $('nw-pager');
   $('nw-pager-info').textContent = `แสดง ${start+1}–${Math.min(start+PAGE_SIZE,total)} จาก ${total} รายการ`;
@@ -549,13 +586,10 @@ function openAddModal() {
   $('nw-modal-title').textContent = 'เพิ่มข้อมูลเครือข่าย';
   $('modal-id').value = '';
   $('modal-name').value = '';
-  $('modal-org').value = '';
   $('modal-type').value = '';
   $('modal-zone').value = '';
   $('modal-address').value = '';
   $('modal-phone').value = '';
-  $('modal-email').value = '';
-  $('modal-note').value = '';
   populateProvinceDropdown('modal-province-sel', '');
   $('nw-modal-ov').classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -567,15 +601,12 @@ function openEditModal(id) {
   $('nw-modal-title').textContent = 'แก้ไขข้อมูลเครือข่าย';
   $('modal-id').value = r.id;
   $('modal-name').value = r.name||'';
-  $('modal-org').value = r.org||'';
   $('modal-type').value = r.type||'';
   $('modal-zone').value = r.zone||'';
   $('modal-address').value = r.address||'';
   $('modal-phone').value = r.phone||'';
-  $('modal-email').value = r.email||'';
-  $('modal-note').value = r.note||'';
   populateProvinceDropdown('modal-province-sel', r.zone||'');
-  setTimeout(()=>{ $('modal-province-sel').value = r.province||''; }, 50);
+  $('modal-province-sel').value = r.province||'';
   $('nw-modal-ov').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
@@ -585,47 +616,63 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
+// ── SAVE (INSERT / UPDATE) ────────────────────────────
 async function saveRecord() {
   const id = $('modal-id').value;
   const name = $('modal-name').value.trim();
   const type = $('modal-type').value;
   const zone = $('modal-zone').value;
-  const province = $('modal-province-sel').value;
+  const province = ($('modal-province-sel').value || '').trim();
 
   if (!name || !type || !zone || !province) {
-    showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true); return;
+    showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', true);
+    return;
   }
 
   const saveBtn = $('btn-save');
-  saveBtn.disabled = true; saveBtn.textContent = 'กำลังบันทึก...';
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'กำลังบันทึก...';
 
+  // ── payload ตรงกับ column ใน data_network ──
   const payload = {
     name,
-    org: $('modal-org').value.trim(),
     type,
     zone,
     province,
     address: $('modal-address').value.trim(),
-    phone: $('modal-phone').value.trim(),
-    email: $('modal-email').value.trim(),
-    note: $('modal-note').value.trim(),
+    phone:   $('modal-phone').value.trim(),
   };
 
   try {
     let error;
     if (id) {
-      ({ error } = await db.from('network_contacts').update(payload).eq('id',id));
+      // UPDATE
+      ({ error } = await db
+        .from(TABLE_NAME)
+        .update(payload)
+        .eq('id', id));
     } else {
-      ({ error } = await db.from('network_contacts').insert([payload]));
+      // INSERT
+      ({ error } = await db
+        .from(TABLE_NAME)
+        .insert([payload]));
     }
-    if (error) { showToast('เกิดข้อผิดพลาด: '+error.message, true); return; }
+
+    if (error) {
+      console.error('Save error:', error);
+      showToast('❌ เกิดข้อผิดพลาด: ' + error.message, true);
+      return;
+    }
+
     showToast(id ? '✅ อัปเดตข้อมูลเรียบร้อย' : '✅ เพิ่มข้อมูลเรียบร้อย');
     closeModal();
     await loadData();
   } catch(err) {
-    showToast('❌ '+err.message, true);
+    console.error('Unexpected error:', err);
+    showToast('❌ ' + err.message, true);
   } finally {
-    saveBtn.disabled=false; saveBtn.textContent='บันทึก';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'บันทึก';
   }
 }
 
@@ -635,20 +682,43 @@ function openDeleteConfirm(id, name) {
   $('nw-confirm-msg').textContent = `คุณต้องการลบ "${name}" ใช่หรือไม่?`;
   $('nw-confirm-ov').classList.add('show');
 }
-function closeConfirm() { $('nw-confirm-ov').classList.remove('show'); pendingDeleteId=null; }
+
+function closeConfirm() {
+  $('nw-confirm-ov').classList.remove('show');
+  pendingDeleteId = null;
+}
 
 async function confirmDelete() {
   if (!pendingDeleteId) return;
-  const { error } = await db.from('network_contacts').delete().eq('id',pendingDeleteId);
-  if (error) { showToast('เกิดข้อผิดพลาด: '+error.message, true); return; }
-  showToast('🗑️ ลบข้อมูลเรียบร้อย');
-  closeConfirm();
-  await loadData();
+
+  try {
+    const { error } = await db
+      .from(TABLE_NAME)
+      .delete()
+      .eq('id', pendingDeleteId);
+
+    if (error) {
+      console.error('Delete error:', error);
+      showToast('❌ เกิดข้อผิดพลาด: ' + error.message, true);
+      return;
+    }
+
+    showToast('🗑️ ลบข้อมูลเรียบร้อย');
+    closeConfirm();
+    await loadData();
+  } catch(err) {
+    showToast('❌ ' + err.message, true);
+  }
 }
 
 // ── HELPERS ───────────────────────────────────────────
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
 let toastTimer;
@@ -658,7 +728,7 @@ function showToast(msg, isError=false) {
   t.style.borderLeftColor = isError ? '#E04031' : '#1D9E75';
   t.style.display='block';
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{t.style.display='none';},3000);
+  toastTimer=setTimeout(()=>{t.style.display='none';},3500);
 }
 
 // ── NAV ───────────────────────────────────────────────
@@ -680,69 +750,7 @@ function toggleHiaMenu(e) {
     submenu.classList.toggle('show');
     if (toggle) toggle.classList.toggle('active');
   }
-  if (window.innerWidth <= 768 && submenu.classList.contains('show')) {
-    submenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
 }
-
-// ✅ Toggle User Menu on Mobile (แบบเลื่อนตามหน้าจอ)
-function toggleUserMenu() {
-  if (window.innerWidth <= 768) {
-    const menu = document.createElement('div');
-    menu.id = 'mobile-user-menu';
-    
-    // ✅ แก้ไขตรงนี้: เปลี่ยน position เป็น 'fixed' และเพิ่ม z-index สูงๆ
-    menu.style.cssText = `
-      position: fixed;              /* ✅ เปลี่ยนจาก absolute เป็น fixed */
-      top: 60px;                    /* ✅ ปรับระยะจากด้านบนให้พอดีกับ topnav */
-      right: 16px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 9999;                /* ✅ เพิ่มค่าให้สูงกว่าองค์ประกอบอื่น */
-      min-width: 140px;
-      animation: slideDown 0.2s ease; /* ✅ เพิ่มอนิเมชั่นให้นุ่มนวล */
-    `;
-    
-    menu.innerHTML = `
-      <div style="padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text);">
-        ${document.getElementById('user-name')?.textContent || 'ผู้ใช้'}
-      </div>
-      <div style="padding: 8px 16px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);">
-        ${document.getElementById('user-role')?.textContent || 'user'}
-      </div>
-      <button onclick="handleLogout(); document.getElementById('mobile-user-menu')?.remove();" 
-        style="width: 100%; padding: 8px 16px; text-align: left; font-size: 13px; color: var(--red); background: none; border: none; cursor: pointer;">
-        🚪 ออกจากระบบ
-      </button>
-    `;
-    
-    // ลบเมนูเก่าถ้ามี
-    document.getElementById('mobile-user-menu')?.remove();
-    document.body.appendChild(menu);
-    
-    // ปิดเมื่อคลิกที่อื่น
-    setTimeout(() => {
-      document.addEventListener('click', function closeMenu(e) {
-        if (!e.target.closest('#mobile-user-menu') && !e.target.closest('#user-avatar')) {
-          menu.remove();
-          document.removeEventListener('click', closeMenu);
-        }
-      });
-    }, 100);
-  }
-}
-
-// ✅ เพิ่ม onclick ที่ avatar
-document.addEventListener('DOMContentLoaded', () => {
-  const avatar = document.getElementById('user-avatar');
-  if (avatar) {
-    avatar.style.cursor = 'pointer';
-    avatar.onclick = toggleUserMenu;
-  }
-});
 
 function toggleUserMenu() {
   if (window.innerWidth > 768) return;
@@ -802,6 +810,13 @@ document.addEventListener('click', e => {
 
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // ตั้งค่า avatar click
+  const avatar = document.getElementById('user-avatar');
+  if (avatar) {
+    avatar.style.cursor = 'pointer';
+    avatar.onclick = toggleUserMenu;
+  }
+
   updateAuthUI();
   populateZoneDropdown();
   await loadData();
@@ -809,7 +824,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('nw-modal-ov').addEventListener('click', e => { if(e.target===$('nw-modal-ov')) closeModal(); });
   $('nw-confirm-ov').addEventListener('click', e => { if(e.target===$('nw-confirm-ov')) closeConfirm(); });
   document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); closeConfirm(); } });
-
 });
 </script>
 </body>
